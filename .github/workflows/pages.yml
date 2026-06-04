@@ -37,7 +37,7 @@ jobs:
         # Next.js static export fails to prerender routes marked as 'edge' because it
         # evaluates them in Node.js where 'self' is not defined. We strip the edge
         # export dynamically just for the GitHub Pages static build.
-        run: find src/app -type f -name "*.tsx" -o -name "*.ts" -exec sed -i 's/export const runtime = .\+edge.\+//g' {} +
+        run: find src/app -type f \( -name "*.tsx" -o -name "*.ts" \) -exec perl -pi -e "s/export const runtime = 'edge'//g" {} +
 
       - name: Build static export (STATIC_EXPORT=1 → output:export + basePath:/cafe)
         run: pnpm build
