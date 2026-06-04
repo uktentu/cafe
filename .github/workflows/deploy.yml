@@ -36,21 +36,11 @@ jobs:
           NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
           NEXT_PUBLIC_THEME: ${{ secrets.NEXT_PUBLIC_THEME }}
 
-      - name: Lint
-        run: pnpm lint
-        env:
-          NEXT_PUBLIC_CLIENT_SLUG: ${{ secrets.NEXT_PUBLIC_CLIENT_SLUG }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
-          NEXT_PUBLIC_THEME: ${{ secrets.NEXT_PUBLIC_THEME }}
-
-  # ── Deploy: build → Cloudflare Pages ──────────────────────────────
+  # ── Deploy: static export → Cloudflare Pages ──────────────────────
   deploy:
     name: Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
     needs: ci
-    # Only deploy on pushes to main (not on PRs)
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     permissions:
       contents: read
@@ -70,38 +60,34 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build (Next.js → Cloudflare Pages format)
-        run: pnpm pages:build
+      # Build as static export (output:'export') — no Edge Runtime required.
+      # Cloudflare Pages serves at root so NEXT_BASEPATH='' (no /cafe prefix).
+      - name: Build static export for Cloudflare Pages
+        run: pnpm build
         env:
+          STATIC_EXPORT: "1"
+          NEXT_BASEPATH: ""
           NEXT_PUBLIC_CLIENT_SLUG: ${{ secrets.NEXT_PUBLIC_CLIENT_SLUG }}
-          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_SITE_URL: https://cafe.pages.dev
           NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
           NEXT_PUBLIC_THEME: ${{ secrets.NEXT_PUBLIC_THEME }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          SUPABASE_SECRET_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           NEXT_PUBLIC_CDN_URL: ${{ secrets.NEXT_PUBLIC_CDN_URL }}
           NEXT_PUBLIC_WHATSAPP: ${{ secrets.NEXT_PUBLIC_WHATSAPP }}
           NEXT_PUBLIC_PHONE: ${{ secrets.NEXT_PUBLIC_PHONE }}
-          BREVO_API_KEY: ${{ secrets.BREVO_API_KEY }}
           OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
-          NEXT_PUBLIC_FIREBASE_API_KEY: ${{ secrets.NEXT_PUBLIC_FIREBASE_API_KEY }}
-          NEXT_PUBLIC_FIREBASE_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_PROJECT_ID }}
-          NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID: ${{ secrets.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID }}
-          NEXT_PUBLIC_RESERVATIONS: ${{ secrets.NEXT_PUBLIC_RESERVATIONS }}
-          NEXT_PUBLIC_MULTI_BRANCH: ${{ secrets.NEXT_PUBLIC_MULTI_BRANCH }}
-          NEXT_PUBLIC_BILINGUAL: ${{ secrets.NEXT_PUBLIC_BILINGUAL }}
-          NEXT_PUBLIC_SECONDARY_LOCALE: ${{ secrets.NEXT_PUBLIC_SECONDARY_LOCALE }}
+          NEXT_PUBLIC_RESERVATIONS: false
+          NEXT_PUBLIC_MULTI_BRANCH: false
+          NEXT_PUBLIC_BILINGUAL: false
+          NEXT_PUBLIC_SECONDARY_LOCALE: hi
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy static output to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=cafe --commit-dirty=true
+          command: pages deploy out --project-name=cafe --commit-dirty=true

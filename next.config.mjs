@@ -25,8 +25,11 @@ if (cdnHost) {
 const nextConfig = {
   // Static export for GitHub Pages demo. Undefined = SSR (Cloudflare Pages / local dev).
   output: isStaticExport ? 'export' : undefined,
-  // basePath for GitHub Pages: repo name is "cafe"
-  basePath: isStaticExport ? '/cafe' : '',
+  // basePath: GitHub Pages needs /cafe (repo name); Cloudflare Pages serves at root.
+  // NEXT_BASEPATH env var overrides; defaults to /cafe for static export.
+  basePath: process.env.NEXT_BASEPATH !== undefined
+    ? process.env.NEXT_BASEPATH
+    : (isStaticExport ? '/cafe' : ''),
   // Static export requires unoptimized images (no image API).
   images: {
     unoptimized: isStaticExport,
