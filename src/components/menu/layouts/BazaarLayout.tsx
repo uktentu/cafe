@@ -74,26 +74,50 @@ function CategoryStrip({
               <button
                 key={item.id}
                 onClick={() => { openItem(item); track('item_view', { business_id: item.business_id, item_id: item.id }) }}
-                className="relative shrink-0 overflow-hidden rounded-2xl text-left"
-                style={{ width: 'clamp(168px, 25vw, 240px)', height: 'clamp(168px, 25vw, 240px)', scrollSnapAlign: 'start', background: 'var(--sf1)', opacity: item.is_available ? 1 : 0.5 }}
+                className={`relative shrink-0 overflow-hidden rounded-2xl text-left ${imgUrl ? '' : 'p-3 flex flex-col justify-between'}`}
+                style={{ 
+                  width: imgUrl ? 'clamp(168px, 25vw, 240px)' : 'clamp(200px, 40vw, 280px)',
+                  height: 'clamp(168px, 25vw, 240px)', 
+                  scrollSnapAlign: 'start', 
+                  background: 'var(--sf1)', 
+                  opacity: item.is_available ? 1 : 0.5 
+                }}
               >
                 {imgUrl ? (
-                  <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="168px" />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center" style={{ background: 'radial-gradient(80% 80% at 50% 40%, var(--brand-dim) 0%, transparent 70%)' }}><Icon size={36} style={{ color: 'var(--brand)' }} /></div>
-                )}
-                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-2.5">
-                  <p className="truncate text-sm font-bold leading-tight text-white" style={{ fontFamily: 'var(--font-display)' }}>{item.name}</p>
-                  <div className="mt-1 flex items-center justify-between gap-1">
-                    <div className="flex items-center gap-1">
-                      <VegMark dietary={item.dietary} size="xs" />
-                      {!item.is_available && <span className="rounded-full bg-black/60 px-1.5 py-0.5 text-[9px] font-semibold text-white">Sold out</span>}
+                  <>
+                    <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="168px" />
+                    <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
+                    <div className="absolute inset-x-0 bottom-0 p-2.5">
+                      <p className="truncate text-sm font-bold leading-tight text-white" style={{ fontFamily: 'var(--font-display)' }}>{item.name}</p>
+                      <div className="mt-1 flex items-center justify-between gap-1">
+                        <div className="flex items-center gap-1">
+                          <VegMark dietary={item.dietary} size="xs" />
+                          {!item.is_available && <span className="rounded-full bg-black/60 px-1.5 py-0.5 text-[9px] font-semibold text-white">Sold out</span>}
+                        </div>
+                        {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
+                        <span className="text-xs font-black" style={{ color: 'var(--brand2, var(--brand))' }}>{formatPrice(item.price)}</span>
+                      </div>
+                      {item.badge && <div className="mt-1"><ItemBadge badge={item.badge} /></div>}
                     </div>
-                    <span className="text-xs font-black" style={{ color: 'var(--brand2, var(--brand))' }}>{formatPrice(item.price)}</span>
-                  </div>
-                  {item.badge && <div className="mt-1"><ItemBadge badge={item.badge} /></div>}
-                </div>
+                  </>
+                ) : (
+                  <>
+                    <Icon size={72} className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none" style={{ color: 'var(--brand)', transform: 'rotate(-10deg)' }} />
+                    <div>
+                      <div className="flex items-start justify-between gap-2 mb-1">
+                        <span className="text-sm font-bold leading-tight" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</span>
+                        {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
+                        <span className="shrink-0 text-sm font-black" style={{ color: 'var(--brand)' }}>{formatPrice(item.price)}</span>
+                      </div>
+                      {item.description && <p className="text-[11px] leading-snug line-clamp-3" style={{ color: 'var(--txt2)' }}>{item.description}</p>}
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5 relative z-10">
+                      <VegMark dietary={item.dietary} size="xs" />
+                      {item.badge && <ItemBadge badge={item.badge} />}
+                      {!item.is_available && <span className="rounded-full px-1.5 py-0.5 text-[9px] font-semibold uppercase" style={{ background: 'var(--bdr)', color: 'var(--txt3)' }}>Sold out</span>}
+                    </div>
+                  </>
+                )}
               </button>
             )
           })}

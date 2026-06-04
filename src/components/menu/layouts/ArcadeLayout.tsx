@@ -148,18 +148,24 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--txt)', position: 'relative' }}>
+      {/* Global scanline overlay */}
+      <div className="pointer-events-none absolute inset-0 z-[100] opacity-30" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.2) 2px, rgba(0,0,0,0.2) 4px)' }} />
+      {/* Global screen flicker */}
+      <div className="pointer-events-none absolute inset-0 z-[99] opacity-[0.02]" style={{ animation: 'flicker 0.15s infinite' }} />
+      <style>{`@keyframes flicker { 0% { background: #fff; } 50% { background: #000; } 100% { background: transparent; } }`}</style>
+      
       {/* Global XP floats + particles (portaled to fixed) */}
       {xpFloats.map((f) => <XpFloat key={f.id} x={f.x} y={f.y} xp={f.xp} color={f.color} />)}
       {particles.map((p) => <ClickParticle key={p.id} x={p.x} y={p.y} />)}
 
       {/* INSERT COIN marquee header */}
       <div
-        className="overflow-hidden py-1.5"
+        className="overflow-hidden py-1.5 shadow-[0_0_15px_var(--brand)] relative z-10"
         style={{ background: 'var(--brand)', borderBottom: '2px solid var(--brand2)' }}
       >
         <div className="ticker flex gap-8 whitespace-nowrap text-[10px] font-black uppercase tracking-[0.3em]" style={{ color: 'var(--bg)', fontFamily: 'var(--font-body)' }}>
-          {Array.from({ length: 8 }, (_, i) => (
-            <span key={i}>🕹️ INSERT COIN &nbsp;&nbsp; 👾 GAME MENU &nbsp;&nbsp; ⭐ SELECT ITEM &nbsp;&nbsp;</span>
+          {Array.from({ length: 12 }, (_, i) => (
+            <span key={i} className="animate-pulse">🕹️ INSERT COIN &nbsp;&nbsp; 👾 GAME MENU &nbsp;&nbsp; ⭐ SELECT ITEM &nbsp;&nbsp;</span>
           ))}
         </div>
       </div>
@@ -177,9 +183,9 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
         {comboLabel && (
           <m.span
             key={comboLabel + combo}
-            className="text-xs font-black uppercase tracking-widest"
-            style={{ color: 'var(--brand2)', fontFamily: 'var(--font-display)', textShadow: '0 0 8px var(--brand2)' }}
-            initial={{ scale: 1.6, opacity: 0 }}
+            className="text-xs font-black uppercase tracking-widest animate-pulse"
+            style={{ color: 'var(--brand2)', fontFamily: 'var(--font-display)', textShadow: '0 0 10px var(--brand2), 0 0 20px var(--brand2)' }}
+            initial={{ scale: 2, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ type: 'spring', stiffness: 500, damping: 20 }}
@@ -328,41 +334,41 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
                   )}
 
                   {/* Image */}
-                  <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', background: 'var(--sf2)' }}>
-                    {imgUrl
-                      ? <Image src={imgUrl} alt={item.name} fill className="object-cover transition-transform duration-300 hover:scale-105" sizes="(max-width:640px) 95vw, (max-width:768px) 50vw, 33vw" />
-                      : (
-                        <div className="flex h-full w-full items-center justify-center" style={{ background: `radial-gradient(circle, ${cardAccent}22 0%, transparent 70%)` }}>
-                          <Icon size={36} style={{ color: cardAccent, filter: `drop-shadow(0 0 8px ${cardAccent})` }} />
+                  {imgUrl && (
+                    <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', background: 'var(--sf2)' }}>
+                      <Image src={imgUrl} alt={item.name} fill className="object-cover transition-transform duration-300 hover:scale-105" sizes="(max-width:640px) 95vw, (max-width:768px) 50vw, 33vw" />
+                      {/* Scanlines overlay on image */}
+                      <div
+                        className="pointer-events-none absolute inset-0"
+                        style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 3px)' }}
+                      />
+                      {!item.is_available && (
+                        <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(180,0,0,0.8)' }}>
+                          <m.span
+                            className="px-2 py-1 text-xs font-black uppercase tracking-widest text-white"
+                            style={{ border: '1px solid rgba(255,255,255,0.6)', fontFamily: 'var(--font-body)' }}
+                            animate={{ opacity: [1, 0.5, 1] }}
+                            transition={{ duration: 0.9, repeat: Infinity }}
+                          >
+                            GAME OVER
+                          </m.span>
                         </div>
-                      )
-                    }
-                    {/* Scanlines overlay on image */}
-                    <div
-                      className="pointer-events-none absolute inset-0"
-                      style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 3px)' }}
-                    />
-                    {!item.is_available && (
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'rgba(180,0,0,0.8)' }}>
-                        <m.span
-                          className="px-2 py-1 text-xs font-black uppercase tracking-widest text-white"
-                          style={{ border: '1px solid rgba(255,255,255,0.6)', fontFamily: 'var(--font-body)' }}
-                          animate={{ opacity: [1, 0.5, 1] }}
-                          transition={{ duration: 0.9, repeat: Infinity }}
-                        >
-                          GAME OVER
-                        </m.span>
-                      </div>
-                    )}
-                  </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Card footer */}
-                  <div className="flex flex-col gap-2 p-3">
-                    <p className="line-clamp-2 text-sm font-bold leading-snug" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>
+                  <div className="flex flex-col gap-2 p-3 relative h-full">
+                    {!imgUrl && (
+                      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ background: `radial-gradient(circle at top right, ${cardAccent}15 0%, transparent 80%)` }}>
+                        <Icon size={100} className="absolute -right-4 -bottom-4 opacity-5" style={{ color: cardAccent, transform: 'rotate(-15deg)' }} />
+                      </div>
+                    )}
+                    <p className={`text-sm font-bold leading-snug ${imgUrl ? 'line-clamp-2' : ''}`} style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>
                       {item.name}
                     </p>
                     {item.description && (
-                      <p className="line-clamp-1 text-[11px]" style={{ color: 'var(--txt3)' }}>{item.description}</p>
+                      <p className={`text-[11px] ${imgUrl ? 'line-clamp-1' : ''}`} style={{ color: 'var(--txt3)' }}>{item.description}</p>
                     )}
                     <div className="flex flex-wrap items-center justify-between gap-1.5">
                       {/* Pixel price badge */}
@@ -377,6 +383,7 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
                           boxShadow: `0 0 6px ${cardAccent}33`,
                         }}
                       >
+                        {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
                         [{formatPrice(item.price)}]
                       </m.span>
                       <div className="flex items-center gap-1.5">

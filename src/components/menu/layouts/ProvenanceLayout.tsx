@@ -87,19 +87,21 @@ export function ProvenanceLayout({ categories, items, businessId: _businessId }:
                   className="flex w-full items-start gap-5 py-6 text-left"
                   style={{ borderBottom: idx < catItems.length - 1 ? '1px solid var(--bdr2)' : 'none', opacity: item.is_available ? 1 : 0.5 }}
                 >
-                  <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg md:h-32 md:w-32" style={{ background: 'var(--sf1)' }}>
-                    {imgUrl ? (
+                  {imgUrl && (
+                    <div className="relative h-24 w-24 shrink-0 overflow-hidden rounded-lg md:h-32 md:w-32" style={{ background: 'var(--sf1)' }}>
                       <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 96px, 128px" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center"><Icon size={28} style={{ color: 'var(--txt3)' }} /></div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-start justify-between gap-3">
-                      <h3 className="text-lg leading-snug" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)', fontStyle: 'italic' }}>{item.name}</h3>
+                      <h3 className="text-lg leading-snug flex items-start gap-2" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)', fontStyle: 'italic' }}>
+                        {!imgUrl && <Icon size={20} className="mt-1 opacity-40 shrink-0" style={{ color: 'var(--brand)' }} />}
+                        {item.name}
+                      </h3>
+                      {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
                       <span className="shrink-0 text-base font-semibold" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>{formatPrice(item.price)}</span>
                     </div>
-                    {item.description && <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed" style={{ color: 'var(--txt2)' }}>{item.description}</p>}
+                    {item.description && <p className={`mt-1.5 text-sm leading-relaxed ${imgUrl ? 'line-clamp-2' : ''}`} style={{ color: 'var(--txt2)' }}>{item.description}</p>}
                     <div className="mt-2 flex items-center gap-2">
                       <VegMark dietary={item.dietary} size="xs" />
                       {item.badge && <ItemBadge badge={item.badge} />}

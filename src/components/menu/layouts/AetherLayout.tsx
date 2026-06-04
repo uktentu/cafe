@@ -22,7 +22,6 @@ export function AetherLayout({ categories, items, businessId: _businessId }: Lay
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
-      <style>{`.aether-grid{column-count:2;column-gap:1rem}@media(min-width:768px){.aether-grid{column-count:3}}@media(min-width:1024px){.aether-grid{column-count:4;column-gap:1.25rem}}`}</style>
 
       <div className="px-4 py-6 md:px-8 lg:px-10">
         {categories.map((cat) => {
@@ -30,17 +29,17 @@ export function AetherLayout({ categories, items, businessId: _businessId }: Lay
           const Icon = getCategoryIcon(cat.icon)
           return (
             <section key={cat.id} data-cat={cat.id} ref={register(cat.id)} className="mb-12 scroll-mt-16">
-              {/* Sticky section label — sticks at top-0 (Aether has no inline sticky nav) */}
+              {/* Sticky section label */}
               <div
-                className="sticky z-20 mb-6 flex items-center gap-4 py-2"
-                style={{ top: 0, background: 'var(--bg)', backdropFilter: 'blur(12px)' }}
+                className="sticky z-50 mb-6 flex items-center gap-4 py-2"
+                style={{ top: 16, background: 'var(--bg)', backdropFilter: 'blur(12px)' }}
               >
                 <div className="h-px flex-1" style={{ background: 'var(--bdr)' }} />
                 <h2 className="text-center text-sm font-bold uppercase tracking-[0.25em] md:tracking-[0.3em]" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{cat.name}</h2>
                 <div className="h-px flex-1" style={{ background: 'var(--bdr)' }} />
               </div>
 
-              <div className="aether-grid">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-5">
                 {catItems.map((item, idx) => {
                   const imgUrl = cdnUrl(itemImageKey(item))
                   const hasImage = !!imgUrl
@@ -54,26 +53,27 @@ export function AetherLayout({ categories, items, businessId: _businessId }: Lay
                       whileTap={{ scale: 0.98 }}
                       whileHover={{ y: -6, boxShadow: '0 12px 40px rgba(0,0,0,0.1)' }}
                       onClick={() => { openItem(item); track('item_view', { business_id: item.business_id, item_id: item.id }) }}
-                      className="mb-4 inline-block w-full overflow-hidden rounded-3xl text-left align-top"
-                      style={{ breakInside: 'avoid', background: 'var(--sf1)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid var(--bdr)', opacity: item.is_available ? 1 : 0.5 }}
+                      className="w-full overflow-hidden rounded-3xl text-left flex flex-col h-full relative"
+                      style={{ background: 'var(--sf1)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', border: '1px solid var(--bdr)', opacity: item.is_available ? 1 : 0.5 }}
                     >
                       {hasImage && (
-                        <div className="relative aspect-[4/3] overflow-hidden" style={{ borderRadius: '24px 24px 0 0' }}>
+                        <div className="relative aspect-[4/3] shrink-0 overflow-hidden" style={{ borderRadius: '24px 24px 0 0' }}>
                           <Image src={imgUrl!} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
                         </div>
                       )}
-                      <div className={hasImage ? 'p-4' : 'p-5'}>
+                      <div className={`flex flex-col flex-1 ${hasImage ? 'p-4' : 'p-5'}`}>
                         {!hasImage && (
                           <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full" style={{ background: 'var(--brand-dim, var(--sf2))' }}><Icon size={20} style={{ color: 'var(--brand)' }} /></div>
                         )}
                         <h3 className="text-sm font-semibold leading-snug" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</h3>
-                        {item.description && <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed" style={{ color: 'var(--txt2)' }}>{item.description}</p>}
-                        <div className="mt-3 flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-1.5">
+                        {item.description && <p className={`mt-1.5 text-xs leading-relaxed ${hasImage ? 'line-clamp-3' : ''}`} style={{ color: 'var(--txt2)' }}>{item.description}</p>}
+                        <div className="mt-auto pt-4 flex flex-wrap items-center justify-between gap-2">
+                          <div className="flex flex-wrap items-center gap-1.5">
                             <VegMark dietary={item.dietary} size="xs" />
                             {item.badge && <ItemBadge badge={item.badge} />}
                             {!item.is_available && <span className="text-[10px] font-medium uppercase" style={{ color: 'var(--txt3)' }}>Sold out</span>}
                           </div>
+                          {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
                           <span className="shrink-0 text-sm font-bold" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>{formatPrice(item.price)}</span>
                         </div>
                       </div>

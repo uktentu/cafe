@@ -97,17 +97,22 @@ export function SakuraLayout({ categories, items, businessId: _businessId }: Lay
                     className="flex w-full items-center gap-4 rounded-3xl p-3 text-left"
                     style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', border: '1px solid var(--bdr)', boxShadow: '0 4px 24px rgba(0,0,0,0.06)', opacity: item.is_available ? 1 : 0.55 }}
                   >
-                    <div className="relative h-[88px] w-[88px] shrink-0 overflow-hidden" style={{ borderRadius: 22, background: 'var(--sf2)' }}>
-                      {imgUrl
-                        ? <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="88px" />
-                        : <div className="flex h-full w-full items-center justify-center"><Icon size={28} style={{ color: 'var(--brand)', opacity: 0.5 }} /></div>
-                      }
-                    </div>
+                    {imgUrl && (
+                      <div className="relative h-[88px] w-[88px] shrink-0 overflow-hidden" style={{ borderRadius: 22, background: 'var(--sf2)' }}>
+                        <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="88px" />
+                      </div>
+                    )}
                     <div className="min-w-0 flex-1">
-                      <p className="text-[15px] font-semibold leading-snug" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--txt)' }}>{item.name}</p>
-                      {item.description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed" style={{ color: 'var(--txt2)' }}>{item.description}</p>}
+                      <p className="text-[15px] font-semibold leading-snug flex items-center gap-1.5" style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', color: 'var(--txt)' }}>
+                        {!imgUrl && <Icon size={16} style={{ color: 'var(--brand)', opacity: 0.6 }} />}
+                        {item.name}
+                      </p>
+                      {item.description && <p className={`mt-1 text-xs leading-relaxed ${imgUrl ? 'line-clamp-2' : ''}`} style={{ color: 'var(--txt2)' }}>{item.description}</p>}
                       <div className="mt-1.5 flex flex-wrap items-center gap-2">
-                        <span className="text-sm font-semibold" style={{ color: 'var(--brand)', fontStyle: 'italic' }}>{formatPrice(item.price)}</span>
+                        <span className="text-sm font-semibold" style={{ color: 'var(--brand)', fontStyle: 'italic' }}>
+                          {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
+                          {formatPrice(item.price)}
+                        </span>
                         <VegMark dietary={item.dietary} size="xs" />
                         {item.badge && <ItemBadge badge={item.badge} />}
                         {!item.is_available && <span className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--txt3)' }}>Sold out</span>}

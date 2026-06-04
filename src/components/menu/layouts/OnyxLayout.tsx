@@ -24,26 +24,33 @@ function DotRow({ item, idx, openItem }: { item: Item; idx: number; openItem: (i
       viewport={{ once: true, margin: '-30px' }}
       onClick={() => { openItem(item); track('item_view', { business_id: item.business_id, item_id: item.id }) }}
       whileHover={{ x: 8 }}
-      className="group flex w-full items-baseline gap-2 py-3.5 text-left md:py-5"
+      className="group flex w-full flex-col py-3.5 text-left md:py-5"
       style={{ borderBottom: '1px solid var(--bdr)', opacity: item.is_available ? 1 : 0.5 }}
     >
-      <VegMark dietary={item.dietary} className="self-center" />
-      <span className="shrink-0 text-sm font-medium transition-colors group-hover:text-[color:var(--brand)]" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>
-        {item.name}
-      </span>
-      {item.badge && <ItemBadge badge={item.badge} className="self-center" />}
-      {!item.is_available && <span className="self-center text-[10px] uppercase" style={{ color: 'var(--txt3)' }}>Sold out</span>}
-      {/* Dot leader fills available space, baseline-aligned */}
-      <span
-        aria-hidden
-        className="min-w-6 flex-1 self-end overflow-hidden whitespace-nowrap pb-1 leading-none"
-        style={{ color: 'var(--txt3)', fontSize: '0.55rem', letterSpacing: '0.3em' }}
-      >
-        {'·'.repeat(120)}
-      </span>
-      <span className="shrink-0 text-sm font-semibold tabular-nums" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>
-        {formatPrice(item.price)}
-      </span>
+      <div className="flex w-full items-baseline gap-2">
+        <VegMark dietary={item.dietary} className="self-center" />
+        <span className="shrink-0 text-sm font-medium transition-colors group-hover:text-[color:var(--brand)]" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>
+          {item.name}
+        </span>
+        {item.badge && <ItemBadge badge={item.badge} className="self-center" />}
+        {!item.is_available && <span className="self-center text-[10px] uppercase" style={{ color: 'var(--txt3)' }}>Sold out</span>}
+        <span
+          aria-hidden
+          className="min-w-6 flex-1 self-end overflow-hidden whitespace-nowrap pb-1 leading-none"
+          style={{ color: 'var(--txt3)', fontSize: '0.55rem', letterSpacing: '0.3em' }}
+        >
+          {'·'.repeat(120)}
+        </span>
+        <span className="shrink-0 text-sm font-semibold tabular-nums" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>
+          {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
+          {formatPrice(item.price)}
+        </span>
+      </div>
+      {item.description && (
+        <div className="mt-1.5 pl-6 pr-12 text-xs italic leading-relaxed" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-display)' }}>
+          {item.description}
+        </div>
+      )}
     </m.button>
   )
 }
@@ -107,7 +114,7 @@ export function OnyxLayout({ categories, items, businessId: _businessId }: Layou
                 <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: 'var(--brand2, var(--brand))', fontFamily: 'var(--font-body)' }}>{cat.name}</h2>
                 <div className="h-px flex-1" style={{ background: 'var(--bdr)' }} />
               </div>
-              <div className="px-6 pb-10 md:px-14 md:pb-12 lg:px-20 lg:pb-14">
+              <div className="px-6 pb-10 md:px-8 md:pb-12 lg:px-12 lg:pb-14">
                 {catItems.map((item, idx) => <DotRow key={item.id} item={item} idx={idx} openItem={openItem} />)}
               </div>
             </section>

@@ -86,46 +86,61 @@ export function EmberLayout({ categories, items, businessId: _businessId }: Layo
                   transition={{ delay: idx * 0.05, duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => { openItem(item); track('item_view', { business_id: item.business_id, item_id: item.id }) }}
-                  className="relative aspect-square overflow-hidden rounded-xl text-left"
+                  className={`relative overflow-hidden rounded-xl text-left ${imgUrl ? 'aspect-square' : 'p-3 min-h-[110px]'}`}
                   style={{
                     background: 'var(--sf1)',
                     border: '1px solid var(--bdr)',
                     opacity: item.is_available ? 1 : 0.55,
                   }}
                 >
-                  {imgUrl
-                    ? <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
-                    : (
-                      <div className="absolute inset-0 flex items-center justify-center" style={{ background: 'var(--sf2)' }}>
-                        <Icon size={36} style={{ color: 'var(--brand)' }} />
+                  {imgUrl ? (
+                    <>
+                      <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
+                      <div
+                        className="absolute inset-x-0 bottom-0 p-2 pt-8 pointer-events-none"
+                        style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)' }}
+                      >
+                        <p
+                          className="text-xs font-bold leading-tight"
+                          style={{ color: 'var(--brand2)', fontFamily: 'var(--font-display)' }}
+                        >
+                          {item.name}
+                        </p>
+                        <div className="mt-1 flex items-center justify-between">
+                          <span className="text-xs font-semibold" style={{ color: 'var(--brand2)' }}>
+                            {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
+                            {formatPrice(item.price)}
+                          </span>
+                          <div className="flex items-center gap-1">
+                            <VegMark dietary={item.dietary} size="xs" />
+                            {item.badge && <ItemBadge badge={item.badge} />}
+                          </div>
+                        </div>
+                        {!item.is_available && (
+                          <span className="text-[9px] uppercase tracking-widest" style={{ color: 'var(--txt3)' }}>
+                            Sold out
+                          </span>
+                        )}
                       </div>
-                    )
-                  }
-                  <div
-                    className="absolute inset-x-0 bottom-0 p-2 pt-8"
-                    style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)' }}
-                  >
-                    <p
-                      className="text-xs font-bold leading-tight"
-                      style={{ color: 'var(--brand2)', fontFamily: 'var(--font-display)' }}
-                    >
-                      {item.name}
-                    </p>
-                    <div className="mt-1 flex items-center justify-between">
-                      <span className="text-xs font-semibold" style={{ color: 'var(--brand2)' }}>
-                        {formatPrice(item.price)}
-                      </span>
-                      <div className="flex items-center gap-1">
+                    </>
+                  ) : (
+                    <div className="flex flex-col h-full relative">
+                      <Icon size={80} className="absolute -right-4 -bottom-4 opacity-5 pointer-events-none" style={{ color: 'var(--brand)' }} />
+                      <div className="flex items-start justify-between gap-2">
+                        <span className="text-sm font-bold" style={{ color: 'var(--brand)', fontFamily: 'var(--font-display)' }}>{item.name}</span>
+                        {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
+                        <span className="shrink-0 text-sm font-semibold" style={{ color: 'var(--brand)' }}>{formatPrice(item.price)}</span>
+                      </div>
+                      {item.description && (
+                        <p className="mt-1 text-xs leading-relaxed line-clamp-3" style={{ color: 'var(--txt2)' }}>{item.description}</p>
+                      )}
+                      <div className="mt-auto pt-3 flex flex-wrap items-center gap-2 relative z-10">
                         <VegMark dietary={item.dietary} size="xs" />
                         {item.badge && <ItemBadge badge={item.badge} />}
+                        {!item.is_available && <span className="text-[10px] uppercase tracking-widest" style={{ color: 'var(--txt3)' }}>Sold out</span>}
                       </div>
                     </div>
-                    {!item.is_available && (
-                      <span className="text-[9px] uppercase tracking-widest" style={{ color: 'var(--txt3)' }}>
-                        Sold out
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </m.button>
               )
             })}

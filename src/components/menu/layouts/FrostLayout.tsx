@@ -62,7 +62,7 @@ export function FrostLayout({ categories, items, businessId: _businessId }: Layo
           dragElastic={0.18}
           onDragEnd={onDragEnd}
           style={{ touchAction: 'pan-y' }}
-          className="grid grid-cols-1 gap-4 p-4 min-[400px]:grid-cols-2 lg:grid-cols-3 lg:gap-5 lg:p-6"
+          className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 lg:gap-5 lg:p-6"
         >
           {catItems.map((item, idx) => {
             const imgUrl = cdnUrl(itemImageKey(item))
@@ -75,24 +75,32 @@ export function FrostLayout({ categories, items, businessId: _businessId }: Layo
                 transition={{ delay: idx * 0.05, type: 'spring', stiffness: 360, damping: 24 }}
                 whileTap={{ scale: 0.97 }}
                 onClick={() => { openItem(item); track('item_view', { business_id: item.business_id, item_id: item.id }) }}
-                className="flex flex-col overflow-hidden rounded-3xl text-left"
+                className={`flex flex-col overflow-hidden text-left ${imgUrl ? 'rounded-3xl' : 'rounded-2xl p-2'}`}
                 style={{ background: cardBg, border: '1px solid var(--bdr)', opacity: item.is_available ? 1 : 0.55 }}
               >
-                <div className="relative overflow-hidden" style={{ aspectRatio: '1', borderRadius: '50% 50% 0 0', background: 'var(--sf2)' }}>
-                  {imgUrl ? (
+                {imgUrl && (
+                  <div className="relative overflow-hidden" style={{ aspectRatio: '1', borderRadius: '50% 50% 0 0', background: 'var(--sf2)' }}>
                     <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center"><Icon size={32} style={{ color: 'var(--brand2)' }} /></div>
-                  )}
-                </div>
-                <div className="flex flex-col gap-1 p-3">
+                  </div>
+                )}
+                <div className="flex flex-col gap-1 p-3 w-full">
                   <p className="text-sm font-semibold leading-snug" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</p>
-                  {item.description && <p className="line-clamp-2 text-xs" style={{ color: 'var(--txt2)' }}>{item.description}</p>}
+                  {item.description && (
+                    <p className={`text-xs ${imgUrl ? 'line-clamp-2' : ''}`} style={{ color: 'var(--txt2)' }}>
+                      {item.description}
+                    </p>
+                  )}
                   <div className="mt-1 flex flex-wrap items-center justify-between gap-1">
+                    {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
                     <span className="rounded-full px-2.5 py-0.5 text-xs font-bold" style={{ background: PILL_COLORS[activeIdx % PILL_COLORS.length], color: 'var(--bg)' }}>{formatPrice(item.price)}</span>
                     <div className="flex items-center gap-1"><VegMark dietary={item.dietary} size="xs" />{item.badge && <ItemBadge badge={item.badge} />}</div>
                   </div>
                   {!item.is_available && <p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--txt3)' }}>🍦 Sold out</p>}
+                  {!imgUrl && item.is_available && (
+                    <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide mt-1" style={{ color: 'var(--brand)' }}>
+                      <Icon size={14} /> TAP FOR DETAILS
+                    </div>
+                  )}
                 </div>
               </m.button>
             )

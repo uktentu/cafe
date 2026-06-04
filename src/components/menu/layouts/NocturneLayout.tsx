@@ -37,6 +37,7 @@ function Row({ item, idx, openItem }: { item: Item; idx: number; openItem: (i: I
       )}
       <span className="shrink-0 text-[15px] font-semibold tabular-nums"
         style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>
+        {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
         {formatPrice(item.price)}
       </span>
     </m.button>
@@ -76,17 +77,7 @@ export function NocturneLayout({ categories, items, businessId: _businessId }: L
         })}
       </div>
 
-      {/* Snap scroll container */}
-      <div
-        ref={scrollRef}
-        style={{
-          height: '100svh',
-          overflowY: 'scroll',
-          scrollSnapType: 'y mandatory',
-          overscrollBehavior: 'contain',
-          touchAction: 'pan-y',
-        }}
-      >
+      <div ref={scrollRef}>
         {categories.map((cat, ci) => {
           const catItems = items.filter((i) => i.category_id === cat.id)
           return (
@@ -96,17 +87,14 @@ export function NocturneLayout({ categories, items, businessId: _businessId }: L
               ref={register(cat.id)}
               style={{
                 minHeight: '100svh',
-                scrollSnapAlign: 'start',
-                scrollSnapStop: 'always',
                 display: 'flex',
                 flexDirection: 'column',
-                justifyContent: 'center',
                 padding: '5rem 1.5rem 8rem',
                 position: 'relative',
               }}
               className="md:px-20 md:py-24"
             >
-              <div className="mx-auto w-full max-w-xl md:max-w-2xl lg:max-w-3xl">
+              <div className="mx-auto my-auto w-full max-w-xl md:max-w-2xl lg:max-w-3xl">
                 {/* Big index numeral */}
                 <m.span
                   initial={{ opacity: 0, y: 24 }}

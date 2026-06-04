@@ -29,7 +29,7 @@ function ItemGrid({ activeCat, catItems, openItem }: { activeCat: Category | und
         <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{activeCat?.name}</h2>
         {activeCat?.description && <p className="mt-0.5 text-xs" style={{ color: 'var(--txt2)' }}>{activeCat.description}</p>}
       </div>
-      <div className="grid grid-cols-2 gap-4 px-4 pb-8 md:grid-cols-3 md:px-6 lg:grid-cols-4 lg:gap-5 lg:px-8">
+      <div className="grid grid-cols-2 gap-4 px-4 pb-8 md:grid-cols-2 md:px-6 lg:grid-cols-3 xl:grid-cols-4 lg:gap-5 lg:px-8">
         {catItems.map((item, idx) => {
           const imgUrl = cdnUrl(itemImageKey(item))
           return (
@@ -44,22 +44,33 @@ function ItemGrid({ activeCat, catItems, openItem }: { activeCat: Category | und
               className="flex flex-col overflow-hidden rounded-3xl text-left"
               style={{ background: 'var(--sf1)', border: '1px solid var(--bdr)', opacity: item.is_available ? 1 : 0.5 }}
             >
-              <div className="relative aspect-[4/3] overflow-hidden md:aspect-[3/2]" style={{ background: 'var(--sf2)' }}>
-                {imgUrl
-                  ? <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
-                  : <div className="flex h-full w-full items-center justify-center"><Icon size={32} style={{ color: 'var(--txt3)' }} /></div>
-                }
-              </div>
-              <div className="flex-1 p-3">
+              {imgUrl && (
+                <div className="relative aspect-[4/3] overflow-hidden md:aspect-[3/2]" style={{ background: 'var(--sf2)' }}>
+                  <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
+                </div>
+              )}
+              <div className="flex-1 p-3 w-full">
                 <div className="flex items-start justify-between gap-1">
                   <p className="flex-1 text-sm font-semibold leading-snug" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</p>
+                  {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
                   <span className="shrink-0 text-sm font-bold" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>{formatPrice(item.price)}</span>
                 </div>
-                {item.description && <p className="mt-1 line-clamp-2 text-xs leading-relaxed" style={{ color: 'var(--txt2)' }}>{item.description}</p>}
-                <div className="mt-2 flex items-center gap-1.5">
-                  <VegMark dietary={item.dietary} size="xs" />
-                  {item.badge && <ItemBadge badge={item.badge} />}
-                  {!item.is_available && <span className="text-[10px] font-medium uppercase tracking-wide" style={{ color: 'var(--txt3)' }}>Sold out</span>}
+                {item.description && (
+                  <p className={`mt-1 text-xs leading-relaxed ${imgUrl ? 'line-clamp-2' : ''}`} style={{ color: 'var(--txt2)' }}>
+                    {item.description}
+                  </p>
+                )}
+                <div className="mt-2 flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <VegMark dietary={item.dietary} size="xs" />
+                    {item.badge && <ItemBadge badge={item.badge} />}
+                    {!item.is_available && <span className="text-[10px] font-medium uppercase tracking-wide" style={{ color: 'var(--txt3)' }}>Sold out</span>}
+                  </div>
+                  {!imgUrl && (
+                    <div className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: 'var(--brand)' }}>
+                      <Icon size={14} /> TAP FOR DETAILS
+                    </div>
+                  )}
                 </div>
               </div>
             </m.button>

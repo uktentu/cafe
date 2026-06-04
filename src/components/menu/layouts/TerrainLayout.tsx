@@ -121,22 +121,25 @@ export function TerrainLayout({ categories, items, businessId: _businessId }: La
                             className="flex w-full items-center gap-4 px-5 py-4 text-left md:rounded-lg md:px-4"
                             style={{ borderBottom: '1px solid var(--bdr)', opacity: item.is_available ? 1 : 0.5 }}
                           >
-                            <div
-                              className="relative h-20 w-20 shrink-0 overflow-hidden rounded md:h-24 md:w-24"
-                              style={{ background: 'var(--sf2)' }}
-                            >
-                              {imgUrl
-                                ? <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 80px, 96px" />
-                                : <div className="flex h-full w-full items-center justify-center"><Icon size={24} style={{ color: 'var(--txt3)' }} /></div>
-                              }
-                            </div>
+                            {imgUrl && (
+                              <div
+                                className="relative h-20 w-20 shrink-0 overflow-hidden rounded md:h-24 md:w-24"
+                                style={{ background: 'var(--sf2)' }}
+                              >
+                                <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 80px, 96px" />
+                              </div>
+                            )}
                             <div className="min-w-0 flex-1">
                               <div className="flex items-baseline justify-between gap-2">
-                                <span className="truncate text-sm font-semibold" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</span>
+                                <span className="truncate text-sm font-semibold flex items-center gap-1.5" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>
+                                  {!imgUrl && <Icon size={16} style={{ color: 'var(--txt3)' }} />}
+                                  {item.name}
+                                </span>
+                                {item.compare_price && item.compare_price > item.price && <s className="opacity-50 font-normal mr-1.5 text-[0.85em]">{formatPrice(item.compare_price)}</s>}
                                 <span className="shrink-0 text-sm font-medium" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>{formatPrice(item.price)}</span>
                               </div>
                               {item.description && (
-                                <p className="mt-1 line-clamp-2 text-xs leading-relaxed" style={{ color: 'var(--txt2)' }}>{item.description}</p>
+                                <p className={`mt-1 text-xs leading-relaxed ${imgUrl ? 'line-clamp-2' : ''}`} style={{ color: 'var(--txt2)' }}>{item.description}</p>
                               )}
                               <div className="mt-1.5 flex items-center gap-2">
                                 <VegMark dietary={item.dietary} size="xs" />
