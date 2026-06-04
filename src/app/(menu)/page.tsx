@@ -14,7 +14,8 @@ import { MenuContent } from '@/components/menu/MenuContent'
 import { WhatsAppCTA } from '@/components/menu/WhatsAppCTA'
 import { DeferredItemModal } from '@/components/menu/DeferredItemModal'
 
-export const revalidate = 30
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
+export const runtime = 'edge'
 
 export async function generateMetadata(): Promise<Metadata> {
   const { slug, siteUrl } = getConfig()
