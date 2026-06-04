@@ -21,12 +21,13 @@ async function _getCmsContext(): Promise<CmsContext> {
   if (!supabaseConfigured()) return { state: 'unconfigured' }
 
   const supabase = createClient()
-  // getSession() reads from the cookie — guaranteed fresh now that middleware
-  // perfectly forwards cookie mutations to Server Components.
+  // Validate the JWT with the Supabase API. We must use getUser() here instead
+  // of getSession() because Cloudflare Pages Edge Runtime strictly enforces
+  // Fetch API standards and strips middleware-mutated request headers, meaning
+  // Server Components cannot reliably receive synced cookies from middleware.
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
-  const user = session?.user
+    data: { user },
+  } = await supabase.auth.getUser()
   if (!user) return { state: 'unauthed' }
 
   const { slug } = getConfig()
