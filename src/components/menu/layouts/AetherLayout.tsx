@@ -22,9 +22,9 @@ export function AetherLayout({ categories, items, businessId: _businessId }: Lay
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
-      <style>{`.aether-grid{column-count:2;column-gap:1rem}@media(min-width:768px){.aether-grid{column-count:3}}`}</style>
+      <style>{`.aether-grid{column-count:2;column-gap:1rem}@media(min-width:768px){.aether-grid{column-count:3}}@media(min-width:1024px){.aether-grid{column-count:4;column-gap:1.25rem}}`}</style>
 
-      <div className="px-4 py-6 md:px-8">
+      <div className="px-4 py-6 md:px-8 lg:px-10">
         {categories.map((cat) => {
           const catItems = items.filter((i) => i.category_id === cat.id)
           const Icon = getCategoryIcon(cat.icon)

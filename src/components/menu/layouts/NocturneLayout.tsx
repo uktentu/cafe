@@ -106,7 +106,7 @@ export function NocturneLayout({ categories, items, businessId: _businessId }: L
               }}
               className="md:px-20 md:py-24"
             >
-              <div className="mx-auto w-full max-w-xl md:max-w-2xl">
+              <div className="mx-auto w-full max-w-xl md:max-w-2xl lg:max-w-3xl">
                 {/* Big index numeral */}
                 <m.span
                   initial={{ opacity: 0, y: 24 }}

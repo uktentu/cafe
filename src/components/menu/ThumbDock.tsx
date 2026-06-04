@@ -90,7 +90,7 @@ export function ThumbDock({ categories, presentDietary }: ThumbDockProps) {
               onClick={() => setOpen(false)}
             />
             <m.div
-              className="fixed inset-x-0 bottom-0 z-[81] max-h-[80svh] overflow-y-auto rounded-t-3xl pb-[env(safe-area-inset-bottom)]"
+              className="fixed inset-x-0 bottom-0 z-[81] max-h-[80svh] overflow-y-auto rounded-t-3xl pb-[env(safe-area-inset-bottom)] lg:inset-x-auto lg:left-1/2 lg:w-[560px] lg:-translate-x-1/2 lg:rounded-3xl lg:bottom-4"
               style={{ background: 'var(--sf1)', borderTop: '1px solid var(--bdr2)', touchAction: 'none' }}
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
@@ -155,7 +155,7 @@ export function ThumbDock({ categories, presentDietary }: ThumbDockProps) {
                 <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest" style={{ color: 'var(--txt3)' }}>
                   Jump to
                 </p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
                   {categories.map((cat) => {
                     const Icon = getCategoryIcon(cat.icon)
                     const active = cat.id === activeCategoryId

@@ -59,9 +59,10 @@ export default async function MenuPage() {
         Skip to menu
       </a>
 
-      <MenuHero business={business} theme={theme} />
-
-      <BestsellerStrip items={items} categories={categories} theme={theme} />
+      <div className={['provenance', 'onyx', 'sakura'].includes(theme) ? "md:ml-[220px]" : ""}>
+        <MenuHero business={business} theme={theme} />
+        <BestsellerStrip items={items} categories={categories} theme={theme} />
+      </div>
 
       <MenuContent categories={categories} items={items} businessId={business.id} theme={theme} />
 

@@ -65,7 +65,7 @@ function MercadoHero({ business }: { business: Business }) {
       ) : (
         <div className="absolute inset-0" style={{ background: 'linear-gradient(135deg, var(--brand) 0%, var(--sf1) 100%)' }} />
       )}
-      <div className="relative flex min-h-[inherit] flex-col items-center justify-end gap-3 px-5 pb-8 pt-16 text-center">
+      <div className="relative flex min-h-[inherit] flex-col items-center justify-end gap-3 px-5 pb-8 pt-16 text-center lg:pb-12 lg:pt-20">
         <LogoOrInitials business={business} />
         <h1
           style={{
@@ -96,7 +96,7 @@ function ProvenanceHero({ business }: { business: Business }) {
   return (
     <header className="relative" style={{ background: 'var(--bg)' }}>
       {cover && (
-        <div className="relative h-[200px] w-full overflow-hidden md:h-[260px]">
+        <div className="relative h-[200px] w-full overflow-hidden md:h-[260px] lg:h-[320px]">
           <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-80" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, var(--bg) 100%)' }} />
         </div>
@@ -299,7 +299,7 @@ function AetherHero({ business }: { business: Business }) {
   return (
     <header className="relative overflow-hidden" style={{ background: 'var(--bg)' }}>
       {cover && (
-        <div className="relative mx-auto mt-8 h-[220px] w-full max-w-lg overflow-hidden rounded-3xl md:h-[280px]">
+        <div className="relative mx-auto mt-8 h-[220px] w-full max-w-lg overflow-hidden rounded-3xl md:h-[280px] lg:h-[340px] lg:max-w-2xl">
           <Image src={cover} alt="" fill priority sizes="512px" className="object-cover" />
         </div>
       )}
@@ -549,7 +549,7 @@ function ArcadeHero({ business }: { business: Business }) {
   return (
     <header className="relative isolate overflow-hidden" style={{ background: 'var(--bg)' }}>
       {cover && (
-        <div className="relative h-[160px] overflow-hidden md:h-[220px]">
+        <div className="relative h-[160px] overflow-hidden md:h-[220px] lg:h-[280px]">
           <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-20" />
         </div>
       )}

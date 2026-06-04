@@ -75,7 +75,7 @@ function CategoryStrip({
                 key={item.id}
                 onClick={() => { openItem(item); track('item_view', { business_id: item.business_id, item_id: item.id }) }}
                 className="relative shrink-0 overflow-hidden rounded-2xl text-left"
-                style={{ width: 'clamp(168px, 25vw, 200px)', height: 'clamp(168px, 25vw, 200px)', scrollSnapAlign: 'start', background: 'var(--sf1)', opacity: item.is_available ? 1 : 0.5 }}
+                style={{ width: 'clamp(168px, 25vw, 240px)', height: 'clamp(168px, 25vw, 240px)', scrollSnapAlign: 'start', background: 'var(--sf1)', opacity: item.is_available ? 1 : 0.5 }}
               >
                 {imgUrl ? (
                   <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="168px" />

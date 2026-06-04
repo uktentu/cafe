@@ -20,6 +20,7 @@ const BG_COLORS = ['var(--sf1)', 'var(--sf2)']
 
 export function FrostLayout({ categories, items, businessId: _businessId }: LayoutProps) {
   const openItem = useMenuStore((s) => s.openItem)
+  const requestJump = useMenuStore((s) => s.requestJump)
   const { activeId, setActiveId } = useTabCategorySync(categories)
   const { onDragEnd } = useSwipeCategory(categories, activeId, setActiveId)
   const activeIdx = categories.findIndex((c) => c.id === activeId)
@@ -36,7 +37,7 @@ export function FrostLayout({ categories, items, businessId: _businessId }: Layo
           return (
             <m.button
               key={cat.id}
-              onClick={() => setActiveId(cat.id)}
+              onClick={() => requestJump(cat.id)}
               whileTap={{ scale: 0.92 }}
               animate={isActive ? { scale: [1, 1.12, 1] } : { scale: 1 }}
               transition={{ type: 'spring', stiffness: 500, damping: 18 }}
@@ -61,7 +62,7 @@ export function FrostLayout({ categories, items, businessId: _businessId }: Layo
           dragElastic={0.18}
           onDragEnd={onDragEnd}
           style={{ touchAction: 'pan-y' }}
-          className="grid grid-cols-1 gap-4 p-4 min-[400px]:grid-cols-2"
+          className="grid grid-cols-1 gap-4 p-4 min-[400px]:grid-cols-2 lg:grid-cols-3 lg:gap-5 lg:p-6"
         >
           {catItems.map((item, idx) => {
             const imgUrl = cdnUrl(itemImageKey(item))

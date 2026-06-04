@@ -25,7 +25,8 @@ const BG_PATTERN = {
 
 export function SakuraLayout({ categories, items, businessId: _businessId }: LayoutProps) {
   const openItem = useMenuStore((s) => s.openItem)
-  const { activeId, setActiveId } = useTabCategorySync(categories)
+  const requestJump = useMenuStore((s) => s.requestJump)
+  const { activeId } = useTabCategorySync(categories)
   const cat = categories.find((c) => c.id === activeId)
   const Icon = getCategoryIcon(cat?.icon)
   const catItems = items.filter((i) => i.category_id === activeId)
@@ -44,7 +45,7 @@ export function SakuraLayout({ categories, items, businessId: _businessId }: Lay
             return (
               <button
                 key={c.id}
-                onClick={() => setActiveId(c.id)}
+                onClick={() => requestJump(c.id)}
                 className="relative flex items-center rounded-2xl px-3 py-2.5 text-left text-sm transition-colors"
                 style={{ color: active ? 'var(--brand)' : 'var(--txt2)', fontFamily: 'var(--font-body)', fontStyle: 'italic', fontWeight: active ? 600 : 400, background: active ? 'var(--sf2)' : 'transparent' }}
               >
@@ -81,7 +82,7 @@ export function SakuraLayout({ categories, items, businessId: _businessId }: Lay
               )}
             </div>
 
-            <div className="mx-auto grid max-w-xl grid-cols-1 gap-3 md:max-w-2xl md:grid-cols-2">
+            <div className="mx-auto grid max-w-xl grid-cols-1 gap-3 md:max-w-2xl md:grid-cols-2 lg:max-w-4xl lg:grid-cols-3 lg:gap-4">
               {catItems.map((item, idx) => {
                 const imgUrl = cdnUrl(itemImageKey(item))
                 return (
@@ -137,7 +138,7 @@ export function SakuraLayout({ categories, items, businessId: _businessId }: Lay
             return (
               <button
                 key={c.id}
-                onClick={() => setActiveId(c.id)}
+                onClick={() => requestJump(c.id)}
                 className="relative shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition-colors"
                 style={{ background: active ? 'var(--brand)' : 'transparent', color: active ? 'var(--bg)' : 'var(--txt2)', fontFamily: 'var(--font-body)', fontStyle: 'italic' }}
               >

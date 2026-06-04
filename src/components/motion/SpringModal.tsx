@@ -61,7 +61,7 @@ export function SpringModal({ open, onClose, children, variant = 'sheet', labell
             aria-labelledby={labelledBy}
             className="relative w-full"
             style={{
-              maxWidth: isSheet ? '100%' : 480,
+              maxWidth: isSheet ? 540 : 480,
               background: 'var(--sf3, #2E2820)',
               borderTopLeftRadius: 20,
               borderTopRightRadius: 20,

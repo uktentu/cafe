@@ -29,7 +29,7 @@ function ItemGrid({ activeCat, catItems, openItem }: { activeCat: Category | und
         <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{activeCat?.name}</h2>
         {activeCat?.description && <p className="mt-0.5 text-xs" style={{ color: 'var(--txt2)' }}>{activeCat.description}</p>}
       </div>
-      <div className="grid grid-cols-2 gap-4 px-4 pb-8 md:grid-cols-3 md:px-6">
+      <div className="grid grid-cols-2 gap-4 px-4 pb-8 md:grid-cols-3 md:px-6 lg:grid-cols-4 lg:gap-5 lg:px-8">
         {catItems.map((item, idx) => {
           const imgUrl = cdnUrl(itemImageKey(item))
           return (
@@ -75,6 +75,7 @@ function ItemGrid({ activeCat, catItems, openItem }: { activeCat: Category | und
 
 export function CoastalLayout({ categories, items, businessId: _businessId }: LayoutProps) {
   const openItem = useMenuStore((s) => s.openItem)
+  const requestJump = useMenuStore((s) => s.requestJump)
   const { activeId, setActiveId } = useTabCategorySync(categories)
   const prevIdxRef = useRef(0)
   const activeIdx = categories.findIndex((c) => c.id === activeId)

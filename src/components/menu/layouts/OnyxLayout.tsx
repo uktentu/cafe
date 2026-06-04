@@ -107,7 +107,7 @@ export function OnyxLayout({ categories, items, businessId: _businessId }: Layou
                 <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.25em]" style={{ color: 'var(--brand2, var(--brand))', fontFamily: 'var(--font-body)' }}>{cat.name}</h2>
                 <div className="h-px flex-1" style={{ background: 'var(--bdr)' }} />
               </div>
-              <div className="px-6 pb-10 md:px-14 md:pb-12">
+              <div className="px-6 pb-10 md:px-14 md:pb-12 lg:px-20 lg:pb-14">
                 {catItems.map((item, idx) => <DotRow key={item.id} item={item} idx={idx} openItem={openItem} />)}
               </div>
             </section>

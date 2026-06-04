@@ -116,7 +116,13 @@ export function useTabCategorySync(categories: Cat[]) {
   useEffect(() => { setActive(activeId) }, [activeId, setActive])
 
   useEffect(() => {
-    if (jump && categories.some((c) => c.id === jump.id)) setActiveId(jump.id)
+    if (jump && categories.some((c) => c.id === jump.id)) {
+      setActiveId(jump.id)
+      // Scroll to the top of the menu container when switching tabs via jump
+      setTimeout(() => {
+        document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }, 50)
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [jump])
 

@@ -17,7 +17,8 @@ import type { LayoutProps } from './MercadoLayout'
 
 export function EmberLayout({ categories, items, businessId: _businessId }: LayoutProps) {
   const openItem = useMenuStore((s) => s.openItem)
-  const { activeId, setActiveId } = useTabCategorySync(categories)
+  const requestJump = useMenuStore((s) => s.requestJump)
+  const { activeId } = useTabCategorySync(categories)
   const cat = categories.find((c) => c.id === activeId)
   const Icon = getCategoryIcon(cat?.icon)
   const catItems = items.filter((i) => i.category_id === activeId)
@@ -34,7 +35,7 @@ export function EmberLayout({ categories, items, businessId: _businessId }: Layo
           return (
             <button
               key={c.id}
-              onClick={() => setActiveId(c.id)}
+              onClick={() => requestJump(c.id)}
               className="shrink-0 px-5 py-3 text-sm font-bold tracking-wide transition-colors"
               style={{
                 background: isActive ? 'var(--brand)' : 'transparent',
@@ -74,7 +75,7 @@ export function EmberLayout({ categories, items, businessId: _businessId }: Layo
             <span style={{ color: 'var(--brand2)', fontSize: 14 }}>◈</span>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 p-4 xs:grid-cols-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 p-4 xs:grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4 lg:p-6">
             {catItems.map((item, idx) => {
               const imgUrl = cdnUrl(itemImageKey(item))
               return (

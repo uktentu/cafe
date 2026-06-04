@@ -21,7 +21,7 @@ export function WhatsAppCTA({ whatsapp, businessId, businessName }: WhatsAppCTAP
 
   return (
     <div
-      className="fixed right-4 z-[70]"
+      className="fixed right-4 z-[70] lg:right-[calc(50%-36rem)]"
       style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
     >
       <m.a

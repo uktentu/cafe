@@ -106,7 +106,7 @@ export function TerrainLayout({ categories, items, businessId: _businessId }: La
                     transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
                     style={{ overflow: 'hidden' }}
                   >
-                    <div className="md:grid md:grid-cols-2 md:gap-4 md:px-4 md:py-4">
+                    <div className="md:grid md:grid-cols-2 md:gap-4 md:px-4 md:py-4 lg:grid-cols-3 lg:gap-5 lg:px-6">
                       {catItems.map((item, idx) => {
                         const imgUrl = cdnUrl(itemImageKey(item))
                         return (

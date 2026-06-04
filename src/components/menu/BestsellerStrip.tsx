@@ -17,7 +17,7 @@ export function BestsellerStrip({ items, categories, theme, title = 'Bestsellers
   const catOf = (id: string | null) => categories.find((c) => c.id === id) ?? null
 
   return (
-    <section aria-label={title} className="px-4 pt-6">
+    <section aria-label={title} className="px-4 pt-6 lg:px-6">
       <h2
         className="mb-3"
         style={{
@@ -30,9 +30,9 @@ export function BestsellerStrip({ items, categories, theme, title = 'Bestsellers
       >
         {title}
       </h2>
-      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+      <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 lg:-mx-6 lg:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {featured.map((it) => (
-          <div key={it.id} className="w-[160px] shrink-0 snap-start">
+          <div key={it.id} className="w-[160px] shrink-0 snap-start lg:w-[200px]">
             <ItemCard item={it} category={catOf(it.category_id)} variant="grid" theme={theme} />
           </div>
         ))}

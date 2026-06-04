@@ -107,7 +107,8 @@ function ClickParticle({ x, y }: { x: number; y: number }) {
 
 export function ArcadeLayout({ categories, items, businessId: _businessId }: LayoutProps) {
   const openItem = useMenuStore((s) => s.openItem)
-  const { activeId, setActiveId } = useTabCategorySync(categories)
+  const requestJump = useMenuStore((s) => s.requestJump)
+  const { activeId } = useTabCategorySync(categories)
   const activeIdx = categories.findIndex((c) => c.id === activeId)
   const Icon = getCategoryIcon(categories.find((c) => c.id === activeId)?.icon)
   const catItems = items.filter((i) => i.category_id === activeId)
@@ -207,7 +208,7 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
             return (
               <m.button
                 key={cat.id}
-                onClick={() => setActiveId(cat.id)}
+                onClick={() => requestJump(cat.id)}
                 whileTap={{ scale: 0.9 }}
                 animate={isActive ? { scale: [1, 1.08, 1] } : { scale: 1 }}
                 transition={{ type: 'spring', stiffness: 500, damping: 18 }}
@@ -274,7 +275,7 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
           </div>
 
           {/* Cards — 1 col on small mobile, 2 col on wider */}
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 lg:gap-4">
             {catItems.map((item, idx) => {
               const imgUrl = cdnUrl(itemImageKey(item))
               const cardAccent = ACCENT_COLORS[(activeIdx + idx) % ACCENT_COLORS.length]

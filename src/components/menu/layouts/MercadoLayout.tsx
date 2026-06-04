@@ -31,9 +31,10 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
     <div style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
       {/* Sticky pill nav */}
       <nav
-        className="sticky top-0 z-30 flex gap-2 overflow-x-auto px-4 py-3"
+        className="sticky top-0 z-30 overflow-x-auto px-4 py-3 lg:px-8"
         style={{ background: 'var(--glass)', backdropFilter: 'blur(14px)', borderBottom: '1px solid var(--bdr)' }}
       >
+        <div className="flex gap-2 lg:mx-auto lg:max-w-5xl">
         {categories.map((cat) => {
           const active = activeId === cat.id
           return (
@@ -50,6 +51,7 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
             </button>
           )
         })}
+        </div>
       </nav>
 
       <div className="mx-auto max-w-5xl">
