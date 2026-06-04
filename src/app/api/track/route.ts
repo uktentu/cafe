@@ -4,7 +4,7 @@
 import { createAdminClient } from '@/lib/supabase/server'
 import type { AnalyticsEventType } from '@/types/database'
 
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 
 const ALLOWED: ReadonlySet<string> = new Set<AnalyticsEventType>([
   'page_view', 'item_view', 'whatsapp_click', 'call_click',

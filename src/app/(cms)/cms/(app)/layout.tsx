@@ -1,3 +1,4 @@
+export const runtime = 'edge'
 // Authed CMS shell: dark sidebar + content. Lives in the (app) route group so
 // /cms/login (outside it) stays shell-free. Resolves the business/role once and
 // passes them to client components via CmsProviders.
@@ -23,7 +24,7 @@ export default async function CmsAppLayout({ children }: { children: React.React
   // Dynamic (runtime) path — normal auth resolution.
   const { getCmsContext } = await import('@/lib/cms-context')
   const ctx = await getCmsContext()
-  if (ctx.state !== 'ok') return <CmsNotice state={ctx.state} debug={ctx.state === 'unauthed' ? ctx.debug : undefined} />
+  if (ctx.state !== 'ok') return <CmsNotice state={ctx.state} />
 
   return (
     <CmsProviders business={ctx.business} role={ctx.role}>

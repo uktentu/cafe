@@ -4,13 +4,12 @@
 // sharp is Node-only → this route runs on the Node runtime.
 // ════════════════════════════════════════════════════════════════════
 import { NextResponse } from 'next/server'
-import sharp from 'sharp'
 import { createClient } from '@/lib/supabase/server'
 import { uploadToR2, r2keys } from '@/lib/r2'
 import { getConfig } from '@/lib/config'
 import { supabaseConfigured } from '@/lib/env'
 
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 export const maxDuration = 30
 
 type UploadType = 'item' | 'logo' | 'cover' | 'banner' | 'og'
@@ -56,31 +55,19 @@ export async function POST(request: Request) {
   }
 
   const slug = getConfig().slug
-  const input = Buffer.from(await file.arrayBuffer())
 
-  // 3. Process with sharp. HEIC/JPEG/PNG → WebP. Strip metadata, no enlarge.
-  let full: Buffer
-  try {
-    full = await sharp(input)
-      .rotate() // honour EXIF orientation (iPhone photos)
-      .resize({ width: 1200, withoutEnlargement: true })
-      .webp({ quality: 80 })
-      .toBuffer()
-  } catch {
-    return NextResponse.json({ error: 'Unsupported or corrupt image' }, { status: 422 })
-  }
+  // 3. Cloudflare Pages (Edge) doesn't support Node.js 'sharp'. 
+  // For now, we upload the raw image directly. To optimize, you should enable 
+  // Cloudflare Image Resizing on your domain instead of processing on the server.
+  const full = Buffer.from(await file.arrayBuffer())
 
   // 4. Upload to R2 under the canonical key convention.
   try {
     if (type === 'item') {
-      const thumb = await sharp(input)
-        .rotate()
-        .resize({ width: 320, withoutEnlargement: true })
-        .webp({ quality: 70 })
-        .toBuffer()
       const fullKey = r2keys.itemFull(slug, id)
       const thumbKey = r2keys.itemThumb(slug, id)
-      await Promise.all([uploadToR2(fullKey, full), uploadToR2(thumbKey, thumb)])
+      // Upload raw image to both keys (Cloudflare Image Resizing can scale them later)
+      await Promise.all([uploadToR2(fullKey, full), uploadToR2(thumbKey, full)])
       return NextResponse.json({
         image_mode: 'custom',
         custom_r2_key: fullKey,

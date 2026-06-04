@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 
 export async function PATCH(request: NextRequest) {
   if (!supabaseConfigured()) {

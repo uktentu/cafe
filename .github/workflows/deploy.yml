@@ -60,13 +60,10 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      # Build as static export (output:'export') — no Edge Runtime required.
-      # Cloudflare Pages serves at root so NEXT_BASEPATH='' (no /cafe prefix).
-      - name: Build static export for Cloudflare Pages
-        run: pnpm build
+      # Build dynamically for Cloudflare Pages Edge Runtime
+      - name: Build dynamic SSR for Cloudflare Pages
+        run: pnpm run pages:build
         env:
-          STATIC_EXPORT: "1"
-          NEXT_BASEPATH: ""
           NEXT_PUBLIC_CLIENT_SLUG: ${{ secrets.NEXT_PUBLIC_CLIENT_SLUG }}
           NEXT_PUBLIC_SITE_URL: https://cafe.pages.dev
           NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
@@ -85,9 +82,9 @@ jobs:
           NEXT_PUBLIC_BILINGUAL: false
           NEXT_PUBLIC_SECONDARY_LOCALE: hi
 
-      - name: Deploy static output to Cloudflare Pages
+      - name: Deploy dynamic output to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy out --project-name=cafe --commit-dirty=true
+          command: pages deploy .vercel/output/static --project-name=cafe --commit-dirty=true

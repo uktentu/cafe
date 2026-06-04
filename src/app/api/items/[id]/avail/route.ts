@@ -8,7 +8,7 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 
-export const runtime = 'nodejs'
+export const runtime = 'edge'
 // API routes are excluded from static export, but Next.js still requires
 // generateStaticParams for dynamic segments when output: 'export' is set.
 // Placeholder so output:'export' doesn't fail — this route is excluded from
