@@ -1,3 +1,7 @@
+# Single-package workspace (required field for pnpm-workspace.yaml to be valid).
+packages:
+  - '.'
+
 # Build scripts allowed to run (pnpm blocks postinstall scripts by default).
 # sharp = native image processing (upload route); unrs-resolver = eslint/oxc
 # resolver; esbuild = tsx/next bundler; workerd = Cloudflare next-on-pages build.
