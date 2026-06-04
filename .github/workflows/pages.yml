@@ -1,0 +1,73 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build static export
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build static export (STATIC_EXPORT=1 → output:export + basePath:/cafe)
+        run: pnpm build
+        env:
+          STATIC_EXPORT: "1"
+          NEXT_PUBLIC_CLIENT_SLUG: ${{ secrets.NEXT_PUBLIC_CLIENT_SLUG }}
+          NEXT_PUBLIC_SITE_URL: https://uktentu.github.io/cafe
+          NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
+          NEXT_PUBLIC_THEME: ${{ secrets.NEXT_PUBLIC_THEME }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          NEXT_PUBLIC_CDN_URL: ${{ secrets.NEXT_PUBLIC_CDN_URL }}
+          NEXT_PUBLIC_WHATSAPP: ${{ secrets.NEXT_PUBLIC_WHATSAPP }}
+          NEXT_PUBLIC_PHONE: ${{ secrets.NEXT_PUBLIC_PHONE }}
+          OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
+          NEXT_PUBLIC_RESERVATIONS: false
+          NEXT_PUBLIC_MULTI_BRANCH: false
+          NEXT_PUBLIC_BILINGUAL: false
+          NEXT_PUBLIC_SECONDARY_LOCALE: hi
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: out
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy
+        id: deployment
+        uses: actions/deploy-pages@v4

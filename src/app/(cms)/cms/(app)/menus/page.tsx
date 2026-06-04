@@ -1,6 +1,6 @@
 import { MenusManager } from '@/components/cms/MenusManager'
 
-export const dynamic = 'force-dynamic'
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 
 export default function MenusPage() {
   return (

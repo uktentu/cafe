@@ -4,7 +4,7 @@ import { getCmsContext } from '@/lib/cms-context'
 import { createClient } from '@/lib/supabase/server'
 import { StatCards, QuickActions } from '@/components/cms/StatCards'
 
-export const dynamic = 'force-dynamic'
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 
 export default async function DashboardPage() {
   const ctx = await getCmsContext()

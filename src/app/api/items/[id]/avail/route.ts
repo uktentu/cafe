@@ -9,6 +9,11 @@ import { createClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 
 export const runtime = 'nodejs'
+// API routes are excluded from static export, but Next.js still requires
+// generateStaticParams for dynamic segments when output: 'export' is set.
+// Placeholder so output:'export' doesn't fail — this route is excluded from
+// static output anyway. The ID value is never actually used in static export.
+export function generateStaticParams() { return [{ id: 'placeholder' }] }
 
 export async function PATCH(
   request: Request,
