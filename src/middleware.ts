@@ -26,26 +26,16 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
-          // 1. Update the request cookies
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          
-          // 2. Synchronize the 'Cookie' header so Server Components can read the updated cookies
-          request.headers.set('cookie', request.cookies.toString())
-          
-          // 3. Create a new response with the mutated request headers
           response = NextResponse.next({
-            request: {
-              headers: request.headers,
-            },
+            request,
           })
-          
-          // 4. Set the cookies on the response so they apply to the browser
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            response.cookies.set(name, value, options)
           )
         },
       },
-    },
+    }
   )
 
   const { pathname } = request.nextUrl

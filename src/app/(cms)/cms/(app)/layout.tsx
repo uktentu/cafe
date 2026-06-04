@@ -23,7 +23,7 @@ export default async function CmsAppLayout({ children }: { children: React.React
   // Dynamic (runtime) path — normal auth resolution.
   const { getCmsContext } = await import('@/lib/cms-context')
   const ctx = await getCmsContext()
-  if (ctx.state !== 'ok') return <CmsNotice state={ctx.state} />
+  if (ctx.state !== 'ok') return <CmsNotice state={ctx.state} debug={ctx.state === 'unauthed' ? ctx.debug : undefined} />
 
   return (
     <CmsProviders business={ctx.business} role={ctx.role}>

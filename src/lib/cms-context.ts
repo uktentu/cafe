@@ -9,7 +9,7 @@ import type { Business, StaffRole, Theme } from '@/types/database'
 
 export type CmsContext =
   | { state: 'unconfigured' }
-  | { state: 'unauthed' }
+  | { state: 'unauthed'; debug?: string }
   | { state: 'no-business' }
   | { state: 'forbidden' }
   | { state: 'ok'; business: Business; userEmail: string; role: StaffRole }
@@ -27,8 +27,9 @@ async function _getCmsContext(): Promise<CmsContext> {
   // Server Components cannot reliably receive synced cookies from middleware.
   const {
     data: { user },
+    error,
   } = await supabase.auth.getUser()
-  if (!user) return { state: 'unauthed' }
+  if (!user) return { state: 'unauthed', debug: error?.message || 'No user returned' }
 
   const { slug } = getConfig()
   const { data: rawBiz } = await supabase
