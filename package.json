@@ -1,26 +1,57 @@
 {
-  "name": "menuos-scaffold",
+  "name": "menuos",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "pages:build": "npx @cloudflare/next-on-pages",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "setup-db": "tsx scripts/setup-db.ts",
+    "setup-client": "tsx scripts/setup-client.ts",
+    "upload-stock": "tsx scripts/upload-stock.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1060.0",
+    "@aws-sdk/s3-request-presigner": "^3.1060.0",
+    "@dnd-kit/core": "^6.3.1",
+    "@dnd-kit/sortable": "^10.0.0",
+    "@formkit/auto-animate": "^0.9.0",
+    "@hookform/resolvers": "^3",
+    "@supabase/ssr": "^0.10.3",
+    "@supabase/supabase-js": "^2",
+    "@tanstack/react-query": "^5",
+    "clsx": "^2.1.1",
+    "framer-motion": "^11",
+    "gsap": "^3",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^4.2.1",
+    "lenis": "^1",
+    "lucide-react": "^1.17.0",
+    "next": "14.2.35",
+    "qr-code-styling": "^1.9.2",
     "react": "^18",
     "react-dom": "^18",
-    "next": "14.2.35"
+    "react-hook-form": "^7",
+    "recharts": "^3.8.1",
+    "sharp": "^0.33",
+    "tailwind-merge": "^3.6.0",
+    "zod": "^3",
+    "zustand": "^4"
   },
   "devDependencies": {
-    "typescript": "^5",
+    "@cloudflare/next-on-pages": "^1.13.16",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "dotenv": "^17.4.2",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.35",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "eslint": "^8",
-    "eslint-config-next": "14.2.35"
+    "tsx": "^4.22.4",
+    "typescript": "^5"
   }
 }

@@ -2,26 +2,200 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ── Universal scrollbar removal ────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Base reset */
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  /* clip keeps position:sticky working; hidden would break it */
+  overflow-x: clip;
+  /* Default bg matches darkest theme — overridden per-theme via :root injection in layout */
+  background: var(--bg, #0E0B09);
 }
-
 body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  /* Inherits theme bg from :root — prevents white "bounce" gap on iOS overscroll */
+  background: var(--bg, #0E0B09);
+  font-family: var(--font-inter), system-ui, Arial, sans-serif;
+  overflow-x: clip;
+}
+
+/* Prevent double-tap zoom on buttons/links.
+   Keep pan-x / pan-y on overflow containers so scrolling still works.
+   The viewport meta (maximum-scale=1, user-scalable=no) handles pinch-zoom. */
+button, a, label, input[type="button"], input[type="submit"] {
+  touch-action: manipulation;
+}
+/* Horizontal scroll containers — allow panning */
+[class*="overflow-x-auto"], [class*="overflow-y-auto"], .nocturne-scroll {
+  touch-action: pan-x pan-y;
+}
+/* Vertical-only scroll */
+[class*="overflow-y-scroll"] {
+  touch-action: pan-y;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .text-balance { text-wrap: balance; }
+  .no-scrollbar { scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+}
+
+/* ── Item reveal — CSS scroll-driven (Basic tier, no GSAP) ─────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  @supports (animation-timeline: view()) {
+    @keyframes reveal-up {
+      from { opacity: 0; transform: translateY(24px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0)    scale(1);    }
+    }
+    .item-card {
+      animation: reveal-up linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 30%;
+    }
+    @media (min-width: 768px) {
+      .item-card { animation-range: entry 0% entry 22%; }
+    }
   }
+}
+
+/* ── WhatsApp CTA pulse ring ─────────────────────────────────────────────── */
+.wa-pulse {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: #25d366;
+  z-index: 0;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .wa-pulse { animation: wa-pulse 2.2s cubic-bezier(0,0,0.2,1) infinite; }
+}
+@keyframes wa-pulse {
+  0%   { transform: scale(1);   opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0;   }
+}
+
+/* ── Skeleton shimmer ────────────────────────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(90deg, var(--sf1) 25%, var(--sf2) 50%, var(--sf1) 75%);
+  background-size: 400px 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position:  400px 0; }
+}
+
+/* ── Marquee ticker ──────────────────────────────────────────────────────── */
+.ticker {
+  white-space: nowrap;
+  animation: marquee 22s linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+/* ── Dietary icon micro-animations ──────────────────────────────────────── */
+.dietary-badge {
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.dietary-badge:hover {
+  transform: scale(1.15);
+}
+
+/* ── Scroll snap utilities ───────────────────────────────────────────────── */
+.snap-container {
+  scroll-snap-type: y mandatory;
+  overflow-y: scroll;
+  height: 100svh;
+}
+.snap-section {
+  scroll-snap-align: start;
+  min-height: 100svh;
+}
+
+/* ── Page transitions ────────────────────────────────────────────────────── */
+@keyframes page-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: page-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* ── Hover card lift ─────────────────────────────────────────────────────── */
+.card-lift {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-lift:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(0,0,0,0.12);
+}
+
+/* ── Nocturne: snap scroll sections ─────────────────────────────────────── */
+.nocturne-scroll {
+  height: 100svh;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  overscroll-behavior: contain;
+}
+.nocturne-section {
+  min-height: 100svh;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+
+/* ── Studio: gallery hover reveal ───────────────────────────────────────── */
+.studio-reveal {
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.studio-cell:hover .studio-reveal,
+.studio-cell:focus-within .studio-reveal {
+  transform: translateY(0);
+}
+
+/* ── Sakura: petal float ─────────────────────────────────────────────────── */
+@keyframes petal-fall {
+  0%   { transform: translateY(-10vh) rotate(0deg)   scale(1);    opacity: 0.8; }
+  100% { transform: translateY(110vh) rotate(360deg) scale(0.6);  opacity: 0;   }
+}
+
+/* ── Frost: shimmer-sparkle ──────────────────────────────────────────────── */
+@keyframes sparkle {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50%       { opacity: 1;   transform: scale(1.2); }
+}
+
+/* ── Ember: glow pulse ───────────────────────────────────────────────────── */
+@keyframes ember-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(220,38,38,0.3); }
+  50%       { box-shadow: 0 0 40px rgba(220,38,38,0.6); }
+}
+
+/* ── Arcade: bounce ──────────────────────────────────────────────────────── */
+@keyframes pop-in {
+  0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.1) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg);  opacity: 1; }
 }

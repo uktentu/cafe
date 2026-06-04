@@ -1,0 +1,17 @@
+name: Supabase Keep-Alive
+# Prevents the shared Supabase project from auto-pausing after 7 idle days.
+# Pings the REST API every 5 days. Set repo secrets SUPABASE_URL + SUPABASE_ANON_KEY.
+on:
+  schedule:
+    - cron: '0 8 */5 * *'
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping DB
+        run: |
+          curl -sf "${{ secrets.SUPABASE_URL }}/rest/v1/businesses?select=id&limit=1" \
+            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+            && echo "OK $(date)" || echo "FAILED"
