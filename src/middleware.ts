@@ -26,8 +26,20 @@ export async function middleware(request: NextRequest) {
           return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
+          // 1. Update the request cookies
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
-          response = NextResponse.next({ request })
+          
+          // 2. Synchronize the 'Cookie' header so Server Components can read the updated cookies
+          request.headers.set('cookie', request.cookies.toString())
+          
+          // 3. Create a new response with the mutated request headers
+          response = NextResponse.next({
+            request: {
+              headers: request.headers,
+            },
+          })
+          
+          // 4. Set the cookies on the response so they apply to the browser
           cookiesToSet.forEach(({ name, value, options }) =>
             response.cookies.set(name, value, options),
           )
@@ -52,7 +64,12 @@ export async function middleware(request: NextRequest) {
       const url = request.nextUrl.clone()
       url.pathname = '/cms/login'
       url.searchParams.set('next', pathname)
-      return NextResponse.redirect(url)
+      const redirect = NextResponse.redirect(url)
+      // Copy any cookies set by Supabase (e.g. clearing tokens) to the redirect
+      response.headers.forEach((value, key) => {
+        if (key.toLowerCase() === 'set-cookie') redirect.headers.append('set-cookie', value)
+      })
+      return redirect
     }
     return response
   }
@@ -61,7 +78,11 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/cms/login'
     url.searchParams.set('next', pathname)
-    return NextResponse.redirect(url)
+    const redirect = NextResponse.redirect(url)
+    response.headers.forEach((value, key) => {
+      if (key.toLowerCase() === 'set-cookie') redirect.headers.append('set-cookie', value)
+    })
+    return redirect
   }
 
   // Already signed in but visiting the login page → go to dashboard.
@@ -69,7 +90,11 @@ export async function middleware(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/cms/dashboard'
     url.search = ''
-    return NextResponse.redirect(url)
+    const redirect = NextResponse.redirect(url)
+    response.headers.forEach((value, key) => {
+      if (key.toLowerCase() === 'set-cookie') redirect.headers.append('set-cookie', value)
+    })
+    return redirect
   }
 
   return response

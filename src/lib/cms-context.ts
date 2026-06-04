@@ -21,8 +21,8 @@ async function _getCmsContext(): Promise<CmsContext> {
   if (!supabaseConfigured()) return { state: 'unconfigured' }
 
   const supabase = createClient()
-  // getSession() reads from the cookie — middleware already validated the JWT
-  // with getUser() on this same request, so the session is guaranteed fresh.
+  // getSession() reads from the cookie — guaranteed fresh now that middleware
+  // perfectly forwards cookie mutations to Server Components.
   const {
     data: { session },
   } = await supabase.auth.getSession()
