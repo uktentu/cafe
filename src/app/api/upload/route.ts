@@ -1,5 +1,5 @@
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
+
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 // ════════════════════════════════════════════════════════════════════
 // POST /api/upload — process an uploaded image with sharp and store on R2.
 // Auth required (must be signed-in staff). Returns R2 KEYS (never URLs).
@@ -90,3 +90,5 @@ export async function POST(request: Request) {
     )
   }
 }
+
+export const runtime = "edge";

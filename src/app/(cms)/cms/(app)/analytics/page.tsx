@@ -17,3 +17,5 @@ export default function AnalyticsPage() {
     </div>
   )
 }
+
+export const runtime = "edge";

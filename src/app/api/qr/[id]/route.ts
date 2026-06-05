@@ -1,5 +1,5 @@
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
+
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
@@ -26,3 +26,7 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
     return NextResponse.redirect(new URL('/', req.url))
   }
 }
+
+export function generateStaticParams() { return [{ id: 'placeholder' }] }
+
+export const runtime = "edge";

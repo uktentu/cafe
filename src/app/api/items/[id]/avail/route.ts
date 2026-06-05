@@ -1,5 +1,5 @@
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
+
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 // ════════════════════════════════════════════════════════════════════
 // PATCH /api/items/[id]/avail — toggle sold-out, then revalidate the menu.
 // RLS (cookie-bound client) enforces that the caller is staff of the business.
@@ -58,3 +58,5 @@ export async function PATCH(
 
   return NextResponse.json({ ok: true, item: data })
 }
+
+export const runtime = "edge";

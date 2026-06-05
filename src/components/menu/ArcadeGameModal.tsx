@@ -68,7 +68,7 @@ function PixelEnemySVG({ frame, type, hitTime }: { frame: number; type: string; 
 
   return (
     <div 
-      className="w-full h-full flex items-center justify-center text-4xl md:text-5xl"
+      className="w-full h-full flex items-center justify-center text-4xl lg:text-5xl"
       style={{
         filter: isHit ? 'brightness(200%)' : 'none',
         transform: type === 'crow' && frame % 2 === 0 ? 'translateY(-4px)' : 'none'
@@ -429,20 +429,20 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
     <m.div layoutId="arcade-game-container" className="fixed inset-0 z-[99999] bg-black text-white overflow-hidden arcade-font select-none touch-none flex flex-col" style={{ borderRadius: 0 }}>
       
       {/* Portrait Warning Overlay (Mobile only) */}
-      <div className="hidden max-md:portrait:flex absolute inset-0 z-[100000] bg-black flex-col items-center justify-center p-8 text-center">
-         <h2 className="text-3xl md:text-5xl text-yellow-400 mb-4 animate-pulse">ROTATE DEVICE 🔄</h2>
-         <p className="text-lg md:text-xl leading-relaxed">This game requires landscape mode.<br/>Turn your phone sideways to play!</p>
+      <div className="hidden max-lg:portrait:flex absolute inset-0 z-[100000] bg-black flex-col items-center justify-center p-8 text-center">
+         <h2 className="text-3xl lg:text-5xl text-yellow-400 mb-4 animate-pulse">ROTATE DEVICE 🔄</h2>
+         <p className="text-lg lg:text-xl leading-relaxed">This game requires landscape mode.<br/>Turn your phone sideways to play!</p>
          <button onClick={onClose} className="mt-12 px-8 py-4 bg-neutral-800 active:bg-neutral-700 rounded-full font-bold tracking-widest uppercase">Close Game</button>
       </div>
 
       {/* Header Overlay */}
-      <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between p-4 md:p-6 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
-        <div className="flex items-center gap-4 text-yellow-400 text-sm md:text-xl font-bold tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+      <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-between p-4 lg:p-6 bg-gradient-to-b from-black/80 to-transparent pointer-events-none">
+        <div className="flex items-center gap-4 text-yellow-400 text-sm lg:text-xl font-bold tracking-wider drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
           <div className="flex items-center gap-2">
             <Trophy className="h-5 w-5" />
             <span>{gameState.score.toString().padStart(5, '0')}</span>
           </div>
-          <div className="flex items-center gap-2 text-neutral-400 text-xs md:text-sm">
+          <div className="flex items-center gap-2 text-neutral-400 text-xs lg:text-sm">
             <span>HI: {gameState.highScore.toString().padStart(5, '0')}</span>
           </div>
         </div>
@@ -453,7 +453,7 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
 
       {/* Game Canvas / Arena */}
       <div 
-        className="absolute inset-0 md:relative md:flex-1 bg-[#1e1b4b] overflow-hidden" 
+        className="absolute inset-0 lg:relative lg:flex-1 bg-[#1e1b4b] overflow-hidden" 
         ref={containerRef}
         style={gameState.screenShake > 0 ? { transform: `translate(${(Math.random() - 0.5) * 10}px, ${(Math.random() - 0.5) * 10}px)` } : {}}
       >
@@ -461,19 +461,19 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
         <div className="absolute inset-0 opacity-30" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
 
         {/* Floor */}
-        <div className="absolute bottom-0 inset-x-0 h-16 md:h-24 border-t-4 border-[#166534]" style={{ background: 'repeating-linear-gradient(90deg, #15803d 0px, #15803d 10px, #166534 10px, #166534 20px)' }} />
+        <div className="absolute bottom-0 inset-x-0 h-16 lg:h-24 border-t-4 border-[#166534]" style={{ background: 'repeating-linear-gradient(90deg, #15803d 0px, #15803d 10px, #166534 10px, #166534 20px)' }} />
 
         {/* Entities container aligned to ground */}
-        <div className="absolute bottom-16 md:bottom-24 inset-x-0 h-0">
+        <div className="absolute bottom-16 lg:bottom-24 inset-x-0 h-0">
           
           {/* Intro Sequence Overlay */}
           {isIntro && (
             <div 
-              className="absolute w-64 md:w-80 bottom-[60px] md:bottom-[80px] bg-white text-black p-4 rounded-xl shadow-lg z-20"
+              className="absolute w-64 lg:w-80 bottom-[60px] lg:bottom-[80px] bg-white text-black p-4 rounded-xl shadow-lg z-20"
               style={{ left: `${gameState.player.x - 20}px` }}
             >
               <div className="absolute -bottom-2 left-10 w-4 h-4 bg-white transform rotate-45" />
-              <p className="text-sm md:text-base mb-4 leading-relaxed font-bold tracking-wider">
+              <p className="text-sm lg:text-base mb-4 leading-relaxed font-bold tracking-wider">
                 While your order is cooking fr fr, survive this no cap 💀
               </p>
               <button 
@@ -488,7 +488,7 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
           {/* Player */}
           {!gameState.player.dead && (
             <div 
-              className={`absolute w-12 h-12 md:w-16 md:h-16 -ml-6 -mt-12 md:-mt-16 ${gameState.player.dashing ? 'opacity-50 drop-shadow-[0_0_15px_rgba(59,130,246,1)]' : ''}`}
+              className={`absolute w-12 h-12 lg:w-16 lg:h-16 -ml-6 -mt-12 lg:-mt-16 ${gameState.player.dashing ? 'opacity-50 drop-shadow-[0_0_15px_rgba(59,130,246,1)]' : ''}`}
               style={{ transform: `translate3d(${gameState.player.x}px, ${gameState.player.y}px, 0)` }}
             >
               <GamePlayerSVG isWalking={Math.abs(gameState.player.vx) > 0 && frameTick % 2 === 0} isCrouching={gameState.player.crouching} />
@@ -496,7 +496,7 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
           )}
           {gameState.player.dead && (
             <div 
-              className="absolute w-12 h-12 md:w-16 md:h-16 -ml-6 -mt-12 md:-mt-16 text-red-500 animate-pulse"
+              className="absolute w-12 h-12 lg:w-16 lg:h-16 -ml-6 -mt-12 lg:-mt-16 text-red-500 animate-pulse"
               style={{ transform: `translate3d(${gameState.player.x}px, ${GROUND_Y}px, 0) rotate(90deg)` }}
             >
               <GamePlayerSVG isWalking={false} isCrouching={false} />
@@ -507,7 +507,7 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
           {gameState.enemies.map(e => (
             <div 
               key={e.id}
-              className="absolute w-12 h-12 md:w-16 md:h-16 -ml-6 -mt-12 md:-mt-16"
+              className="absolute w-12 h-12 lg:w-16 lg:h-16 -ml-6 -mt-12 lg:-mt-16"
               style={{ transform: `translate3d(${e.x}px, ${e.y}px, 0)` }}
             >
               <PixelEnemySVG frame={e.frame} type={e.type} hitTime={e.hitTime} />
@@ -557,8 +557,8 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
         {/* Game Over Screen */}
         {gameState.gameOver && (
           <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-10 p-4">
-            <h2 className="text-4xl md:text-6xl text-red-500 mb-2 animate-pulse text-center">SKILL ISSUE 💀</h2>
-            <p className="text-xl md:text-2xl text-yellow-400 mb-8">FINAL SCORE: {gameState.score}</p>
+            <h2 className="text-4xl lg:text-6xl text-red-500 mb-2 animate-pulse text-center">SKILL ISSUE 💀</h2>
+            <p className="text-xl lg:text-2xl text-yellow-400 mb-8">FINAL SCORE: {gameState.score}</p>
             <button 
               onClick={restart}
               className="flex items-center gap-3 px-6 py-4 bg-white text-black hover:bg-neutral-200 active:scale-95 transition-transform"
@@ -571,34 +571,34 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Controller Area */}
-      <div className="absolute bottom-4 inset-x-4 flex items-end justify-between pointer-events-none z-20 md:relative md:inset-auto md:bottom-auto md:h-64 md:bg-neutral-900 md:border-t-4 md:border-neutral-700 md:items-center md:px-24">
+      <div className="absolute bottom-4 inset-x-4 flex items-end justify-between pointer-events-none z-20 lg:relative lg:inset-auto lg:bottom-auto lg:h-64 lg:bg-neutral-900 lg:border-t-4 lg:border-neutral-700 lg:items-center lg:px-24">
         {/* D-Pad */}
-        <div className="relative w-32 h-32 opacity-60 pointer-events-auto md:w-48 md:h-48 md:opacity-100">
-          <div className="absolute inset-0 m-auto w-12 h-12 md:w-16 md:h-16 bg-neutral-800" />
+        <div className="relative w-32 h-32 opacity-60 pointer-events-auto lg:w-48 lg:h-48 lg:opacity-100">
+          <div className="absolute inset-0 m-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-800" />
           {/* UP */}
           <button 
-            className="absolute top-0 inset-x-0 mx-auto w-12 h-12 md:w-16 md:h-16 bg-neutral-700 active:bg-neutral-500 rounded-t-lg"
+            className="absolute top-0 inset-x-0 mx-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-t-lg"
             onPointerDown={() => keys.current.up = true}
             onPointerUp={() => keys.current.up = false}
             onPointerLeave={() => keys.current.up = false}
           />
           {/* DOWN */}
           <button 
-            className="absolute bottom-0 inset-x-0 mx-auto w-12 h-12 md:w-16 md:h-16 bg-neutral-700 active:bg-neutral-500 rounded-b-lg"
+            className="absolute bottom-0 inset-x-0 mx-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-b-lg"
             onPointerDown={() => keys.current.down = true}
             onPointerUp={() => keys.current.down = false}
             onPointerLeave={() => keys.current.down = false}
           />
           {/* LEFT */}
           <button 
-            className="absolute left-0 inset-y-0 my-auto w-12 h-12 md:w-16 md:h-16 bg-neutral-700 active:bg-neutral-500 rounded-l-lg"
+            className="absolute left-0 inset-y-0 my-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-l-lg"
             onPointerDown={() => keys.current.left = true}
             onPointerUp={() => keys.current.left = false}
             onPointerLeave={() => keys.current.left = false}
           />
           {/* RIGHT */}
           <button 
-            className="absolute right-0 inset-y-0 my-auto w-12 h-12 md:w-16 md:h-16 bg-neutral-700 active:bg-neutral-500 rounded-r-lg"
+            className="absolute right-0 inset-y-0 my-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-r-lg"
             onPointerDown={() => keys.current.right = true}
             onPointerUp={() => keys.current.right = false}
             onPointerLeave={() => keys.current.right = false}
@@ -606,25 +606,25 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 opacity-60 pointer-events-auto pb-4 pr-4 md:gap-8 md:opacity-100 md:pb-0 md:pr-0">
+        <div className="flex gap-4 opacity-60 pointer-events-auto pb-4 pr-4 lg:gap-8 lg:opacity-100 lg:pb-0 lg:pr-0">
           {/* DASH Button */}
           <button 
-            className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-blue-600 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 active:bg-blue-500 shadow-lg flex items-center justify-center transition-all"
+            className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-blue-600 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 active:bg-blue-500 shadow-lg flex items-center justify-center transition-all"
             onPointerDown={() => keys.current.dash = true}
             onPointerUp={() => keys.current.dash = false}
             onPointerLeave={() => keys.current.dash = false}
           >
-            <span className="text-sm md:text-lg font-bold tracking-widest">DASH</span>
+            <span className="text-sm lg:text-lg font-bold tracking-widest">DASH</span>
           </button>
 
           {/* FIRE Button */}
           <button 
-            className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-red-600 border-b-4 border-red-800 active:border-b-0 active:translate-y-1 active:bg-red-500 shadow-lg flex items-center justify-center transition-all"
+            className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-red-600 border-b-4 border-red-800 active:border-b-0 active:translate-y-1 active:bg-red-500 shadow-lg flex items-center justify-center transition-all"
             onPointerDown={() => keys.current.fire = true}
             onPointerUp={() => keys.current.fire = false}
             onPointerLeave={() => keys.current.fire = false}
           >
-            <span className="text-xl md:text-2xl font-bold tracking-widest">FIRE</span>
+            <span className="text-xl lg:text-2xl font-bold tracking-widest">FIRE</span>
           </button>
         </div>
       </div>

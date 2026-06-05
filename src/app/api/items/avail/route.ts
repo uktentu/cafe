@@ -1,5 +1,5 @@
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
+
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 // PATCH /api/items/avail?id=<item-uuid>
 // Toggle sold-out status. Replaces the dynamic /api/items/[id]/avail endpoint
 // with a static-segment route so output:'export' (GitHub Pages) doesn't require
@@ -43,3 +43,5 @@ export async function PATCH(request: NextRequest) {
   revalidatePath('/')
   return NextResponse.json({ ok: true, item: data })
 }
+
+export const runtime = "edge";

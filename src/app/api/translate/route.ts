@@ -1,4 +1,4 @@
-export const runtime = 'edge'
+
 
 import { NextResponse } from 'next/server'
 
@@ -30,3 +30,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Translation failed' }, { status: 500 })
   }
 }
+
+export const runtime = "edge";

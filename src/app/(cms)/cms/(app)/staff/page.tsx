@@ -17,3 +17,5 @@ export default function StaffPage() {
     </div>
   )
 }
+
+export const runtime = "edge";

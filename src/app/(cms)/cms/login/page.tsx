@@ -101,3 +101,5 @@ export default function LoginPage() {
     </Suspense>
   )
 }
+
+export const runtime = "edge";

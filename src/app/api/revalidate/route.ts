@@ -1,5 +1,5 @@
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
+
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 // POST /api/revalidate — push the public menu's ISR cache after a CMS write
 // done via the browser Supabase client. Auth required. Rule: every CMS mutation
 // that affects the public menu calls this so changes go live in ≤ 30s.
@@ -22,3 +22,5 @@ export async function POST() {
   revalidatePath('/', 'layout')
   return NextResponse.json({ ok: true })
 }
+
+export const runtime = "edge";

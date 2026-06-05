@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-export const runtime = 'edge'
-export const dynamic = 'force-dynamic'
+
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 // POST /api/track — persist a subset of analytics events server-side so the
 // public menu bundle never ships @supabase/supabase-js (~65KB). Called via
 // navigator.sendBeacon from lib/firebase.ts. Fire-and-forget: always 204.
@@ -43,3 +43,6 @@ export async function POST(request: Request) {
   }
   return new Response(null, { status: 204 })
 }
+
+
+export const runtime = "edge";

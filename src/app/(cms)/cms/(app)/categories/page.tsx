@@ -5,3 +5,5 @@ export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'for
 export default function CategoriesPage() {
   return <CategoryManager />
 }
+
+export const runtime = "edge";

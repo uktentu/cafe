@@ -2,7 +2,7 @@ import { Lock, Phone, Sparkles, TrendingUp, CheckCircle2 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/Button'
 
-export const runtime = 'edge'
+
 
 export const metadata = {
   title: 'Upgrade Plan | MenuOS',
@@ -144,3 +144,5 @@ export default function UpgradePage({ searchParams }: { searchParams: { feature?
     </div>
   )
 }
+
+export const runtime = "edge";

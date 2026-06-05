@@ -15,3 +15,5 @@ export default function BranchesPage() {
     </div>
   )
 }
+
+export const runtime = "edge";

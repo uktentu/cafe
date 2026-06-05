@@ -17,3 +17,5 @@ export default function MenusPage() {
     </div>
   )
 }
+
+export const runtime = "edge";

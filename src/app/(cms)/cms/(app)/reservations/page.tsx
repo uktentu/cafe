@@ -15,3 +15,5 @@ export default function ReservationsPage() {
     </div>
   )
 }
+
+export const runtime = "edge";

@@ -17,3 +17,5 @@ export default function BannersPage() {
     </div>
   )
 }
+
+export const runtime = "edge";

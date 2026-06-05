@@ -11,3 +11,5 @@ export function generateStaticParams() {
 export default function EditItemPage({ params }: { params: { id: string } }) {
   return <ItemForm itemId={params.id} />
 }
+
+export const runtime = "edge";

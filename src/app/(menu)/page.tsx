@@ -81,3 +81,5 @@ export default async function MenuPage() {
     </>
   )
 }
+
+export const runtime = "edge";
