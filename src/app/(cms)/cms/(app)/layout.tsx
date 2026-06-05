@@ -1,14 +1,13 @@
-export const runtime = 'edge'
 // Authed CMS shell: dark sidebar + content. Lives in the (app) route group so
 // /cms/login (outside it) stays shell-free. Resolves the business/role once and
 // passes them to client components via CmsProviders.
 //
 // STATIC_EXPORT=1 (GitHub Pages demo): force-static so Next.js can export this
-// as a shell — the CmsNotice renders "login required" without hitting Supabase.
 import { CmsProviders } from '@/components/cms/Providers'
 import { Sidebar, MobileTopbar } from '@/components/cms/Sidebar'
 import { CmsNotice } from '@/components/cms/CmsNotice'
 import { ToastViewport } from '@/components/ui/Toast'
+
 
 // In static export mode we cannot hit cookies/auth, so force-static and skip
 // auth resolution — the page renders as an unauthenticated shell.

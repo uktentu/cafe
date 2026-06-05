@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 // PATCH /api/items/avail?id=<item-uuid>
 // Toggle sold-out status. Replaces the dynamic /api/items/[id]/avail endpoint
 // with a static-segment route so output:'export' (GitHub Pages) doesn't require
@@ -7,7 +9,6 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 
-export const runtime = 'edge'
 
 export async function PATCH(request: NextRequest) {
   if (!supabaseConfigured()) {

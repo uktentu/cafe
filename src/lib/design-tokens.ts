@@ -248,3 +248,19 @@ export function themeStyleString(theme: Theme, brandOverride?: string | null): s
     .map(([k, v]) => `${k}:${v}`)
     .join(';')
 }
+
+/** 
+ * Enforce tier-based theme locks for the live menu.
+ * Returns the requested theme if allowed, otherwise falls back to 'mercado'.
+ */
+export function resolveTheme(userTier: Tier, requestedTheme: Theme | null | undefined): Theme {
+  if (!requestedTheme) return 'mercado'
+  const meta = THEMES[requestedTheme]
+  if (!meta) return 'mercado'
+  
+  const TIER_RANK: Record<Tier, number> = { basic: 0, advanced: 1, premium: 2 }
+  if (TIER_RANK[meta.tier] > TIER_RANK[userTier]) {
+    return 'mercado'
+  }
+  return requestedTheme
+}

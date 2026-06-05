@@ -30,6 +30,13 @@ body {
   background: var(--bg, #0E0B09);
   font-family: var(--font-inter), system-ui, Arial, sans-serif;
   overflow-x: clip;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+input, textarea, select, [contenteditable="true"] {
+  -webkit-user-select: auto;
+  user-select: auto;
 }
 
 /* Prevent double-tap zoom on buttons/links.

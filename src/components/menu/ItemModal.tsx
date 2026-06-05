@@ -9,6 +9,7 @@ import { useMenuStore } from '@/stores/menu'
 import { track } from '@/lib/firebase'
 import { cdnUrl, itemImageKey, type Item, type Theme } from '@/types/database'
 import { formatPrice } from '@/lib/utils'
+import { useLanguage } from './LanguageProvider'
 
 interface ItemModalProps {
   businessName: string
@@ -17,6 +18,7 @@ interface ItemModalProps {
 }
 
 export function ItemModal({ businessName, whatsapp, theme = 'mercado' }: ItemModalProps) {
+  const { tUi } = useLanguage()
   const selected = useMenuStore((s) => s.selectedItem)
   const close = useMenuStore((s) => s.closeItem)
   const [imgError, setImgError] = useState(false)
@@ -87,7 +89,7 @@ export function ItemModal({ businessName, whatsapp, theme = 'mercado' }: ItemMod
             )}
             {!item.is_available && (
               <span className="ml-auto rounded-full px-2 py-0.5 text-xs font-bold uppercase" style={{ background: '#C0392B', color: '#fff' }}>
-                Sold Out
+                {tUi('Sold Out', 'Sold Out')}
               </span>
             )}
           </div>
@@ -102,7 +104,7 @@ export function ItemModal({ businessName, whatsapp, theme = 'mercado' }: ItemMod
             <DietaryFlags item={item} />
             {item.allergens.length > 0 && (
               <p className="text-xs" style={{ color: 'var(--txt3)' }}>
-                Contains: {item.allergens.join(', ')}
+                {tUi('Contains:', 'Contains:')} {item.allergens.join(', ')}
               </p>
             )}
           </div>
@@ -117,7 +119,7 @@ export function ItemModal({ businessName, whatsapp, theme = 'mercado' }: ItemMod
               style={{ background: '#25D366' }}
             >
               <MessageCircle className="h-5 w-5" />
-              Order on WhatsApp
+              {tUi('Order on WhatsApp', 'Order on WhatsApp')}
             </a>
           )}
         </div>

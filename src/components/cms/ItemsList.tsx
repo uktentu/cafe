@@ -40,16 +40,17 @@ interface ItemRowProps {
   catIcon: string | null | undefined
   onToggle: (id: string, value: boolean) => void
   isSearchActive: boolean
+  isOverLimit?: boolean
 }
 
-const SortableItemRow = memo(function SortableItemRow({ item, catName, catIcon, onToggle, isSearchActive }: ItemRowProps) {
+const SortableItemRow = memo(function SortableItemRow({ item, catName, catIcon, onToggle, isSearchActive, isOverLimit }: ItemRowProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
   const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : 1 }
   const Icon = getCategoryIcon(catIcon)
   const thumb = cdnUrl(itemImageKey(item))
   
   return (
-    <div ref={setNodeRef} style={style} className={`flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-black/5 ${isDragging ? 'shadow-lg ring-black/10' : ''}`}>
+    <div ref={setNodeRef} style={style} className={`flex items-center gap-3 rounded-xl p-3 ring-1 ${isDragging ? 'shadow-lg ring-black/10 bg-white' : 'ring-black/5 bg-white'} ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50' : ''}`}>
       {!isSearchActive && (
         <button {...attributes} {...listeners} className="flex h-8 w-8 cursor-grab items-center justify-center text-neutral-400 hover:text-neutral-600 active:cursor-grabbing" aria-label="Drag handle">
           <GripVertical className="h-4 w-4" />
@@ -65,7 +66,10 @@ const SortableItemRow = memo(function SortableItemRow({ item, catName, catIcon, 
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate font-medium text-neutral-900">{item.name}</p>
+        <div className="flex items-center gap-2">
+          <p className="truncate font-medium text-neutral-900">{item.name}</p>
+          {isOverLimit && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">LIMIT REACHED</span>}
+        </div>
         <p className="text-xs text-neutral-500">
           {catName ?? 'Uncategorised'} · {formatPrice(item.price)}
         </p>
@@ -77,6 +81,7 @@ const SortableItemRow = memo(function SortableItemRow({ item, catName, catIcon, 
             onChange={(v) => onToggle(item.id, v)}
             label={`${item.name} available`}
             size="sm"
+            disabled={isOverLimit}
           />
           <span className="mt-0.5 text-[10px] text-neutral-400">
             {item.is_available ? 'Available' : 'Sold out'}
@@ -99,10 +104,12 @@ export function ItemsList() {
   const bid = business.id
   const qc = useQueryClient()
   const pushToast = useCmsStore((s) => s.pushToast)
+  const activeBranchId = useCmsStore((s) => s.activeBranchId)
   const { limits } = getConfig()
   const [search, setSearch] = useState('')
+  const [catFilter, setCatFilter] = useState('all')
 
-  const itemsQ = useQuery({ queryKey: qk.items(bid), queryFn: () => fetchItems(bid) })
+  const itemsQ = useQuery({ queryKey: qk.items(bid, activeBranchId), queryFn: () => fetchItems(bid, activeBranchId) })
   const catsQ = useQuery({ queryKey: qk.categories(bid), queryFn: () => fetchCategories(bid) })
 
   const catById = useMemo(() => {
@@ -136,7 +143,15 @@ export function ItemsList() {
   )
 
   const items = itemsQ.data ?? []
-  const filtered = items.filter((it) => it.name.toLowerCase().includes(search.toLowerCase().trim()))
+  const filtered = items.filter((it) => {
+    const matchesSearch = it.name.toLowerCase().includes(search.toLowerCase().trim())
+    const matchesCat = catFilter === 'all' 
+      ? true 
+      : catFilter === 'none' 
+        ? !it.category_id 
+        : it.category_id === catFilter
+    return matchesSearch && matchesCat
+  })
   const atLimit = items.length >= limits.items
   const isSearchActive = search.trim().length > 0
 
@@ -184,14 +199,27 @@ export function ItemsList() {
         </Link>
       </header>
 
-      <div className="relative">
-        <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Search items…"
-          className="h-[42px] w-full rounded-lg border border-neutral-300 bg-white pl-9 pr-3 text-[16px] outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
-        />
+      <div className="flex flex-col sm:flex-row gap-3 relative">
+        <div className="relative flex-1">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search items…"
+            className="h-[42px] w-full rounded-lg border border-neutral-300 bg-white pl-9 pr-3 text-[16px] outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
+          />
+        </div>
+        <select
+          value={catFilter}
+          onChange={(e) => setCatFilter(e.target.value)}
+          className="h-[42px] w-full sm:w-auto min-w-[160px] rounded-lg border border-neutral-300 bg-white px-3 text-sm outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
+        >
+          <option value="all">All Categories</option>
+          {Array.from(catById.entries()).map(([id, cat]) => (
+            <option key={id} value={id}>{cat.name}</option>
+          ))}
+          <option value="none">Uncategorised</option>
+        </select>
       </div>
 
       {itemsQ.isLoading ? (
@@ -203,7 +231,7 @@ export function ItemsList() {
       ) : filtered.length === 0 ? (
         <div className="rounded-2xl bg-white p-10 text-center ring-1 ring-black/5">
           <p className="text-sm text-neutral-500">
-            {items.length === 0 ? 'No items yet. Add your first menu item.' : 'No items match your search.'}
+            {items.length === 0 ? 'No items yet. Add your first menu item.' : 'No items match your filters.'}
           </p>
         </div>
       ) : (
@@ -212,6 +240,8 @@ export function ItemsList() {
             <div className="space-y-2">
               {filtered.map((it) => {
                 const cat = it.category_id ? catById.get(it.category_id) : null
+                const originalIndex = items.findIndex(i => i.id === it.id)
+                const isOverLimit = originalIndex >= limits.items
                 return (
                   <SortableItemRow
                     key={it.id}
@@ -220,6 +250,7 @@ export function ItemsList() {
                     catIcon={cat?.icon}
                     onToggle={handleToggle}
                     isSearchActive={isSearchActive}
+                    isOverLimit={isOverLimit}
                   />
                 )
               })}

@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 // ════════════════════════════════════════════════════════════════════
 // POST /api/upload — process an uploaded image with sharp and store on R2.
 // Auth required (must be signed-in staff). Returns R2 KEYS (never URLs).
@@ -9,7 +11,6 @@ import { uploadToR2, r2keys } from '@/lib/r2'
 import { getConfig } from '@/lib/config'
 import { supabaseConfigured } from '@/lib/env'
 
-export const runtime = 'edge'
 export const maxDuration = 30
 
 type UploadType = 'item' | 'logo' | 'cover' | 'banner' | 'og'

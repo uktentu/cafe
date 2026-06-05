@@ -7,7 +7,7 @@ import { useCms } from './Providers'
 import { useCmsStore } from '@/stores/cms'
 import { qk, fetchStaff, deleteStaff, updateStaffRole } from '@/lib/cms-queries'
 import type { StaffRole } from '@/types/database'
-import { getConfig, tierRank } from '@/lib/config'
+import { getConfig } from '@/lib/config'
 import { Button } from '@/components/ui/Button'
 import { Input, Select } from '@/components/ui/Input'
 
@@ -95,7 +95,6 @@ export function StaffManager() {
   const bid = business.id
   const qc = useQueryClient()
   const pushToast = useCmsStore((s) => s.pushToast)
-  const { tier } = getConfig()
   const [inviting, setInviting] = useState(false)
 
   const { data: staffList = [], isLoading } = useQuery({
@@ -123,9 +122,7 @@ export function StaffManager() {
 
   if (isLoading) return <div className="h-32 animate-pulse rounded-2xl bg-neutral-100" />
 
-  const isPremium = tierRank(tier) >= tierRank('premium')
-  const isAdvanced = tierRank(tier) >= tierRank('advanced')
-  const staffLimit = isPremium ? 9999 : isAdvanced ? 2 : 0
+  const staffLimit = getConfig().limits.staff
   
   // Exclude owner from the limit count usually, but for simplicity let's say "total accounts except owner"
   const nonOwners = staffList.filter(s => s.role !== 'owner')

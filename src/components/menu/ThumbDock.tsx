@@ -11,6 +11,7 @@ import { useMenuStore, type DietaryFilter } from '@/stores/menu'
 import { VegMark } from '@/components/menu/badges'
 import { getCategoryIcon } from '@/components/menu/categoryIcon'
 import type { Category, DietaryPreference } from '@/types/database'
+import { useLanguage } from './LanguageProvider'
 
 interface ThumbDockProps {
   categories: Category[]
@@ -22,6 +23,7 @@ const DIETARY_LABEL: Record<DietaryFilter, string> = {
 }
 
 export function ThumbDock({ categories, presentDietary }: ThumbDockProps) {
+  const { tUi } = useLanguage()
   const [open, setOpen] = useState(false)
   const activeCategoryId = useMenuStore((s) => s.activeCategoryId)
   const requestJump = useMenuStore((s) => s.requestJump)
@@ -71,7 +73,7 @@ export function ThumbDock({ categories, presentDietary }: ThumbDockProps) {
               className="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase"
               style={{ background: 'var(--brand)', color: 'var(--bg)' }}
             >
-              {DIETARY_LABEL[dietary]}
+              {tUi(DIETARY_LABEL[dietary], DIETARY_LABEL[dietary])}
             </span>
           )}
         </m.button>
@@ -141,7 +143,7 @@ export function ThumbDock({ categories, presentDietary }: ThumbDockProps) {
                           }}
                         >
                           {opt !== 'all' && <VegMark dietary={opt} size="xs" />}
-                          {DIETARY_LABEL[opt]}
+                          {tUi(DIETARY_LABEL[opt], DIETARY_LABEL[opt])}
                           {active && <Check className="h-3.5 w-3.5" />}
                         </button>
                       )

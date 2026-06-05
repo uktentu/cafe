@@ -17,7 +17,7 @@ import type { LayoutProps } from './MercadoLayout'
 function Aurora() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes aurora-sweep {
           0%   { transform: rotate(0deg) scale(1.4); opacity: 0.07; }
           50%  { opacity: 0.12; }
@@ -35,7 +35,7 @@ function Aurora() {
           0%   { background-position: -200% center; }
           100% { background-position: 200% center; }
         }
-      `}</style>
+      ` }} />
       {/* Very subtle aurora — must not overpower food names */}
       <div style={{
         position: 'absolute', inset: 0,
@@ -55,21 +55,30 @@ function Starfield() {
   const stars = Array.from({ length: 45 })
   return (
     <div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-      {stars.map((_, i) => (
-        <m.div
-          key={i}
-          className="absolute rounded-full"
-          style={{
-            width: Math.random() * 2 + 0.5,
-            height: Math.random() * 2 + 0.5,
-            background: i % 5 === 0 ? 'var(--brand2, #a78bfa)' : '#fff',
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{ opacity: [0.04, Math.random() * 0.7 + 0.2, 0.04] }}
-          transition={{ duration: Math.random() * 4 + 2, repeat: Infinity, ease: 'easeInOut', delay: Math.random() * 5 }}
-        />
-      ))}
+      {stars.map((_, i) => {
+        const pseudoRand1 = ((i * 13) % 100) / 100
+        const pseudoRand2 = ((i * 29) % 100) / 100
+        const pseudoRand3 = ((i * 47) % 100) / 100
+        const pseudoRand4 = ((i * 71) % 100) / 100
+        const pseudoRand5 = ((i * 89) % 100) / 100
+        const pseudoRand6 = ((i * 101) % 100) / 100
+        
+        return (
+          <m.div
+            key={i}
+            className="absolute rounded-full"
+            style={{
+              width: pseudoRand1 * 2 + 0.5,
+              height: pseudoRand1 * 2 + 0.5,
+              background: i % 5 === 0 ? 'var(--brand2, #a78bfa)' : '#fff',
+              left: `${pseudoRand2 * 100}%`,
+              top: `${pseudoRand3 * 100}%`,
+            }}
+            animate={{ opacity: [0.04, pseudoRand4 * 0.7 + 0.2, 0.04] }}
+            transition={{ duration: pseudoRand5 * 4 + 2, repeat: Infinity, ease: 'easeInOut', delay: pseudoRand6 * 5 }}
+          />
+        )
+      })}
     </div>
   )
 }

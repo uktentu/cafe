@@ -39,7 +39,7 @@ function BazaarBackground() {
       ].join(','),
       animation: 'geo-pulse 8s ease-in-out infinite',
     }}>
-      <style>{BAZAAR_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: BAZAAR_STYLES }} />
     </div>
   )
 }
@@ -67,7 +67,7 @@ function CategoryStrip({
       {/* Sticky category heading — sticks at top-0 (Bazaar has no inline sticky nav) */}
       <div
         className="sticky z-20 flex items-baseline justify-between px-4 py-3 md:px-8"
-        style={{ top: 0, background: 'var(--bg)', borderBottom: '1px solid var(--bdr)' }}
+        style={{ top: 'var(--menu-tabs-offset, 0px)', background: 'var(--bg)', borderBottom: '1px solid var(--bdr)' }}
       >
         <div>
           <h2 className="text-3xl font-black uppercase leading-none tracking-tight md:text-4xl" style={{ fontFamily: 'var(--font-display)', color: 'var(--brand)' }}>{cat.name}</h2>

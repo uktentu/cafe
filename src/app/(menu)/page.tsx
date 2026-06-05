@@ -4,28 +4,22 @@
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import { getConfig } from '@/lib/config'
-import { THEMES } from '@/lib/design-tokens'
 import { getMenuData } from '@/lib/menu-data'
 import { cdnUrl } from '@/types/database'
-import { SplashScreen } from '@/components/menu/SplashScreen'
-import { MenuHero } from '@/components/menu/MenuHero'
-import { BestsellerStrip } from '@/components/menu/BestsellerStrip'
-import { MenuContent } from '@/components/menu/MenuContent'
-import { WhatsAppCTA } from '@/components/menu/WhatsAppCTA'
-import { DeferredItemModal } from '@/components/menu/DeferredItemModal'
+import { MenuLayoutClient } from '@/components/menu/MenuLayoutClient'
 
-export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
-export const runtime = 'edge'
-export const revalidate = 0
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'auto'
+export const revalidate = 30
 
 export async function generateMetadata(): Promise<Metadata> {
-  const { slug, siteUrl } = getConfig()
+  const { slug, siteUrl, features } = getConfig()
   const data = await getMenuData(slug)
   if (!data) return { title: 'Menu' }
   const { business } = data
-  const title = business.seo_title || `${business.name}${business.tagline ? ` · ${business.tagline}` : ''}`
-  const description = business.seo_description || business.tagline || `View the menu for ${business.name}.`
-  const ogImage = cdnUrl(business.seo_og_r2_key) || cdnUrl(business.cover_r2_key)
+  const hasSeo = features.seo
+  const title = (hasSeo && business.seo_title) || `${business.name}${business.tagline ? ` · ${business.tagline}` : ''}`
+  const description = (hasSeo && business.seo_description) || business.tagline || `View the menu for ${business.name}.`
+  const ogImage = (hasSeo && cdnUrl(business.seo_og_r2_key)) || cdnUrl(business.cover_r2_key)
 
   return {
     title,
@@ -40,40 +34,50 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+import { resolveTheme } from '@/lib/design-tokens'
+
 export default async function MenuPage() {
-  const { slug, theme: envTheme } = getConfig()
+  const { slug, theme: envTheme, tier } = getConfig()
   const data = await getMenuData(slug)
   if (!data?.business) notFound()
-  const theme = data.business.theme ?? envTheme
-  const themeMeta = THEMES[theme] ?? THEMES.mercado
-  const splashMs = themeMeta.splashMs
+  const theme = resolveTheme(tier, data.business.theme ?? envTheme)
 
-  const { business, categories, items } = data
+  const { business, categories, items, translations, banners, branches, menus, demo } = data
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Restaurant',
+    name: business.name,
+    image: cdnUrl(business.cover_r2_key) || cdnUrl(business.logo_r2_key),
+    description: business.seo_description || business.tagline,
+    address: {
+      '@type': 'PostalAddress',
+      streetAddress: business.address,
+      addressLocality: business.city,
+    },
+    telephone: business.phone,
+    url: getConfig().siteUrl,
+    menu: getConfig().siteUrl,
+    servesCuisine: business.tagline,
+  }
 
   return (
     <>
-      <SplashScreen name={business.name} splashMs={splashMs} theme={theme} />
-
-      <a
-        href="#menu"
-        className="sr-only focus:not-sr-only focus:absolute focus:left-3 focus:top-3 focus:z-[110] focus:rounded focus:bg-white focus:px-3 focus:py-2 focus:text-sm focus:text-black"
-      >
-        Skip to menu
-      </a>
-
-      <div className={['provenance', 'onyx', 'sakura', 'coastal'].includes(theme) ? "md:ml-[220px]" : ""}>
-        <MenuHero business={business} theme={theme} />
-        <BestsellerStrip items={items} categories={categories} theme={theme} />
-      </div>
-
-      <MenuContent categories={categories} items={items} businessId={business.id} theme={theme} />
-
-      <WhatsAppCTA
-        whatsapp={business.whatsapp ?? ''}
-        businessId={business.id}
-        businessName={business.name}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <DeferredItemModal businessName={business.name} whatsapp={business.whatsapp ?? ''} theme={theme} />
+      <MenuLayoutClient
+        business={business}
+        categories={categories}
+        items={items}
+        translations={translations}
+        banners={banners}
+        branches={branches}
+        menus={menus}
+        initialTheme={theme}
+        isDemo={demo}
+      />
     </>
   )
 }

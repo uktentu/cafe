@@ -81,7 +81,7 @@ export function useScrollCategorySync(categories: Cat[]) {
       el.scrollIntoView({ behavior: 'smooth', block: 'start' }) 
       setTimeout(() => { isJumping.current = false }, 1000) // Lock observer during smooth scroll
     }
-  }, [jump])
+  }, [jump, setActive])
 
   // Sync horizontal nav bar scroll position
   useEffect(() => {

@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 // ════════════════════════════════════════════════════════════════════
 // PATCH /api/items/[id]/avail — toggle sold-out, then revalidate the menu.
 // RLS (cookie-bound client) enforces that the caller is staff of the business.
@@ -8,7 +10,6 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 
-export const runtime = 'edge'
 // API routes are excluded from static export, but Next.js still requires
 // generateStaticParams for dynamic segments when output: 'export' is set.
 // Placeholder so output:'export' doesn't fail — this route is excluded from

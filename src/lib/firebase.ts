@@ -66,7 +66,46 @@ export interface TrackParams {
   [key: string]: unknown
 }
 
-/** Fire a GA4 event and (for mirrored types) beacon it to /api/track. */
+let analyticsQueue: any[] = []
+let flushTimeout: ReturnType<typeof setTimeout> | null = null
+
+function flushAnalytics() {
+  if (analyticsQueue.length === 0) return
+  
+  const payload = JSON.stringify(analyticsQueue)
+  analyticsQueue = [] // Clear immediately
+  
+  if (flushTimeout) {
+    clearTimeout(flushTimeout)
+    flushTimeout = null
+  }
+
+  try {
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' }))
+    } else {
+      void fetch('/api/track', {
+        method: 'POST',
+        body: payload,
+        keepalive: true,
+        headers: { 'content-type': 'application/json' },
+      })
+    }
+  } catch {
+    /* analytics must never break the page */
+  }
+}
+
+// Setup visibility listener to flush on exit
+if (typeof window !== 'undefined') {
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      flushAnalytics()
+    }
+  })
+}
+
+/** Fire a GA4 event and (for mirrored types) queue it for /api/track. */
 export function track(eventType: AnalyticsEventType, params: TrackParams = {}): void {
   if (typeof window === 'undefined') return
   const sid = getSessionId()
@@ -74,27 +113,17 @@ export function track(eventType: AnalyticsEventType, params: TrackParams = {}): 
   // 1. GA4
   window.gtag?.('event', eventType, { ...params, session_id: sid })
 
-  // 2. Supabase mirror via beacon (no supabase-js in this bundle).
+  // 2. Supabase mirror via batching
   if (params.business_id && MIRRORED.has(eventType)) {
-    const payload = JSON.stringify({
+    analyticsQueue.push({
       business_id: params.business_id,
       event_type: eventType,
       item_id: params.item_id ?? null,
       session_id: sid,
     })
-    try {
-      if (navigator.sendBeacon) {
-        navigator.sendBeacon('/api/track', new Blob([payload], { type: 'application/json' }))
-      } else {
-        void fetch('/api/track', {
-          method: 'POST',
-          body: payload,
-          keepalive: true,
-          headers: { 'content-type': 'application/json' },
-        })
-      }
-    } catch {
-      /* analytics must never break the page */
+    
+    if (!flushTimeout) {
+      flushTimeout = setTimeout(flushAnalytics, 5000) // Flush every 5 seconds
     }
   }
 }

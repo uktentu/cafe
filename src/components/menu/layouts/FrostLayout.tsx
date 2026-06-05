@@ -57,17 +57,24 @@ const FROST_STYLES = `
 `
 
 function FrostBubbles() {
-  const bubbles = Array.from({ length: 10 }, (_, i) => ({
-    size: 80 + Math.random() * 220,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    delay: Math.random() * 8,
-    duration: 12 + Math.random() * 10,
-    color: PILL_COLORS[i % PILL_COLORS.length],
-  }))
+  const bubbles = Array.from({ length: 10 }, (_, i) => {
+    const pseudoRand1 = ((i * 13) % 100) / 100
+    const pseudoRand2 = ((i * 29) % 100) / 100
+    const pseudoRand3 = ((i * 47) % 100) / 100
+    const pseudoRand4 = ((i * 71) % 100) / 100
+    const pseudoRand5 = ((i * 89) % 100) / 100
+    return {
+      size: 80 + pseudoRand1 * 220,
+      x: pseudoRand2 * 100,
+      y: pseudoRand3 * 100,
+      delay: pseudoRand4 * 8,
+      duration: 12 + pseudoRand5 * 10,
+      color: PILL_COLORS[i % PILL_COLORS.length],
+    }
+  })
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <style>{FROST_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: FROST_STYLES }} />
       {bubbles.map((b, i) => (
         <div
           key={i}
@@ -109,7 +116,7 @@ export function FrostLayout({ categories, items, businessId: _businessId }: Layo
 
       {/* Rainbow pill nav */}
       <div
-        className="sticky top-0 z-30 flex gap-2 overflow-x-auto px-4 py-3 relative"
+        className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex gap-2 overflow-x-auto px-4 py-3 relative"
         style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--bdr)' }}
       >
         {categories.map((cat, i) => {

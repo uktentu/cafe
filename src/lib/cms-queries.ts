@@ -3,7 +3,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import type { Category, Item, StockImage, Business, Banner, Menu as MenuRow, AnalyticsEvent, QrCode, StaffRole } from '@/types/database'
+import type { Category, Item, StockImage, Business, Banner, Menu as MenuRow, AnalyticsEvent, QrCode, StaffRole, Branch, Reservation, Translation } from '@/types/database'
 
 let _client: ReturnType<typeof createClient> | null = null
 function db() {
@@ -12,7 +12,7 @@ function db() {
 }
 
 export const qk = {
-  items: (bid: string) => ['items', bid] as const,
+  items: (bid: string, branchId?: string | null) => ['items', bid, branchId] as const,
   categories: (bid: string) => ['categories', bid] as const,
   stock: () => ['stock-images'] as const,
   banners: (bid: string) => ['banners', bid] as const,
@@ -20,15 +20,20 @@ export const qk = {
   analytics: (bid: string) => ['analytics', bid] as const,
   qrs: (bid: string) => ['qr_codes', bid] as const,
   staff: (bid: string) => ['staff', bid] as const,
+  branches: (bid: string) => ['branches', bid] as const,
+  reservations: (bid: string, branchId?: string | null) => ['reservations', bid, branchId] as const,
+  translations: (bid: string) => ['translations', bid] as const,
 }
 
 // ── Reads ───────────────────────────────────────────────────────────
-export async function fetchItems(businessId: string): Promise<Item[]> {
-  const { data, error } = await db()
-    .from('items')
-    .select('*')
-    .eq('business_id', businessId)
-    .order('sort_order', { ascending: true })
+export async function fetchItems(businessId: string, branchId?: string | null): Promise<Item[]> {
+  let q = db().from('items').select('*').eq('business_id', businessId)
+  
+  if (branchId) {
+    q = q.or(`branch_id.eq.${branchId},branch_id.is.null`)
+  }
+  
+  const { data, error } = await q.order('sort_order', { ascending: true })
   if (error) throw error
   return (data ?? []).map(normaliseItem)
 }
@@ -161,6 +166,39 @@ export async function reorderCategories(ordered: { id: string; sort_order: numbe
   revalidateMenu()
 }
 
+// ── Branches writes/reads ───────────────────────────────────────────
+export async function fetchBranches(businessId: string): Promise<Branch[]> {
+  const { data, error } = await db()
+    .from('branches')
+    .select('*')
+    .eq('business_id', businessId)
+    .order('sort_order', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as Branch[]
+}
+
+export type BranchInput = Partial<Branch> & { business_id: string; name: string }
+
+export async function createBranch(input: BranchInput): Promise<Branch> {
+  const { data, error } = await db().from('branches').insert(input).select('*').single()
+  if (error) throw error
+  revalidateMenu()
+  return data as Branch
+}
+
+export async function updateBranch(id: string, patch: Partial<Branch>): Promise<Branch> {
+  const { data, error } = await db().from('branches').update(patch).eq('id', id).select('*').single()
+  if (error) throw error
+  revalidateMenu()
+  return data as Branch
+}
+
+export async function deleteBranch(id: string): Promise<void> {
+  const { error } = await db().from('branches').delete().eq('id', id)
+  if (error) throw error
+  revalidateMenu()
+}
+
 // ── Business writes ─────────────────────────────────────────────────
 export async function updateBusiness(id: string, patch: Partial<Business>): Promise<Business> {
   const { data, error } = await db()
@@ -184,7 +222,7 @@ export interface UploadResult {
 
 export async function uploadImage(
   file: File,
-  type: 'item' | 'logo' | 'cover' | 'banner',
+  type: 'item' | 'logo' | 'cover' | 'banner' | 'seo_og',
   id?: string,
 ): Promise<UploadResult> {
   const form = new FormData()
@@ -246,8 +284,21 @@ export async function fetchMenus(businessId: string): Promise<MenuRow[]> {
 export type MenuInput = Partial<MenuRow> & { business_id: string; name: string }
 
 export async function createMenu(input: MenuInput): Promise<MenuRow> {
+  const { count } = await db()
+    .from('menus')
+    .select('id', { count: 'exact', head: true })
+    .eq('business_id', input.business_id)
+    
+  const isFirstMenu = count === 0
+
   const { data, error } = await db().from('menus').insert(input).select('*').single()
   if (error) throw error
+
+  if (isFirstMenu && data) {
+    // Automatically tag all existing categories to this first menu
+    await db().from('categories').update({ menu_id: data.id }).eq('business_id', input.business_id)
+  }
+
   revalidateMenu()
   return data as MenuRow
 }
@@ -324,7 +375,7 @@ export async function deleteStaff(id: string): Promise<void> {
 export interface AnalyticsSummary {
   events: AnalyticsEvent[]
   pageViews7d: { date: string; count: number }[]
-  topItems: { item_id: string; count: number }[]
+  topItems: { item_id: string; name?: string; count: number }[]
   totalPageViews: number
   totalWhatsappClicks: number
   totalItemViews: number
@@ -337,7 +388,8 @@ export async function fetchAnalyticsSummary(businessId: string): Promise<Analyti
     .select('*')
     .eq('business_id', businessId)
     .gte('created_at', sevenDaysAgo)
-    .order('created_at', { ascending: true })
+    .order('created_at', { ascending: false })
+    .limit(1000)
   if (error) throw error
   const events: AnalyticsEvent[] = (data ?? []) as AnalyticsEvent[]
 
@@ -362,10 +414,28 @@ export async function fetchAnalyticsSummary(businessId: string): Promise<Analyti
       itemCount[ev.item_id] = (itemCount[ev.item_id] ?? 0) + 1
     }
   }
-  const topItems = Object.entries(itemCount)
+  let topItems: { item_id: string; count: number; name?: string }[] = Object.entries(itemCount)
     .map(([item_id, count]) => ({ item_id, count }))
     .sort((a, b) => b.count - a.count)
     .slice(0, 5)
+
+  if (topItems.length > 0) {
+    const itemIds = topItems.map(t => t.item_id)
+    const { data: itemsData, error: itemsError } = await db()
+      .from('items')
+      .select('id, name')
+      .eq('business_id', businessId)
+      .in('id', itemIds)
+    
+    if (itemsError) {
+      console.error('Analytics items fetch error:', itemsError)
+    }
+
+    if (itemsData) {
+      const nameMap = new Map(itemsData.map(i => [i.id, i.name]))
+      topItems = topItems.map(t => ({ ...t, name: nameMap.get(t.item_id) }))
+    }
+  }
 
   return {
     events,
@@ -375,4 +445,114 @@ export async function fetchAnalyticsSummary(businessId: string): Promise<Analyti
     totalWhatsappClicks: events.filter((e) => e.event_type === 'whatsapp_click').length,
     totalItemViews: events.filter((e) => e.event_type === 'item_view').length,
   }
+}
+
+// ── Reservations writes/reads ───────────────────────────────────────────
+
+
+export async function fetchTranslations(businessId: string): Promise<Translation[]> {
+  const { data, error } = await db()
+    .from('translations')
+    .select('*')
+    .eq('business_id', businessId)
+  if (error) throw error
+  return data ?? []
+}
+
+export async function fetchSecondaryLocale(businessId: string): Promise<string | null> {
+  const { data, error } = await db()
+    .from('translations')
+    .select('value')
+    .eq('business_id', businessId)
+    .eq('entity_type', 'business')
+    .eq('field', '_system_secondary_locale')
+    .maybeSingle()
+  if (error) throw error
+  return data?.value ?? null
+}
+
+export async function fetchReservations(businessId: string, branchId?: string | null): Promise<Reservation[]> {
+  let q = db().from('reservations').select('*').eq('business_id', businessId)
+  if (branchId) {
+    q = q.eq('branch_id', branchId)
+  }
+  const { data, error } = await q.order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as Reservation[]
+}
+
+export async function updateReservation(id: string, patch: Partial<Reservation>): Promise<void> {
+  const { error } = await db().from('reservations').update(patch).eq('id', id)
+  if (error) throw error
+}
+
+// ── Translations ──────────────────────────────────────────────────────────
+
+export async function setSecondaryLocale(businessId: string, localeCode: string | null): Promise<void> {
+  if (localeCode === null) {
+    const { error } = await db()
+      .from('translations')
+      .delete()
+      .eq('business_id', businessId)
+      .eq('entity_type', 'business')
+      .eq('field', '_system_secondary_locale')
+    if (error) throw error
+    revalidateMenu()
+    return
+  }
+
+  const { error } = await db()
+    .from('translations')
+    .upsert({
+      business_id: businessId,
+      entity_type: 'business',
+      entity_id: businessId,
+      locale: 'en',
+      field: '_system_secondary_locale',
+      value: localeCode
+    }, { onConflict: 'business_id, entity_type, entity_id, locale, field' })
+  if (error) throw error
+  revalidateMenu()
+}
+
+export async function upsertTranslation(
+  businessId: string,
+  entityType: 'item' | 'category' | 'business',
+  entityId: string,
+  locale: string,
+  field: string,
+  value: string
+): Promise<void> {
+  if (!value.trim()) {
+    const { error } = await db()
+      .from('translations')
+      .delete()
+      .eq('business_id', businessId)
+      .eq('entity_type', entityType)
+      .eq('entity_id', entityId)
+      .eq('locale', locale)
+      .eq('field', field)
+    if (error) throw error
+    revalidateMenu()
+    return
+  }
+
+  const { error } = await db()
+    .from('translations')
+    .upsert({
+      business_id: businessId,
+      entity_type: entityType,
+      entity_id: entityId,
+      locale,
+      field,
+      value
+    }, { onConflict: 'business_id, entity_type, entity_id, locale, field' })
+  
+  if (error) throw error
+  revalidateMenu()
+}
+
+export async function deleteReservation(id: string): Promise<void> {
+  const { error } = await db().from('reservations').delete().eq('id', id)
+  if (error) throw error
 }

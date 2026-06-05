@@ -1,8 +1,12 @@
 import { AnalyticsDashboard } from '@/components/cms/Analytics'
+import { getConfig } from '@/lib/config'
+import { redirect } from 'next/navigation'
 
 export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 
 export default function AnalyticsPage() {
+  if (!getConfig().features.analytics) redirect('/cms/upgrade?feature=Analytics')
+
   return (
     <div className="space-y-6">
       <div>

@@ -41,7 +41,7 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
 
   return (
     <div className="relative" style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
-      <style>{MERCADO_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: MERCADO_STYLES }} />
       {/* Subtle diagonal stripe overlay */}
       <div className="pointer-events-none fixed inset-0 z-0" style={{
         backgroundImage: 'repeating-linear-gradient(45deg, var(--brand) 0px, var(--brand) 1px, transparent 1px, transparent 20px)',
@@ -50,7 +50,7 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
       }} />
       {/* Sticky pill nav */}
       <nav
-        className="sticky top-0 z-30 overflow-x-auto px-4 py-3 lg:px-8"
+        className="sticky top-[var(--menu-tabs-offset,0px)] z-30 overflow-x-auto px-4 py-3 lg:px-8"
         style={{ background: 'var(--glass)', backdropFilter: 'blur(14px)', borderBottom: '1px solid var(--bdr)' }}
       >
         <div className="flex gap-2 lg:mx-auto lg:max-w-5xl">
@@ -83,7 +83,7 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
               <div
                 key={cat.id}
                 className="sticky z-20 px-4 py-3 md:px-8 md:py-4"
-                style={{ top: 52, background: 'var(--sf1)', borderBottom: '1px solid var(--bdr)', borderLeft: '4px solid var(--brand)' }}
+                style={{ top: 'calc(52px + var(--menu-tabs-offset, 0px))', background: 'var(--sf1)', borderBottom: '1px solid var(--bdr)', borderLeft: '4px solid var(--brand)' }}
               >
                 <h2
                   className="mercado-cat-heading font-black uppercase tracking-widest"

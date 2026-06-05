@@ -1,8 +1,12 @@
 import { StaffManager } from '@/components/cms/StaffManager'
+import { getConfig } from '@/lib/config'
+import { redirect } from 'next/navigation'
 
 export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 
 export default function StaffPage() {
+  if (!getConfig().features.staffAccounts) redirect('/cms/upgrade?feature=Staff')
+
   return (
     <div className="space-y-6">
       <div>

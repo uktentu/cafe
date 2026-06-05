@@ -53,6 +53,7 @@ async function _getCmsContext(): Promise<CmsContext> {
       swiggy: rawBiz.social_links?.swiggy ?? null,
       zomato: rawBiz.social_links?.zomato ?? null,
       google_maps: rawBiz.social_links?.google_maps ?? null,
+      multiple_menus_enabled: rawBiz.social_links?.multiple_menus_enabled ?? false,
     },
   } as Business
 

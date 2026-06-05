@@ -12,6 +12,7 @@ import {
   type BannerInput,
 } from '@/lib/cms-queries'
 import { cdnUrl, type Banner } from '@/types/database'
+import { getConfig } from '@/lib/config'
 
 function BannerForm({
   banner,
@@ -240,12 +241,16 @@ export function BannersManager() {
         </div>
       )}
 
-      <button
-        onClick={() => setEditing('new')}
-        className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 py-4 text-sm font-semibold text-neutral-500 hover:border-amber-400 hover:text-amber-500 transition-colors"
-      >
-        <Plus className="h-4 w-4" /> New banner
-      </button>
+      {banners.length >= getConfig().limits.banners ? (
+        <p className="text-xs text-amber-600 text-center mt-4">Banner limit reached for your tier. Upgrade for more.</p>
+      ) : (
+        <button
+          onClick={() => setEditing('new')}
+          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 py-4 text-sm font-semibold text-neutral-500 hover:border-amber-400 hover:text-amber-500 transition-colors"
+        >
+          <Plus className="h-4 w-4" /> New banner
+        </button>
+      )}
 
       {editing && (
         <BannerForm

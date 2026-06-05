@@ -1,7 +1,10 @@
+'use client'
+
 // Featured-items strip. Native horizontal scroll-snap (zero JS, great on mobile)
 // — only rendered when at least one item is featured. Server component.
 import { ItemCard } from './ItemCard'
 import type { Category, Item, Theme } from '@/types/database'
+import { useLanguage } from './LanguageProvider'
 
 interface BestsellerStripProps {
   items: Item[]
@@ -11,6 +14,8 @@ interface BestsellerStripProps {
 }
 
 export function BestsellerStrip({ items, categories, theme, title = 'Bestsellers' }: BestsellerStripProps) {
+  const { t, tUi } = useLanguage()
+  const translatedTitle = tUi('Bestsellers', title)
   const featured = items.filter((it) => it.is_featured && it.is_available)
   if (featured.length === 0) return null
 
@@ -28,14 +33,28 @@ export function BestsellerStrip({ items, categories, theme, title = 'Bestsellers
           letterSpacing: '0.02em',
         }}
       >
-        {title}
+        {translatedTitle}
       </h2>
       <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 lg:-mx-6 lg:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {featured.map((it) => (
-          <div key={it.id} className="w-[160px] shrink-0 snap-start lg:w-[200px]">
-            <ItemCard item={it} category={catOf(it.category_id)} variant="grid" theme={theme} />
-          </div>
-        ))}
+        {featured.map((it) => {
+          const cat = catOf(it.category_id)
+          const translatedItem = {
+            ...it,
+            name: t('item', it.id, 'name', it.name),
+            description: it.description ? t('item', it.id, 'description', it.description) : it.description
+          }
+          const translatedCat = cat ? {
+            ...cat,
+            name: t('category', cat.id, 'name', cat.name),
+            description: cat.description ? t('category', cat.id, 'description', cat.description) : cat.description
+          } : null
+
+          return (
+            <div key={it.id} className="w-[160px] shrink-0 snap-start lg:w-[200px]">
+              <ItemCard item={translatedItem} category={translatedCat} variant="grid" theme={theme} />
+            </div>
+          )
+        })}
       </div>
     </section>
   )

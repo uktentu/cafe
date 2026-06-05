@@ -33,14 +33,14 @@ export function ProvenanceLayout({ categories, items, businessId: _businessId }:
 
   return (
     <div className="relative" style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
-      <style>{PROVENANCE_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: PROVENANCE_STYLES }} />
       {/* Aged paper texture */}
       <div
         className="pointer-events-none fixed inset-0 z-0 opacity-[0.06] mix-blend-multiply"
         style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.9%22 numOctaves=%224%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E")' }}
       />
       {/* Mobile top tab nav — hidden on tablet */}
-      <nav className="sticky top-0 z-30 flex overflow-x-auto md:hidden" style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--bdr2)' }}>
+      <nav className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex overflow-x-auto md:hidden" style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--bdr2)' }}>
         {categories.map((cat) => (
           <button id={`nav-btn-${cat.id}`}
             key={cat.id}

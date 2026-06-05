@@ -21,8 +21,10 @@ export function WhatsAppCTA({ whatsapp, businessId, businessName }: WhatsAppCTAP
 
   return (
     <div
-      className="fixed right-4 z-[70] lg:right-[calc(50%-36rem)]"
-      style={{ bottom: 'calc(1rem + env(safe-area-inset-bottom))' }}
+      className="fixed z-[70] right-4 md:right-6 lg:right-8"
+      style={{
+        bottom: 'calc(1rem + env(safe-area-inset-bottom))',
+      }}
     >
       <m.a
         href={href}

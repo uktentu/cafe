@@ -1,9 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { useCms } from './Providers'
+import { useQuery } from '@tanstack/react-query'
 import { ImageUpload } from './ImageUpload'
 import { Button } from '@/components/ui/Button'
 import { Input, Field } from '@/components/ui/Input'
@@ -11,8 +12,9 @@ import { Toggle } from '@/components/ui/Toggle'
 import { useCmsStore } from '@/stores/cms'
 import { getConfig, tierRank } from '@/lib/config'
 import { THEMES } from '@/lib/design-tokens'
-import { updateBusiness, uploadImage } from '@/lib/cms-queries'
-import { cdnUrl, type Theme, type OpeningHours } from '@/types/database'
+import { UpgradePrompt } from './UpgradePrompt'
+import { updateBusiness, uploadImage, fetchSecondaryLocale, setSecondaryLocale } from '@/lib/cms-queries'
+import { cdnUrl, type Theme, type OpeningHours, SUPPORTED_LOCALES } from '@/types/database'
 import { cn } from '@/lib/utils'
 
 const DAYS: { key: string; label: string }[] = [
@@ -28,6 +30,8 @@ interface InfoForm {
   whatsapp: string
   address: string
   city: string
+  seo_title: string
+  seo_description: string
 }
 
 export function SettingsForm() {
@@ -44,6 +48,8 @@ export function SettingsForm() {
       whatsapp: business.whatsapp ?? '',
       address: business.address ?? '',
       city: business.city ?? '',
+      seo_title: business.seo_title ?? '',
+      seo_description: business.seo_description ?? '',
     },
   })
 
@@ -53,9 +59,26 @@ export function SettingsForm() {
   const [multipleMenus, setMultipleMenus] = useState(business.social_links?.multiple_menus_enabled ?? false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
+  const [seoOgFile, setSeoOgFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
 
+  const { data: initialSecondaryLocale } = useQuery({
+    queryKey: ['secondaryLocale', business.id],
+    queryFn: () => fetchSecondaryLocale(business.id),
+  })
+
+  // We keep it in local state. Initialize from data when it arrives.
+  const [secondaryLocale, setSecondaryLocaleState] = useState<string>('')
+  
+  // Set it once it's loaded
+  useEffect(() => {
+    if (initialSecondaryLocale !== undefined && initialSecondaryLocale !== null) {
+      setSecondaryLocaleState(initialSecondaryLocale)
+    }
+  }, [initialSecondaryLocale])
+
   const isAdvancedOrPremium = tierRank(tier) >= tierRank('advanced')
+  const isPremium = tier === 'premium'
 
   const availableThemes = (Object.keys(THEMES) as Theme[]).filter(
     (t) => tierRank(THEMES[t].tier) <= tierRank(tier),
@@ -78,7 +101,9 @@ export function SettingsForm() {
         opening_hours: hours,
         theme,
         theme_color: brand,
-        social_links: { ...business.social_links, multiple_menus_enabled: multipleMenus }
+        social_links: { ...business.social_links, multiple_menus_enabled: multipleMenus },
+        seo_title: values.seo_title || null,
+        seo_description: values.seo_description || null,
       }
       if (logoFile) {
         const up = await uploadImage(logoFile, 'logo')
@@ -88,10 +113,16 @@ export function SettingsForm() {
         const up = await uploadImage(coverFile, 'cover')
         patch.cover_r2_key = up.r2_key
       }
+      if (seoOgFile) {
+        const up = await uploadImage(seoOgFile, 'seo_og')
+        patch.seo_og_r2_key = up.r2_key
+      }
       await updateBusiness(business.id, patch)
+      await setSecondaryLocale(business.id, secondaryLocale)
       pushToast('Settings saved')
       setLogoFile(null)
       setCoverFile(null)
+      setSeoOgFile(null)
       router.refresh()
     } catch (e) {
       pushToast((e as Error).message || 'Save failed', 'error')
@@ -113,21 +144,41 @@ export function SettingsForm() {
           <Field label="Phone"><Input {...register('phone')} placeholder="+91-…" /></Field>
           <Field label="WhatsApp" hint="Digits only, with country code"><Input {...register('whatsapp')} placeholder="9198…" /></Field>
         </div>
-        <Field label="Address"><Input {...register('address')} /></Field>
-        <Field label="City"><Input {...register('city')} /></Field>
+        <div className="grid grid-cols-2 gap-4">
+          <Field label="Address"><Input {...register('address')} /></Field>
+          <Field label="City"><Input {...register('city')} /></Field>
+        </div>
+        <Field label="Secondary Language" hint="Optional secondary language for the menu. Note: Primary is always English.">
+          {getConfig().features.bilingual ? (
+            <select
+              value={secondaryLocale}
+              onChange={(e) => setSecondaryLocaleState(e.target.value)}
+              className="w-full rounded border border-neutral-300 p-2 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+            >
+              <option value="">None (English Only)</option>
+              {SUPPORTED_LOCALES.map((loc) => (
+                <option key={loc.code} value={loc.code}>{loc.name}</option>
+              ))}
+            </select>
+          ) : (
+            <div className="mt-2">
+              <UpgradePrompt feature="Bilingual Menu" description="Enable a secondary language option for international tourists and guests." />
+            </div>
+          )}
+        </Field>
       </section>
 
       {/* Branding */}
       <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
         <h2 className="text-sm font-semibold text-neutral-700">Branding</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <div className="w-32 shrink-0">
             <p className="mb-1 text-sm font-medium text-neutral-700">Logo</p>
             <ImageUpload file={logoFile} existingUrl={cdnUrl(business.logo_r2_key)} onChange={setLogoFile} aspect="aspect-square" />
           </div>
-          <div>
-            <p className="mb-1 text-sm font-medium text-neutral-700">Cover</p>
-            <ImageUpload file={coverFile} existingUrl={cdnUrl(business.cover_r2_key)} onChange={setCoverFile} aspect="aspect-[4/3]" />
+          <div className="flex-1 sm:max-w-md">
+            <p className="mb-1 text-sm font-medium text-neutral-700">Cover Image</p>
+            <ImageUpload file={coverFile} existingUrl={cdnUrl(business.cover_r2_key)} onChange={setCoverFile} aspect="aspect-video" />
           </div>
         </div>
         <Field label="Brand colour">
@@ -187,9 +238,9 @@ export function SettingsForm() {
       </section>
 
       {/* Advanced Features */}
-      {isAdvancedOrPremium && (
-        <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-          <h2 className="text-sm font-semibold text-neutral-700">Advanced Features</h2>
+      <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
+        <h2 className="text-sm font-semibold text-neutral-700">Advanced Features</h2>
+        {isAdvancedOrPremium ? (
           <div className="flex items-center justify-between gap-4">
             <div>
               <p className="font-medium text-neutral-800 text-sm">Multiple Menus</p>
@@ -197,8 +248,28 @@ export function SettingsForm() {
             </div>
             <Toggle checked={multipleMenus} onChange={setMultipleMenus} size="md" label="Multiple menus" />
           </div>
-        </section>
-      )}
+        ) : (
+          <UpgradePrompt feature="Multiple Menus" description="Create separate menus for Breakfast, Lunch, and Dinner with custom automated schedules." />
+        )}
+      </section>
+
+      {/* SEO settings */}
+      <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
+        <h2 className="text-sm font-semibold text-neutral-700">SEO Settings</h2>
+        {isPremium ? (
+          <>
+            <Field label="SEO Title"><Input {...register('seo_title')} placeholder={`e.g. ${business.name} | Best Cafe in Town`} /></Field>
+            <Field label="SEO Description"><Input {...register('seo_description')} placeholder="e.g. Come visit our beautiful cafe..." /></Field>
+            <div className="w-full sm:w-96">
+              <p className="mb-1 text-sm font-medium text-neutral-700">SEO Image (OG Image)</p>
+              <p className="mb-3 text-xs text-neutral-500">Appears when the link is shared on iMessage, WhatsApp, Twitter, etc.</p>
+              <ImageUpload file={seoOgFile} existingUrl={cdnUrl(business.seo_og_r2_key)} onChange={setSeoOgFile} aspect="aspect-[1.91/1]" />
+            </div>
+          </>
+        ) : (
+          <UpgradePrompt feature="SEO Customization" description="Take full control of how your menu appears on Google and when shared on social media." />
+        )}
+      </section>
 
       <Button type="submit" loading={saving} className="w-full md:w-auto">Save settings</Button>
     </form>

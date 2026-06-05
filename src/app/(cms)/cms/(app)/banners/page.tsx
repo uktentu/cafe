@@ -1,8 +1,12 @@
 import { BannersManager } from '@/components/cms/BannersManager'
+import { getConfig } from '@/lib/config'
+import { redirect } from 'next/navigation'
 
 export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 
 export default function BannersPage() {
+  if (!getConfig().features.banners) redirect('/cms/upgrade?feature=Banners')
+
   return (
     <div className="space-y-6">
       <div>

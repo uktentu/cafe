@@ -1,3 +1,5 @@
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 // POST /api/revalidate — push the public menu's ISR cache after a CMS write
 // done via the browser Supabase client. Auth required. Rule: every CMS mutation
 // that affects the public menu calls this so changes go live in ≤ 30s.
@@ -6,7 +8,6 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 
-export const runtime = 'edge'
 
 export async function POST() {
   if (!supabaseConfigured()) {
@@ -18,6 +19,6 @@ export async function POST() {
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  revalidatePath('/')
+  revalidatePath('/', 'layout')
   return NextResponse.json({ ok: true })
 }

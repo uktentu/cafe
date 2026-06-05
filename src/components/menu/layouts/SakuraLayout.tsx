@@ -43,15 +43,22 @@ const PETAL_SIZES = [8, 14, 20]
 function FallingPetals() {
   return (
     <div className="pointer-events-none fixed inset-0 z-[2] overflow-hidden">
-      <style>{SAKURA_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: SAKURA_STYLES }} />
       {Array.from({ length: 22 }).map((_, i) => {
+        // Use deterministic pseudo-random values based on index `i` to prevent React hydration mismatch
+        const pseudoRand1 = ((i * 13) % 100) / 100
+        const pseudoRand2 = ((i * 29) % 100) / 100
+        const pseudoRand3 = ((i * 47) % 100) / 100
+        const pseudoRand4 = ((i * 71) % 100) / 100
+        const pseudoRand5 = ((i * 89) % 100) / 100
+
         const size = PETAL_SIZES[i % 3]
-        const duration = 12 + Math.random() * 14
-        const swayDuration = 3 + Math.random() * 4
-        const delay = Math.random() * 14
-        const startX = Math.random() * 100
-        const driftX = Math.random() * 160 - 80
-        const opacity = 0.15 + Math.random() * 0.35
+        const duration = 12 + pseudoRand1 * 14
+        const swayDuration = 3 + pseudoRand2 * 4
+        const delay = pseudoRand3 * 14
+        const startX = pseudoRand4 * 100
+        const driftX = pseudoRand5 * 160 - 80
+        const opacity = 0.15 + pseudoRand1 * 0.35
         return (
           <m.div
             key={i}
@@ -163,7 +170,7 @@ export function SakuraLayout({ categories, items, businessId: _businessId }: Lay
             {/* Sticky category heading */}
             <div
               className="sticky z-20 mb-6 px-4 py-4 text-center"
-              style={{ top: 0, background: 'var(--glass)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--bdr)' }}
+              style={{ top: 'var(--menu-tabs-offset, 0px)', background: 'var(--glass)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--bdr)' }}
             >
               <m.h2
                 key={activeId + 'title'}

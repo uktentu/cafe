@@ -17,11 +17,6 @@ import { alternateSide } from '@/components/menu/scrollVariants'
 import type { LayoutProps } from './MercadoLayout'
 
 const TERRAIN_STYLES = `
-  @keyframes herb-drift {
-    0%,100% { transform: translateY(0) rotate(0deg); opacity: 0.06; }
-    33%      { transform: translateY(-18px) rotate(8deg); opacity: 0.09; }
-    66%      { transform: translateY(8px) rotate(-5deg); opacity: 0.05; }
-  }
   @keyframes chalk-reveal {
     from { clip-path: inset(0 100% 0 0); }
     to   { clip-path: inset(0 0% 0 0); }
@@ -33,26 +28,31 @@ function HerbWatermarks() {
   const herbs = ['🌿', '🌾', '🍃', '🍀']
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <style>{TERRAIN_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: TERRAIN_STYLES }} />
       {[{ top: '5%', left: '2%', size: 120 }, { top: '15%', right: '3%', size: 100 }, { bottom: '10%', left: '5%', size: 90 }, { bottom: '20%', right: '2%', size: 110 }].map((pos, i) => (
-        <div
+        <m.div
           key={i}
+          initial={{ opacity: 0, y: 0, rotate: 0 }}
+          animate={{
+            opacity: [0.06, 0.09, 0.05, 0.06],
+            y: [0, -18, 8, 0],
+            rotate: [0, 8, -5, 0]
+          }}
+          transition={{
+            duration: 14 + i * 4,
+            delay: i * 3,
+            ease: "easeInOut",
+            repeat: Infinity
+          }}
           style={{
             position: 'absolute',
             ...pos,
             fontSize: pos.size,
             lineHeight: 1,
-            opacity: 0.06, // Base opacity to prevent high-contrast flash before animation starts
-            animationName: 'herb-drift',
-            animationDuration: `${14 + i * 4}s`,
-            animationDelay: `${i * 3}s`,
-            animationTimingFunction: 'ease-in-out',
-            animationIterationCount: 'infinite',
-            animationFillMode: 'both',
           }}
         >
           {herbs[i]}
-        </div>
+        </m.div>
       ))}
     </div>
   )
@@ -74,7 +74,7 @@ export function TerrainLayout({ categories, items, businessId: _businessId }: La
       />
       {/* Scrollable breadcrumb nav */}
       <div
-        className="sticky top-0 z-30 px-5 py-2.5"
+        className="sticky top-[var(--menu-tabs-offset,0px)] z-30 px-5 py-2.5"
         style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--bdr)' }}
       >
         <nav className="flex gap-x-2 overflow-x-auto text-xs uppercase tracking-widest">
@@ -113,7 +113,7 @@ export function TerrainLayout({ categories, items, businessId: _businessId }: La
                 className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left md:px-8 md:py-5"
                 style={{
                   position: isOpen ? 'sticky' : 'relative',
-                  top: isOpen ? 44 : undefined,
+                  top: isOpen ? 'calc(44px + var(--menu-tabs-offset, 0px))' : undefined,
                   zIndex: isOpen ? 20 : undefined,
                   background: isOpen ? 'var(--sf1)' : 'var(--bg)',
                   borderLeft: isOpen ? '3px solid var(--brand)' : '3px solid transparent',

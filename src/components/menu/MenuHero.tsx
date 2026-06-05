@@ -1,7 +1,15 @@
 // MenuHero — each theme gets its own visual treatment. Server component.
+'use client'
+
 import Image from 'next/image'
+import { useLanguage } from './LanguageProvider'
 import { cdnUrl, type Business, type Theme } from '@/types/database'
+import { useState, useEffect, useRef } from 'react'
+import { m, AnimatePresence } from 'framer-motion'
 import { isOpenNow } from '@/lib/hours'
+import { ArcadeGameModal } from './ArcadeGameModal'
+import { BookTableButton } from './BookTableButton'
+import { Info } from 'lucide-react'
 
 function initials(name: string): string {
   return name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('')
@@ -9,16 +17,51 @@ function initials(name: string): string {
 
 // ── Shared building blocks ─────────────────────────────────────────
 
-function StatusBadge({ business }: { business: Business }) {
+function StatusBadge({ business, theme, align = 'center' }: { business: Business; theme?: Theme; align?: 'start' | 'center' }) {
   const status = isOpenNow(business.opening_hours)
-  if (!status.label) return null
+  const justifyClass = align === 'start' ? 'justify-start' : 'justify-center'
+
+  const isArcade = theme === 'arcade'
+  const isOnyx = theme === 'onyx'
+  const isProvenance = theme === 'provenance'
+  const radiusClass = (isArcade || isOnyx || isProvenance) ? 'rounded-none' : 'rounded-full'
+
+  if (!status.label) {
+    return (
+      <div className={`flex items-center gap-3 mt-1 flex-wrap ${justifyClass}`}>
+        <BookTableButton theme={theme} />
+        <button
+          onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
+          className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
+          style={{ background: 'var(--glass)', color: 'var(--txt)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
+          aria-label="Shop Information"
+        >
+          <Info className={isArcade ? "h-3 w-3" : "h-4 w-4"} />
+          Info
+        </button>
+      </div>
+    )
+  }
+
   return (
-    <div
-      className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium"
-      style={{ background: 'var(--glass)', color: 'var(--txt2)', backdropFilter: 'blur(8px)' }}
-    >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ background: status.open ? '#22C55E' : '#EF4444' }} />
-      {status.label}
+    <div className={`flex items-center gap-3 mt-1 flex-wrap ${justifyClass}`}>
+      <div
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-white/10 ${radiusClass} ${isArcade ? 'arcade-font text-[8px] uppercase border-[var(--txt2)]' : ''}`}
+        style={{ background: 'var(--glass)', color: 'var(--txt2)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
+      >
+        <span className={isArcade ? "h-1 w-1 rounded-none" : "h-1.5 w-1.5 rounded-full"} style={{ background: status.open ? '#22C55E' : '#EF4444' }} />
+        {status.label}
+      </div>
+      <BookTableButton theme={theme} />
+      <button
+        onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
+        className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
+        style={{ background: 'var(--glass)', color: 'var(--txt)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
+        aria-label="Shop Information"
+      >
+        <Info className={isArcade ? "h-3 w-3" : "h-4 w-4"} />
+        Info
+      </button>
     </div>
   )
 }
@@ -84,7 +127,7 @@ function MercadoHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} theme="mercado" />
       </div>
     </header>
   )
@@ -120,7 +163,7 @@ function ProvenanceHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} theme="onyx" />
         <div className="h-px w-12" style={{ background: 'var(--bdr2)' }} />
       </div>
     </header>
@@ -152,7 +195,7 @@ function TerrainHero({ business }: { business: Business }) {
               {business.tagline}
             </p>
           )}
-          <StatusBadge business={business} />
+          <StatusBadge business={business} align="start" theme="terrain" />
         </div>
         {cover && (
           <div className="relative h-[220px] overflow-hidden md:h-auto md:min-h-[320px]">
@@ -202,7 +245,7 @@ function BazaarHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} theme="bazaar" />
       </div>
     </header>
   )
@@ -244,7 +287,7 @@ function NocturneHero({ business }: { business: Business }) {
         )}
         <div className="flex items-center gap-3">
           <div className="h-px w-8" style={{ background: 'var(--brand)' }} />
-          <StatusBadge business={business} />
+          <StatusBadge business={business} theme="nocturne" />
           <div className="h-px w-8" style={{ background: 'var(--brand)' }} />
         </div>
       </div>
@@ -287,7 +330,7 @@ function CoastalHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} theme="coastal" />
       </div>
     </header>
   )
@@ -326,7 +369,7 @@ function AetherHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} align="start" theme="sakura" />
       </div>
     </header>
   )
@@ -372,7 +415,7 @@ function OnyxHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} theme="provenance" />
         {/* Scroll cue */}
         <div className="absolute bottom-20 flex flex-col items-center gap-1">
           <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: 'var(--txt3)', fontFamily: 'var(--font-body)' }}>
@@ -420,7 +463,7 @@ function StudioHero({ business }: { business: Business }) {
               </p>
             )}
           </div>
-          <StatusBadge business={business} />
+          <StatusBadge business={business} align="start" theme="studio" />
         </div>
         {/* Right: cover image or pattern */}
         <div className="relative h-[180px] md:h-auto" style={{ background: 'var(--sf1)' }}>
@@ -474,7 +517,7 @@ function SakuraHero({ business }: { business: Business }) {
         )}
         <div className="flex items-center gap-3">
           <div className="h-px w-8" style={{ background: 'var(--brand3)' }} />
-          <StatusBadge business={business} />
+          <StatusBadge business={business} theme="coastal" />
           <div className="h-px w-8" style={{ background: 'var(--brand3)' }} />
         </div>
       </div>
@@ -504,7 +547,7 @@ function FrostHero({ business }: { business: Business }) {
         {business.tagline && (
           <p className="text-sm" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>{business.tagline}</p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} theme="frost" />
       </div>
     </header>
   )
@@ -543,15 +586,155 @@ function EmberHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} />
+        <StatusBadge business={business} align="start" theme="ember" />
       </div>
     </header>
   )
 }
 
 // ── arcade — neon, gaming, electric ──────────────────────────────
+
+function PixelCloud({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+      <path d="M6,6 h2 v-2 h4 v-2 h4 v2 h4 v4 h2 v4 h-20 v-2 h-2 v-2 h2 v-2 z" />
+    </svg>
+  )
+}
+
+function PixelPlayer({ frame }: { frame: number }) {
+  return (
+    <svg viewBox="0 0 16 16" width="100%" height="100%" className="drop-shadow-[0_0_8px_var(--brand)]">
+      {/* Head */}
+      <rect x="6" y="1" width="5" height="1" fill="#0f172a" /> {/* Hair top */}
+      <rect x="5" y="2" width="1" height="1" fill="#0f172a" /> {/* Hair side */}
+      <rect x="6" y="2" width="5" height="1" fill="#ef4444" /> {/* Bandana */}
+      <rect x="4" y="2" width="2" height="1" fill="#ef4444" /> {/* Knot */}
+      <rect x="4" y="3" width="1" height="1" fill="#ef4444" /> {/* Knot tail */}
+      
+      <rect x="6" y="3" width="5" height="3" fill="#fcd34d" /> {/* Face */}
+      <rect x="9" y="3" width="1" height="1" fill="#0f172a" /> {/* Eye */}
+      <rect x="10" y="4" width="1" height="1" fill="#f59e0b" /> {/* Nose shadow */}
+      
+      {/* Body */}
+      <rect x="6" y="6" width="5" height="3" fill="#fcd34d" /> {/* Chest */}
+      <rect x="7" y="6" width="2" height="2" fill="#f59e0b" /> {/* Pecs shadow */}
+      <rect x="6" y="9" width="5" height="2" fill="#1e3a8a" /> {/* Pants top */}
+      <rect x="6" y="9" width="5" height="1" fill="#0f172a" /> {/* Belt */}
+      <rect x="8" y="9" width="1" height="1" fill="#eab308" /> {/* Buckle */}
+      
+      {/* Arm & Gun */}
+      <rect x="7" y="6" width="4" height="2" fill="#fcd34d" />
+      <rect x="11" y="5" width="1" height="3" fill="#4b5563" /> {/* Gun stock */}
+      <rect x="12" y="6" width="4" height="1" fill="#6b7280" /> {/* Gun barrel top */}
+      <rect x="12" y="7" width="3" height="1" fill="#4b5563" /> {/* Gun barrel bottom */}
+      <rect x="12" y="8" width="1" height="1" fill="#1f2937" /> {/* Trigger guard */}
+      <rect x="16" y="6" width="1" height="1" fill="#ef4444" /> {/* Gun tip */}
+
+      {/* Legs animated */}
+      {frame === 0 ? (
+        <>
+          <rect x="6" y="11" width="2" height="4" fill="#1e3a8a" />
+          <rect x="5" y="14" width="3" height="1" fill="#7f1d1d" />
+          <rect x="9" y="10" width="2" height="3" fill="#1e40af" />
+          <rect x="9" y="13" width="3" height="1" fill="#7f1d1d" />
+        </>
+      ) : (
+        <>
+          <rect x="5" y="11" width="2" height="3" fill="#1e3a8a" />
+          <rect x="4" y="13" width="2" height="1" fill="#7f1d1d" />
+          <rect x="8" y="11" width="2" height="4" fill="#1e40af" />
+          <rect x="8" y="14" width="3" height="1" fill="#7f1d1d" />
+        </>
+      )}
+    </svg>
+  )
+}
+
+function ArcadeScene() {
+  const [frame, setFrame] = useState(0)
+  const [shots, setShots] = useState<number[]>([])
+
+  useEffect(() => {
+    const timer = setInterval(() => setFrame(f => (f === 0 ? 1 : 0)), 150)
+    return () => clearInterval(timer)
+  }, [])
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      if (Math.random() > 0.4) {
+        const id = Date.now()
+        setShots(s => [...s, id])
+        setTimeout(() => setShots(s => s.filter(x => x !== id)), 600)
+      }
+    }, 400)
+    return () => clearInterval(timer)
+  }, [])
+
+  return (
+    <div className="relative w-full max-w-2xl mx-auto overflow-hidden rounded pt-1 mt-4 h-24" style={{ background: 'var(--bg)', border: '2px solid var(--brand)', boxShadow: 'inset 0 0 10px rgba(139,92,246,0.2)' }}>
+      {/* Sky/backdrop */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#1e1b4b] to-transparent opacity-50 pointer-events-none" />
+
+      <p className="absolute inset-x-0 top-2 text-[10px] uppercase tracking-[0.4em] text-center z-10" style={{ color: 'var(--brand)', opacity: 0.6, fontFamily: 'var(--font-body)', textShadow: '0 0 8px var(--brand)' }}>▶ HOLD TO PLAY ◀</p>
+      
+      {/* Floating clouds */}
+      <m.div className="absolute top-2 left-0 text-white/30" animate={{ x: [700, -100] }} transition={{ duration: 18, repeat: Infinity, ease: 'linear' }}>
+        <PixelCloud className="h-5 w-10" />
+      </m.div>
+      <m.div className="absolute top-8 left-0 text-white/10" animate={{ x: [750, -100] }} transition={{ duration: 24, repeat: Infinity, ease: 'linear', delay: 4 }}>
+        <PixelCloud className="h-4 w-8" />
+      </m.div>
+      <m.div className="absolute top-5 left-0 text-white/20" animate={{ x: [700, -100] }} transition={{ duration: 14, repeat: Infinity, ease: 'linear', delay: 8 }}>
+        <PixelCloud className="h-3 w-6" />
+      </m.div>
+
+      {/* Grass ground */}
+      <div className="absolute bottom-0 inset-x-0 h-3 border-t border-green-900/50" style={{ background: 'repeating-linear-gradient(90deg, #15803d 0px, #15803d 4px, #166534 4px, #166534 8px)' }} />
+
+      {/* Player and bullets moving together across the screen */}
+      <m.div
+        className="absolute bottom-3 h-10 w-10"
+        animate={{ x: ['-50px', '800px'] }}
+        transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
+      >
+        <PixelPlayer frame={frame} />
+        <AnimatePresence>
+          {shots.map(id => (
+            <m.div
+              key={id}
+              className="absolute top-2 left-8 h-1.5 w-3 bg-yellow-400"
+              style={{ boxShadow: '0 0 8px yellow, 0 0 2px white' }}
+              initial={{ x: 0, opacity: 1 }}
+              animate={{ x: 300, opacity: 0 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4, ease: 'linear' }}
+            />
+          ))}
+        </AnimatePresence>
+      </m.div>
+    </div>
+  )
+}
 function ArcadeHero({ business }: { business: Business }) {
   const cover = cdnUrl(business.cover_r2_key)
+  const [isGameOpen, setIsGameOpen] = useState(false)
+  const [isPressing, setIsPressing] = useState(false)
+  const pressTimer = useRef<NodeJS.Timeout | null>(null)
+
+  const startPress = () => {
+    setIsPressing(true)
+    pressTimer.current = setTimeout(() => {
+      setIsGameOpen(true)
+      setIsPressing(false)
+    }, 800) // 800ms hold to play
+  }
+
+  const cancelPress = () => {
+    setIsPressing(false)
+    if (pressTimer.current) clearTimeout(pressTimer.current)
+  }
+  
   return (
     <header className="relative isolate overflow-hidden" style={{ background: 'var(--bg)' }}>
       {cover && (
@@ -589,9 +772,36 @@ function ArcadeHero({ business }: { business: Business }) {
         {business.tagline && (
           <p className="text-xs uppercase tracking-[0.3em]" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)', textShadow: '0 0 8px var(--brand)' }}>{business.tagline}</p>
         )}
-        <StatusBadge business={business} />
-        <p className="text-[10px] uppercase tracking-[0.4em] animate-pulse" style={{ color: 'var(--txt3)', fontFamily: 'var(--font-body)' }}>▶ TAP TO PLAY ◀</p>
+        <StatusBadge business={business} theme="arcade" />
+        
+        {/* Clickable Arcade Scene to launch game */}
+        {!isGameOpen && (
+          <m.div 
+            layoutId="arcade-game-container"
+            onPointerDown={startPress}
+            onPointerUp={cancelPress}
+            onPointerLeave={cancelPress}
+            className="relative w-full cursor-pointer transition-transform hover:scale-[1.02] active:scale-95"
+            role="button"
+            tabIndex={0}
+            aria-label="Hold to Play Arcade Game"
+            style={{ borderRadius: '1rem', overflow: 'hidden' }}
+          >
+            <ArcadeScene />
+            {/* Hold progress effect */}
+            {isPressing && (
+              <m.div 
+                className="absolute inset-y-0 left-0 bg-white/20 z-20 pointer-events-none mix-blend-overlay"
+                initial={{ width: '0%' }}
+                animate={{ width: '100%' }}
+                transition={{ duration: 0.8, ease: 'linear' }}
+              />
+            )}
+          </m.div>
+        )}
       </div>
+
+      {isGameOpen && <ArcadeGameModal onClose={() => setIsGameOpen(false)} />}
     </header>
   )
 }
@@ -614,6 +824,14 @@ const HERO_MAP: Record<Theme, React.ComponentType<{ business: Business }>> = {
 }
 
 export function MenuHero({ business, theme }: { business: Business; theme: Theme }) {
+  const { t } = useLanguage()
   const Hero = HERO_MAP[theme] ?? HERO_MAP.mercado
-  return <Hero business={business} />
+  
+  const translatedBusiness = {
+    ...business,
+    name: t('business', business.id, 'name', business.name),
+    tagline: business.tagline ? t('business', business.id, 'tagline', business.tagline) : business.tagline,
+  }
+
+  return <Hero business={translatedBusiness} />
 }

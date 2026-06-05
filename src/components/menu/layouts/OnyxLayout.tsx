@@ -43,7 +43,7 @@ const ONYX_STYLES = `
 function GoldScanline() {
   return (
     <div className="pointer-events-none fixed inset-0 z-[1] overflow-hidden">
-      <style>{ONYX_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: ONYX_STYLES }} />
       <div
         style={{
           position: 'absolute',
@@ -165,7 +165,7 @@ export function OnyxLayout({ categories, items, businessId: _businessId }: Layou
       </aside>
 
       {/* Mobile sticky top strip */}
-      <nav className="sticky top-0 z-30 flex gap-4 overflow-x-auto px-4 py-3 md:hidden" style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--bdr)' }}>
+      <nav className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex gap-4 overflow-x-auto px-4 py-3 md:hidden" style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--bdr)' }}>
         {categories.map((cat) => (
           <button id={`nav-btn-${cat.id}`}
             key={cat.id}
@@ -192,7 +192,7 @@ export function OnyxLayout({ categories, items, businessId: _businessId }: Layou
             <section key={cat.id} data-cat={cat.id} ref={register(cat.id)} className="scroll-mt-16">
               <div
                 className="sticky z-20 flex items-center gap-4 px-6 py-3 md:static md:mb-6 md:px-8 md:py-0 md:pt-12"
-                style={{ top: 48, background: 'var(--bg)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--bdr)' }}
+                style={{ top: 'calc(48px + var(--menu-tabs-offset, 0px))', background: 'var(--bg)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--bdr)' }}
               >
                 <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.3em]" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>
                   {cat.name.split('').map((char, i) => (

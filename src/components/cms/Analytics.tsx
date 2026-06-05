@@ -121,7 +121,7 @@ export function AnalyticsDashboard() {
                 <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-violet-50 text-xs font-bold text-violet-600">
                   {idx + 1}
                 </span>
-                <p className="flex-1 truncate text-sm text-neutral-700 font-mono">{item.item_id.slice(0, 8)}…</p>
+                <p className="flex-1 truncate text-sm text-neutral-700 font-medium">{item.name || <span className="font-mono text-xs">{item.item_id.slice(0, 8)}…</span>}</p>
                 <span className="text-sm font-semibold text-neutral-900">{item.count} views</span>
               </div>
             ))}

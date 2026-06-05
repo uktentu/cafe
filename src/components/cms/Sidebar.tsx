@@ -2,15 +2,17 @@
 
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
+import { useQuery } from '@tanstack/react-query'
 import { AnimatePresence, m } from 'framer-motion'
 import {
-  LayoutDashboard, UtensilsCrossed, FolderTree, QrCode, Settings,
-  BarChart3, Megaphone, CalendarClock, Users, CalendarCheck, Building2,
-  Lock, Menu as MenuIcon, X, LogOut, ExternalLink, type LucideIcon,
+  Menu, LayoutList, Settings, QrCode, LogOut, BarChart3, Store, CalendarCheck, FileText,
+  Megaphone, CalendarClock, Users, LayoutDashboard,
+  Lock, Menu as MenuIcon, X, ExternalLink, type LucideIcon,
 } from 'lucide-react'
 import { getConfig } from '@/lib/config'
 import type { Features } from '@/lib/config'
 import { createClient } from '@/lib/supabase/client'
+import { qk, fetchBranches } from '@/lib/cms-queries'
 import { useCmsStore } from '@/stores/cms'
 import { useCms } from '@/components/cms/Providers'
 import { cn } from '@/lib/utils'
@@ -24,10 +26,13 @@ interface NavItem {
 
 const PRIMARY: NavItem[] = [
   { href: '/cms/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/cms/items', label: 'Items', icon: UtensilsCrossed },
-  { href: '/cms/categories', label: 'Categories', icon: FolderTree },
+  { href: '/cms/items', label: 'Items', icon: Menu },
+  { href: '/cms/categories', label: 'Categories', icon: LayoutList },
   { href: '/cms/qr-codes', label: 'QR Codes', icon: QrCode },
+  { href: '/cms/branches', label: 'Branches', icon: Store, feature: 'multiBranch' },
+  { href: '/cms/reservations', label: 'Reservations', icon: CalendarCheck, feature: 'reservations' },
   { href: '/cms/settings', label: 'Settings', icon: Settings },
+  { href: '/cms/tools', label: 'Tools', icon: FileText },
 ]
 
 // Tier-gated — shown with a lock when the feature is off (sales mechanism, not hidden).
@@ -36,20 +41,28 @@ const GATED: NavItem[] = [
   { href: '/cms/banners', label: 'Banners', icon: Megaphone, feature: 'banners' },
   { href: '/cms/menus', label: 'Menus', icon: CalendarClock, feature: 'menus' },
   { href: '/cms/staff', label: 'Staff', icon: Users, feature: 'staffAccounts' },
-  { href: '/cms/reservations', label: 'Reservations', icon: CalendarCheck, feature: 'reservations' },
-  { href: '/cms/branches', label: 'Branches', icon: Building2, feature: 'multiBranch' },
 ]
 
 function NavRow({ item, active, locked, onNavigate }: { item: NavItem; active: boolean; locked: boolean; onNavigate: () => void }) {
   const Icon = item.icon
   const base = 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition'
+  const router = useRouter()
+  
   if (locked) {
     return (
-      <div className={cn(base, 'cursor-not-allowed text-neutral-500')} title="Upgrade to unlock">
+      <button 
+        type="button"
+        className={cn(base, 'w-full text-left cursor-not-allowed text-neutral-500 bg-transparent border-0 hover:bg-white/5 hover:text-white transition-colors')} 
+        onClick={() => {
+          onNavigate()
+          router.push(`/cms/upgrade?feature=${encodeURIComponent(item.label)}`)
+        }}
+        title="Upgrade to unlock"
+      >
         <Icon className="h-[18px] w-[18px]" />
         <span className="flex-1">{item.label}</span>
         <Lock className="h-3.5 w-3.5" />
-      </div>
+      </button>
     )
   }
   return (
@@ -61,6 +74,36 @@ function NavRow({ item, active, locked, onNavigate }: { item: NavItem; active: b
       <Icon className="h-[18px] w-[18px]" />
       <span>{item.label}</span>
     </Link>
+  )
+}
+
+function BranchSwitcher() {
+  const { business } = useCms()
+  const { features } = getConfig()
+  const activeBranchId = useCmsStore((s) => s.activeBranchId)
+  const setActiveBranch = useCmsStore((s) => s.setActiveBranch)
+  
+  const { data: branches = [] } = useQuery({
+    queryKey: qk.branches(business.id),
+    queryFn: () => fetchBranches(business.id),
+    enabled: features.multiBranch
+  })
+
+  if (!features.multiBranch || branches.length === 0) return null
+
+  return (
+    <div className="px-5 pb-4">
+      <select
+        value={activeBranchId || ''}
+        onChange={(e) => setActiveBranch(e.target.value || null)}
+        className="w-full rounded-md border border-white/20 bg-white/5 px-2 py-1.5 text-xs text-white focus:border-amber-500 focus:outline-none"
+      >
+        <option value="">All Branches</option>
+        {branches.map(b => (
+          <option key={b.id} value={b.id}>{b.name}</option>
+        ))}
+      </select>
+    </div>
   )
 }
 
@@ -80,27 +123,34 @@ function SidebarContent({ businessName, userEmail, onNavigate }: { businessName:
 
   return (
     <div className="flex h-full flex-col bg-[#1A1917] text-white">
-      <div className="border-b border-white/10 px-5 py-4">
-        <p className="text-base font-semibold">{businessName}</p>
-        <p className="truncate text-xs text-neutral-400">{userEmail}</p>
+      <div className="border-b border-white/10 pt-4">
+        <div className="px-5 pb-3">
+          <p className="text-base font-semibold">{businessName}</p>
+          <p className="truncate text-xs text-neutral-400">{userEmail}</p>
+        </div>
+        <BranchSwitcher />
       </div>
 
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {PRIMARY.map((item) => (
-          <NavRow key={item.href} item={item} active={isActive(item.href)} locked={false} onNavigate={onNavigate} />
-        ))}
+        {PRIMARY.map((item) => {
+          const isLockedByTier = item.feature ? !features[item.feature] : false
+          return <NavRow key={item.href} item={item} active={isActive(item.href)} locked={isLockedByTier} onNavigate={onNavigate} />
+        })}
         <div className="my-3 border-t border-white/10" />
         {GATED.map((item) => {
-          let enabled = item.feature ? features[item.feature] : true
-          // If the feature is menus, we also check if the user has enabled it in settings
-          if (item.feature === 'menus' && enabled) {
-            enabled = business.social_links?.multiple_menus_enabled === true
+          const isLockedByTier = item.feature ? !features[item.feature] : false
+          let isHiddenByUser = false
+          
+          if (item.feature === 'menus' && !isLockedByTier) {
+            if (business.social_links?.multiple_menus_enabled !== true) {
+              isHiddenByUser = true
+            }
           }
-          // Do not render Menus if it's completely disabled by the user to keep sidebar clean
-          if (item.feature === 'menus' && !enabled) return null
+          
+          if (isHiddenByUser) return null
           
           return (
-            <NavRow key={item.href} item={item} active={isActive(item.href)} locked={!enabled} onNavigate={onNavigate} />
+            <NavRow key={item.href} item={item} active={isActive(item.href)} locked={isLockedByTier} onNavigate={onNavigate} />
           )
         })}
       </nav>

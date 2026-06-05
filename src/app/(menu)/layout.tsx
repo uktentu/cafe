@@ -2,16 +2,16 @@
 // the wrapper div AND :root so that body/html background tracks the theme color.
 // This prevents the white "bounce" gap that appears when over-scrolling on mobile.
 import { getConfig } from '@/lib/config'
-import { themeCssVars, THEMES } from '@/lib/design-tokens'
+import { themeCssVars, THEMES, resolveTheme } from '@/lib/design-tokens'
 import { themeFontVars, FONT_VARS_CLASS } from '@/lib/fonts'
 import { getMenuData } from '@/lib/menu-data'
 import { MenuRuntime } from '@/components/menu/MenuRuntime'
 
 export default async function MenuLayout({ children }: { children: React.ReactNode }) {
-  const { theme: envTheme, slug } = getConfig()
+  const { theme: envTheme, slug, tier } = getConfig()
   const data = await getMenuData(slug)
   const business = data?.business ?? null
-  const theme = business?.theme ?? envTheme
+  const theme = resolveTheme(tier, business?.theme ?? envTheme)
 
   const scheme = THEMES[theme]?.scheme ?? 'dark'
   const cssVars = {

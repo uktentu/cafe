@@ -38,16 +38,16 @@ const AETHER_STYLES = `
   .aether-cloud {
     position: absolute;
     border-radius: 9999px;
-    filter: blur(80px);
-    opacity: 0.05;
+    filter: blur(100px);
+    opacity: 0.02;
     will-change: transform;
   }
 `
 
 function Clouds() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden" aria-hidden="true">
-      <style>{AETHER_STYLES}</style>
+    <div className="pointer-events-none fixed inset-0 h-[100dvh] z-0 overflow-hidden" aria-hidden="true">
+      <style dangerouslySetInnerHTML={{ __html: AETHER_STYLES }} />
       <div className="aether-cloud" style={{ width: '60vw', height: '40vh', background: 'var(--brand)', top: '-10%', left: '-10%', animation: 'aether-float-1 20s ease-in-out infinite' }} />
       <div className="aether-cloud" style={{ width: '50vw', height: '50vh', background: 'var(--brand2, var(--brand))', top: '40%', right: '-15%', animation: 'aether-float-2 25s ease-in-out infinite' }} />
       <div className="aether-cloud" style={{ width: '70vw', height: '30vh', background: 'var(--brand)', bottom: '-10%', left: '15%', animation: 'aether-float-3 22s ease-in-out infinite' }} />
@@ -67,10 +67,10 @@ export function AetherLayout({ categories, items, businessId: _businessId }: Lay
           const catItems = items.filter((i) => i.category_id === cat.id)
           const Icon = getCategoryIcon(cat.icon)
           return (
-            <section key={cat.id} data-cat={cat.id} ref={register(cat.id)} className="mb-12 scroll-mt-16">
+            <section key={cat.id} data-cat={cat.id} ref={register(cat.id)} className="mb-8 scroll-mt-16">
               {/* Sticky section label — max-w so lines hug content on wide viewports */}
               <div
-                className="sticky top-0 z-40 mb-6 flex items-center gap-4 py-3 max-w-2xl mx-auto lg:max-w-none"
+                className="sticky top-[var(--menu-tabs-offset,0px)] z-40 mb-6 flex items-center gap-4 py-3 max-w-2xl mx-auto lg:max-w-none"
                 style={{ background: 'var(--bg)', backdropFilter: 'blur(12px)', borderBottom: '2px solid var(--bg)' }}
               >
                 <div className="h-px flex-1" style={{ background: 'var(--bdr)' }} />

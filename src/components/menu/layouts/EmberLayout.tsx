@@ -20,32 +20,40 @@ function EmberParticles() {
   const particles = Array.from({ length: 25 })
   return (
     <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @keyframes lantern-spin { from { transform: rotate(0deg) scale(1); } 50% { transform: rotate(180deg) scale(1.05); } to { transform: rotate(360deg) scale(1); } }
         @keyframes ember-glow { 0%,100% { box-shadow: 0 0 0 0 transparent; } 50% { box-shadow: 0 0 30px 8px rgba(255,60,0,0.25); } }
         .ember-item:hover { animation: ember-glow 0.6s ease-out; }
-      `}</style>
+      ` }} />
       {particles.map((_, i) => {
-        const duration = Math.random() * 8 + 5
-        const delay = Math.random() * 5
-        const xOffset = Math.random() * 100 - 50
-        const color = ['var(--brand)', 'var(--brand2)', '#ff6b00'][Math.floor(Math.random() * 3)]
+        const pseudoRand1 = ((i * 13) % 100) / 100
+        const pseudoRand2 = ((i * 29) % 100) / 100
+        const pseudoRand3 = ((i * 47) % 100) / 100
+        const pseudoRand4 = ((i * 71) % 100) / 100
+        const pseudoRand5 = ((i * 89) % 100) / 100
+        const pseudoRand6 = ((i * 101) % 100) / 100
+        const pseudoRand7 = ((i * 103) % 100) / 100
+        
+        const duration = pseudoRand1 * 8 + 5
+        const delay = pseudoRand2 * 5
+        const xOffset = pseudoRand3 * 100 - 50
+        const color = ['var(--brand)', 'var(--brand2)', '#ff6b00'][Math.floor(pseudoRand4 * 3)]
         return (
           <m.div
             key={i}
             className="absolute rounded-full"
             style={{
-              width: Math.random() * 4 + 2,
-              height: Math.random() * 4 + 2,
+              width: pseudoRand5 * 4 + 2,
+              height: pseudoRand5 * 4 + 2,
               background: color,
-              left: `${Math.random() * 100}%`,
+              left: `${pseudoRand6 * 100}%`,
               bottom: -20,
               boxShadow: `0 0 10px 2px ${color}`
             }}
             animate={{
               y: [0, -1200],
               x: xOffset,
-              opacity: [0, Math.random() * 0.8 + 0.2, 0]
+              opacity: [0, pseudoRand7 * 0.8 + 0.2, 0]
             }}
             transition={{
               duration,
@@ -89,7 +97,7 @@ export function EmberLayout({ categories, items, businessId: _businessId }: Layo
       <LanternWatermark />
       {/* Block tabs — sticky, full-width horizontal, scrollbar hidden with right-fade mask */}
       <div
-        className="sticky top-0 z-30 flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
           background: 'var(--glass)',
           backdropFilter: 'blur(12px)',
@@ -234,14 +242,14 @@ export function EmberLayout({ categories, items, businessId: _businessId }: Layo
 
           {/* Chinese decorative divider — each ◈ twinkles with staggered animation */}
           <p className="py-4 text-center text-sm tracking-widest" style={{ color: 'var(--brand)' }}>
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
               @keyframes ember-twinkle { 0%,100%{opacity:1} 50%{opacity:0.3} }
               .ember-dec:nth-child(1){animation:ember-twinkle 2s ease-in-out infinite 0s}
               .ember-dec:nth-child(2){animation:ember-twinkle 2s ease-in-out infinite 0.3s}
               .ember-dec:nth-child(3){animation:ember-twinkle 2s ease-in-out infinite 0.6s}
               .ember-dec:nth-child(4){animation:ember-twinkle 2s ease-in-out infinite 0.9s}
               .ember-dec:nth-child(5){animation:ember-twinkle 2s ease-in-out infinite 1.2s}
-            `}</style>
+            ` }} />
             <span className="ember-dec">◈</span>
             <span className="ember-dec"> · </span>
             <span className="ember-dec">·</span>

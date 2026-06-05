@@ -53,6 +53,7 @@ export const demoCategories: Category[] = [
 
 const base = {
   business_id: BIZ_ID,
+  branch_id: null as string | null,
   is_jain: false,
   is_gluten_free: false,
   allergens: [] as string[],

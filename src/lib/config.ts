@@ -7,7 +7,7 @@
 // defaults. Changing a client's limit = edit one Cloudflare env var, no code,
 // no redeploy logic. Safe to call on server and client (NEXT_PUBLIC_* inlined).
 // ════════════════════════════════════════════════════════════════════
-import { cache } from 'react'
+
 import type { Tier, Theme } from '@/types/database'
 
 export interface Limits {
@@ -142,18 +142,18 @@ function _buildConfig(): AppConfig {
   }
 }
 
-// React.cache deduplicates calls within the same server request and resets
-// between requests, preventing cross-request data leakage. On the client the
-// module is per-page so a simple module-level memo is safe.
-export const getConfig: () => AppConfig =
-  typeof window === 'undefined' ? cache(_buildConfig) : (() => {
-    let c: AppConfig | null = null
-    return () => { if (!c) c = _buildConfig(); return c }
-  })()
+let _cachedConfig: AppConfig | null = null
+
+export const getConfig = (): AppConfig => {
+  if (!_cachedConfig) {
+    _cachedConfig = _buildConfig()
+  }
+  return _cachedConfig
+}
 
 /** Test helper — only works in non-cached (client-side) context. */
 export function __resetConfig() {
-  // no-op in server context (React.cache resets per request automatically)
+  _cachedConfig = null
 }
 
 export const tierRank = (tier: Tier) => TIER_RANK[tier]

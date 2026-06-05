@@ -72,6 +72,7 @@ function PillsNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyle'>
           return (
             <button
               key={c.id}
+              id={`nav-btn-${c.id}`}
               ref={(el) => { pillRefs.current[c.id] = el }}
               onClick={() => goTo(c.id, businessId)}
               aria-current={isActive ? 'true' : undefined}
@@ -111,6 +112,7 @@ function TextNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyle'>)
           return (
             <button
               key={c.id}
+              id={`nav-btn-${c.id}`}
               ref={(el) => { pillRefs.current[c.id] = el }}
               onClick={() => goTo(c.id, businessId)}
               aria-current={isActive ? 'true' : undefined}
@@ -155,6 +157,7 @@ function SectionsNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyl
             <span key={c.id} className="flex shrink-0 items-center gap-1">
               {idx > 0 && <span className="text-xs opacity-30" style={{ color: 'var(--txt)' }}>·</span>}
               <button
+                id={`nav-btn-${c.id}`}
                 onClick={() => goTo(c.id, businessId)}
                 aria-current={isActive ? 'true' : undefined}
                 className="whitespace-nowrap px-2 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors"
@@ -189,6 +192,7 @@ function BlocksNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyle'
           return (
             <button
               key={c.id}
+              id={`nav-btn-${c.id}`}
               onClick={() => goTo(c.id, businessId)}
               aria-current={isActive ? 'true' : undefined}
               className="relative shrink-0 whitespace-nowrap px-5 py-3 text-sm font-bold uppercase tracking-widest transition-colors"
@@ -234,6 +238,7 @@ function VerticalNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyl
             return (
               <button
                 key={c.id}
+                id={`nav-btn-${c.id}`}
                 onClick={() => goTo(c.id, businessId)}
                 aria-current={isActive ? 'true' : undefined}
                 className="relative shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wider transition-colors"

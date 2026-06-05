@@ -12,9 +12,17 @@ interface MenuState {
   openItem: (item: Item) => void
   closeItem: () => void
 
+  // Reservation modal
+  reservationModalOpen: boolean
+  setReservationModal: (open: boolean) => void
+
   // Global dietary filter (applied centrally in MenuContent)
   dietary: DietaryFilter
   setDietary: (d: DietaryFilter) => void
+
+  // Branch Selection
+  selectedBranchId: string | null
+  setSelectedBranchId: (id: string | null) => void
 
   // Active category (written by layouts' scroll-spy / tab clicks; read by dock)
   activeCategoryId: string | null
@@ -34,8 +42,14 @@ export const useMenuStore = create<MenuState>((set) => ({
   openItem: (item) => set({ selectedItem: item }),
   closeItem: () => set({ selectedItem: null }),
 
+  reservationModalOpen: false,
+  setReservationModal: (open) => set({ reservationModalOpen: open }),
+
   dietary: 'all',
   setDietary: (d) => set({ dietary: d }),
+
+  selectedBranchId: null,
+  setSelectedBranchId: (id) => set({ selectedBranchId: id }),
 
   activeCategoryId: null,
   setActiveCategoryId: (id) => set({ activeCategoryId: id }),

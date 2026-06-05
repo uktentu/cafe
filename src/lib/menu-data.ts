@@ -10,12 +10,17 @@ import { cache } from 'react'
 import { createAnonClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 import { demoBusiness, demoCategories, demoItems } from '@/lib/demo-data'
-import type { Business, Category, Item, Theme, ImageMode } from '@/types/database'
+import { getConfig } from '@/lib/config'
+import type { Business, Category, Item, Theme, ImageMode, Translation, Banner, Branch, Menu } from '@/types/database'
 
 export interface MenuData {
   business: Business
   categories: Category[]
   items: Item[]
+  translations: Translation[]
+  banners: Banner[]
+  branches: Branch[]
+  menus: Menu[]
   demo: boolean
 }
 
@@ -38,6 +43,7 @@ function normaliseBusiness(raw: any): Business {
       swiggy: raw.social_links?.swiggy ?? null,
       zomato: raw.social_links?.zomato ?? null,
       google_maps: raw.social_links?.google_maps ?? null,
+      multiple_menus_enabled: raw.social_links?.multiple_menus_enabled ?? false,
     },
   } as Business
 }
@@ -89,7 +95,7 @@ export const getMenuData = cache(_getMenuData)
 
 async function _getMenuData(slug: string): Promise<MenuData | null> {
   if (!supabaseConfigured()) {
-    return { business: demoBusiness, categories: demoCategories, items: demoItems, demo: true }
+    return { business: demoBusiness, categories: demoCategories, items: demoItems, translations: [], banners: [], branches: [], menus: [], demo: true }
   }
 
   const supabase = createAnonClient()
@@ -104,7 +110,7 @@ async function _getMenuData(slug: string): Promise<MenuData | null> {
   if (!raw) return null
   const business = normaliseBusiness(raw)
 
-  const [{ data: rawCats }, { data: rawItems }] = await Promise.all([
+  const [{ data: rawCats }, { data: rawItems }, { data: rawTrans }, { data: rawBanners }, { data: rawBranches }, { data: rawMenus }] = await Promise.all([
     supabase
       .from('categories')
       .select('*')
@@ -116,12 +122,44 @@ async function _getMenuData(slug: string): Promise<MenuData | null> {
       .select('*')
       .eq('business_id', business.id)
       .order('sort_order', { ascending: true }),
+    supabase
+      .from('translations')
+      .select('*')
+      .eq('business_id', business.id),
+    supabase
+      .from('banners')
+      .select('*')
+      .eq('business_id', business.id)
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true }),
+    supabase
+      .from('branches')
+      .select('*')
+      .eq('business_id', business.id),
+    supabase
+      .from('menus')
+      .select('*')
+      .eq('business_id', business.id)
+      .eq('is_active', true),
   ])
+
+  const { limits, features } = getConfig()
+
+  // Enforce tier limits for live menu rendering
+  const limitedCategories = (rawCats ?? []).map(normaliseCategory).slice(0, limits.categories)
+  const limitedItems = (rawItems ?? []).map(normaliseItem).slice(0, limits.items)
+  const activeBanners = features.banners ? (rawBanners ?? []).slice(0, limits.banners) : []
+  const activeBranches = features.multiBranch ? (rawBranches ?? []) : []
+  const activeMenus = features.menus ? (rawMenus ?? []) : []
 
   return {
     business,
-    categories: (rawCats ?? []).map(normaliseCategory),
-    items: (rawItems ?? []).map(normaliseItem),
+    categories: limitedCategories,
+    items: limitedItems,
+    translations: rawTrans ?? [],
+    banners: activeBanners,
+    branches: activeBranches,
+    menus: activeMenus,
     demo: false,
   }
 }

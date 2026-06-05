@@ -42,7 +42,7 @@ const COASTAL_STYLES = `
 function OceanBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-0">
-      <style>{COASTAL_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: COASTAL_STYLES }} />
       {/* Deep gradient layer */}
       <div style={{
         position: 'absolute', inset: 0,
@@ -63,26 +63,33 @@ function OceanBackground() {
 function SeaFoam() {
   return (
     <div className="pointer-events-none fixed bottom-0 left-0 right-0 z-[1] h-24 overflow-hidden">
-      {Array.from({ length: 12 }).map((_, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            bottom: 0,
-            left: `${(i / 12) * 100 + Math.random() * 8}%`,
-            width: 8 + Math.random() * 12,
-            height: 8 + Math.random() * 12,
-            borderRadius: '50%',
-            background: 'var(--brand)',
-            opacity: 0,
-            animationName: 'foam-rise',
-            animationDuration: `${2 + Math.random() * 3}s`,
-            animationDelay: `${Math.random() * 5}s`,
-            animationTimingFunction: 'ease-out',
-            animationIterationCount: 'infinite',
-          }}
-        />
-      ))}
+      {Array.from({ length: 12 }).map((_, i) => {
+        const pseudoRand1 = ((i * 13) % 100) / 100
+        const pseudoRand2 = ((i * 29) % 100) / 100
+        const pseudoRand3 = ((i * 47) % 100) / 100
+        const pseudoRand4 = ((i * 71) % 100) / 100
+        
+        return (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              bottom: 0,
+              left: `${(i / 12) * 100 + pseudoRand1 * 8}%`,
+              width: 8 + pseudoRand2 * 12,
+              height: 8 + pseudoRand2 * 12,
+              borderRadius: '50%',
+              background: 'var(--brand)',
+              opacity: 0,
+              animationName: 'foam-rise',
+              animationDuration: `${2 + pseudoRand3 * 3}s`,
+              animationDelay: `${pseudoRand4 * 5}s`,
+              animationTimingFunction: 'ease-out',
+              animationIterationCount: 'infinite',
+            }}
+          />
+        )
+      })}
     </div>
   )
 }
@@ -91,7 +98,7 @@ function ItemGrid({ activeCat, catItems, openItem }: { activeCat: Category | und
   return (
     <div>
       <div
-        className="sticky top-0 z-20 px-4 py-3 md:px-6 md:py-4"
+        className="sticky top-[var(--menu-tabs-offset,0px)] z-20 px-4 py-3 md:px-6 md:py-4"
         style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--bdr)' }}
       >
         <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{activeCat?.name}</h2>
@@ -152,8 +159,7 @@ function ItemGrid({ activeCat, catItems, openItem }: { activeCat: Category | und
                 </>
               ) : (
                 <>
-                  <div className="absolute inset-0 rounded-2xl" style={{ background: 'var(--brand-dim, var(--sf2))', opacity: 0.5 }} />
-                  <div className="absolute inset-2 rounded-xl" style={{ background: 'var(--sf1)', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }} />
+                  <div className="absolute inset-0 rounded-2xl" style={{ background: 'var(--brand-dim, var(--sf2))', opacity: 0.3 }} />
                   <div className="relative z-10 p-5 w-full flex h-full items-center justify-between gap-4">
                     <div className="flex-1 min-w-0 flex flex-col justify-center">
                       <p className="text-base font-bold leading-tight mb-1" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</p>

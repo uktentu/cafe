@@ -1,11 +1,17 @@
+export const runtime = 'edge'
+export const dynamic = 'force-dynamic'
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { createClient as createServerClient } from '@/lib/supabase/server'
 import type { StaffRole } from '@/types/database'
 
-export const runtime = 'edge'
+
+import { getConfig } from '@/lib/config'
 
 export async function POST(request: Request) {
+  if (!getConfig().features.staffAccounts) {
+    return NextResponse.json({ error: 'Staff accounts feature is not enabled for this tier' }, { status: 403 })
+  }
   try {
     const { email, role, name, businessId } = await request.json() as {
       email: string

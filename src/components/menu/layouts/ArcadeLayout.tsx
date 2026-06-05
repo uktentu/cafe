@@ -149,14 +149,14 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
 
   return (
     <div style={{ background: 'var(--bg)', color: 'var(--txt)', position: 'relative' }}>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
         .arcade-font { font-family: 'Press Start 2P', monospace !important; text-transform: uppercase; }
         @keyframes flicker { 0% { background: #fff; } 50% { background: #000; } 100% { background: transparent; } }
         @keyframes coin-blink { 0%,49%{opacity:1} 50%,100%{opacity:0} }
         .insert-coin-blink { animation: coin-blink 1s step-end infinite; }
         @keyframes combo-shrink { from{width:100%} to{width:0%} }
-      `}</style>
+      ` }} />
       {/* Scanlines — tighter 1px/3px ratio for authentic CRT */}
       <div className="pointer-events-none absolute inset-0 z-[100] opacity-[0.18]" style={{ background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.35) 3px, rgba(0,0,0,0.35) 4px)' }} />
       {/* Screen flicker */}
@@ -244,7 +244,7 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
 
       {/* HUD tab bar — sticky with scanlines + LEVEL badge */}
       <div
-        className="sticky top-0 z-[45] flex items-center gap-2 overflow-x-auto px-3 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="sticky top-[var(--menu-tabs-offset,0px)] z-[45] flex items-center gap-2 overflow-x-auto px-3 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{
           background: 'var(--glass)',
           backdropFilter: 'blur(14px)',

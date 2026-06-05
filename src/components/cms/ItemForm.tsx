@@ -15,9 +15,11 @@ import { Input, Textarea, Select, Field } from '@/components/ui/Input'
 import { Toggle } from '@/components/ui/Toggle'
 import { useCmsStore } from '@/stores/cms'
 import {
-  qk, fetchItem, fetchCategories, createItem, updateItem, deleteItem, uploadImage,
+  qk, fetchItem, fetchCategories, createItem, updateItem, deleteItem, uploadImage, fetchBranches,
+  fetchTranslations, upsertTranslation
 } from '@/lib/cms-queries'
 import { cdnUrl, type Badge, type ImageMode, type Item, type DietaryPreference } from '@/types/database'
+import { getConfig } from '@/lib/config'
 import { cn } from '@/lib/utils'
 
 const schema = z.object({
@@ -26,7 +28,10 @@ const schema = z.object({
   price: z.number({ invalid_type_error: 'Price is required' }).min(0, 'Price must be ≥ 0'),
   compare_price: z.number().min(0).nullable().optional(),
   category_id: z.string().optional(),
+  branch_id: z.string().nullable().optional(),
   badge: z.string().optional(),
+  name_tl: z.string().optional(),
+  description_tl: z.string().optional(),
 })
 type FormValues = z.infer<typeof schema>
 
@@ -53,6 +58,14 @@ export function ItemForm({ itemId }: { itemId?: string }) {
 
   const catsQ = useQuery({ queryKey: qk.categories(business.id), queryFn: () => fetchCategories(business.id) })
   const itemQ = useQuery({ queryKey: ['item', itemId], queryFn: () => fetchItem(itemId!), enabled: editing })
+  const { features } = getConfig()
+  const branchesQ = useQuery({ queryKey: qk.branches(business.id), queryFn: () => fetchBranches(business.id), enabled: features.multiBranch })
+  const transQ = useQuery({ queryKey: qk.translations(business.id), queryFn: () => fetchTranslations(business.id) })
+  const activeBranchId = useCmsStore((s) => s.activeBranchId)
+
+  const translations = Array.isArray(transQ.data) ? transQ.data : []
+  const secondaryLocaleSetting = translations.find((t) => t.entity_type === 'business' && t.field === '_system_secondary_locale')
+  const secondaryLocale = secondaryLocaleSetting?.value || null
 
   // Image + non-native fields kept outside RHF.
   const [imageMode, setImageMode] = useState<ImageMode>('none')
@@ -68,27 +81,31 @@ export function ItemForm({ itemId }: { itemId?: string }) {
 
   const { register, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { name: '', description: '', price: 0, compare_price: null, category_id: '', badge: '' },
+    defaultValues: { name: '', description: '', price: 0, compare_price: null, category_id: '', badge: '', branch_id: activeBranchId || '', name_tl: '', description_tl: '' },
   })
 
   // Populate when editing.
   useEffect(() => {
     const it = itemQ.data
     if (!it) return
+    const ts = Array.isArray(transQ.data) ? transQ.data : []
     reset({
       name: it.name,
       description: it.description ?? '',
       price: it.price,
       compare_price: it.compare_price,
       category_id: it.category_id ?? '',
+      branch_id: it.branch_id ?? '',
       badge: it.badge ?? '',
+      name_tl: ts.find(t => t.entity_id === it.id && t.field === 'name')?.value || '',
+      description_tl: ts.find(t => t.entity_id === it.id && t.field === 'description')?.value || '',
     })
     setImageMode(it.image_mode)
     setStockKey(it.stock_image_key)
     setExisting({ custom_r2_key: it.custom_r2_key, custom_thumb_key: it.custom_thumb_key })
     setDietary(it.dietary); setJain(it.is_jain); setGf(it.is_gluten_free)
     setFeatured(it.is_featured)
-  }, [itemQ.data, reset])
+  }, [itemQ.data, transQ.data, reset])
 
   async function onSubmit(values: FormValues) {
     setImgErr(null)
@@ -111,7 +128,8 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         description: values.description?.trim() || null,
         price: Number(values.price),
         compare_price: values.compare_price ?? null,
-        category_id: values.category_id || null,
+        category_id: values.category_id || undefined,
+        branch_id: values.branch_id || null,
         badge: (values.badge || null) as Badge | null,
         dietary, is_jain: jain, is_gluten_free: gf,
         is_featured: featured,
@@ -143,7 +161,42 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         })
       }
 
-      await qc.invalidateQueries({ queryKey: qk.items(business.id) })
+      // Upsert translations
+      if (id && secondaryLocale) {
+        let nameTl = values.name_tl?.trim() || ''
+        let descTl = values.description_tl?.trim() || ''
+
+        // Auto-translate using Google if empty
+        if (!nameTl && values.name) {
+          try {
+            const res = await fetch('/api/translate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: values.name, to: secondaryLocale })
+            })
+            const data = await res.json()
+            if (data.translatedText) nameTl = data.translatedText
+          } catch (err) { console.error('Failed to auto-translate name:', err) }
+        }
+
+        if (!descTl && values.description) {
+          try {
+            const res = await fetch('/api/translate', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ text: values.description, to: secondaryLocale })
+            })
+            const data = await res.json()
+            if (data.translatedText) descTl = data.translatedText
+          } catch (err) { console.error('Failed to auto-translate description:', err) }
+        }
+
+        await upsertTranslation(business.id, 'item', id, secondaryLocale, 'name', nameTl)
+        await upsertTranslation(business.id, 'item', id, secondaryLocale, 'description', descTl)
+      }
+
+      qc.invalidateQueries({ queryKey: qk.items(business.id, activeBranchId) })
+      qc.invalidateQueries({ queryKey: qk.translations(business.id) })
       pushToast(editing ? 'Item saved' : 'Item added')
       router.push('/cms/items')
       router.refresh()
@@ -193,9 +246,19 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         <Field label="Name" required error={errors.name?.message}>
           <Input {...register('name')} placeholder="e.g. Paneer Tikka" />
         </Field>
+        {secondaryLocale && (
+          <Field label={`Name (${secondaryLocale.toUpperCase()})`} hint="Translation for secondary locale">
+            <Input {...register('name_tl')} dir={secondaryLocale === 'ar' ? 'rtl' : 'ltr'} />
+          </Field>
+        )}
         <Field label="Description">
           <Textarea {...register('description')} placeholder="Short, appetising description…" />
         </Field>
+        {secondaryLocale && (
+          <Field label={`Description (${secondaryLocale.toUpperCase()})`} hint="Translation for secondary locale">
+            <Textarea {...register('description_tl')} dir={secondaryLocale === 'ar' ? 'rtl' : 'ltr'} />
+          </Field>
+        )}
         <div className="grid grid-cols-2 gap-4">
           <Field label="Price (₹)" required error={errors.price?.message}>
             <Input type="number" step="0.01" inputMode="decimal" {...register('price', { valueAsNumber: true })} />
@@ -224,6 +287,19 @@ export function ItemForm({ itemId }: { itemId?: string }) {
             </Select>
           </Field>
         </div>
+        
+        {features.multiBranch && (branchesQ.data?.length ?? 0) > 0 && (
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Branch">
+              <Select {...register('branch_id')}>
+                <option value="">All Branches</option>
+                {branchesQ.data?.map((b) => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </Select>
+            </Field>
+          </div>
+        )}
       </div>
 
       {/* Image section */}

@@ -132,7 +132,7 @@ export function StudioLayout({ categories, items, businessId: _businessId }: Lay
 
   return (
     <div className="relative" style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
-      <style>{STUDIO_STYLES}</style>
+      <style dangerouslySetInnerHTML={{ __html: STUDIO_STYLES }} />
       {/* Film grain fixed overlay */}
       <div className="pointer-events-none fixed inset-0 z-0 opacity-[0.06] mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22n%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23n)%22/%3E%3C/svg%3E")' }} />
       {categories.map((cat) => {
@@ -142,7 +142,7 @@ export function StudioLayout({ categories, items, businessId: _businessId }: Lay
             {/* Sticky block label */}
             <div
               className="sticky z-20 flex items-center justify-between border-b border-t px-4 py-3 md:px-6 md:py-4 studio-aperture"
-              style={{ top: 0, background: 'var(--bg)', backdropFilter: 'blur(10px)', borderColor: 'var(--bdr2)' }}
+              style={{ top: 'var(--menu-tabs-offset, 0px)', background: 'var(--bg)', backdropFilter: 'blur(10px)', borderColor: 'var(--bdr2)' }}
             >
               <h2 className="text-xs font-bold uppercase tracking-[0.25em] md:text-sm" style={{ fontFamily: 'var(--font-display)', color: 'var(--brand2, var(--brand))' }}>{cat.name}</h2>
               <div className="flex items-center gap-3">

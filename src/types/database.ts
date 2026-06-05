@@ -74,7 +74,8 @@ export interface Category {
 export interface Item {
   id: string
   business_id: string
-  category_id: string | null
+  category_id: string
+  branch_id: string | null
   name: string
   description: string | null
   price: number
@@ -92,7 +93,6 @@ export interface Item {
   is_featured: boolean
   sort_order: number
   view_count: number
-  branch_id?: string | null
   created_at?: string
   updated_at?: string
 }
@@ -130,6 +130,56 @@ export interface StaffAccount {
   name: string | null
   is_active: boolean
   created_at?: string
+}
+
+export interface Branch {
+  id: string
+  business_id: string
+  name: string
+  address: string | null
+  phone: string | null
+  opening_hours: OpeningHours | null
+  is_active: boolean
+  sort_order: number
+  created_at?: string
+}
+
+export interface Reservation {
+  id: string
+  business_id: string
+  branch_id: string | null
+  name: string
+  phone: string
+  email: string | null
+  party_size: number
+  date: string
+  time: string
+  notes: string | null
+  status: 'pending' | 'confirmed' | 'cancelled'
+  staff_notes: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export const SUPPORTED_LOCALES = [
+  { code: 'hi', name: 'Hindi (हिंदी)', dir: 'ltr' },
+  { code: 'ar', name: 'Arabic (العربية)', dir: 'rtl' },
+  { code: 'es', name: 'Spanish (Español)', dir: 'ltr' },
+  { code: 'fr', name: 'French (Français)', dir: 'ltr' },
+  { code: 'ta', name: 'Tamil (தமிழ்)', dir: 'ltr' },
+  { code: 'te', name: 'Telugu (తెలుగు)', dir: 'ltr' },
+] as const
+
+export type LocaleCode = typeof SUPPORTED_LOCALES[number]['code']
+
+export interface Translation {
+  id: string
+  business_id: string
+  entity_type: 'item' | 'category' | 'business'
+  entity_id: string
+  locale: string
+  field: string
+  value: string
 }
 
 export type AnalyticsEventType =
@@ -171,33 +221,7 @@ export interface Banner {
   ends_at: string | null
 }
 
-// ── Premium ───────────────────────────────────────────────────────
-export interface Branch {
-  id: string
-  business_id: string
-  name: string
-  address: string | null
-  phone: string | null
-  opening_hours: OpeningHours | null
-  is_active: boolean
-  sort_order: number
-}
-
-export type ReservationStatus = 'pending' | 'confirmed' | 'cancelled'
-export interface Reservation {
-  id: string
-  business_id: string
-  branch_id: string | null
-  name: string
-  phone: string
-  email: string | null
-  party_size: number
-  date: string
-  time: string
-  notes: string | null
-  status: ReservationStatus
-  staff_notes: string | null
-}
+// Duplicates removed
 
 // ════════════════════════════════════════════════════════════════════
 // Helper — derive the full CDN URL from an R2 key.

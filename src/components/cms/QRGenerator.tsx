@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { useCmsStore } from '@/stores/cms'
 import { getConfig } from '@/lib/config'
-import { qk, fetchQrCodes, createQrCode, updateQrCode, deleteQrCode, type QrCodeInput } from '@/lib/cms-queries'
+import { qk, fetchQrCodes, createQrCode, updateQrCode, deleteQrCode, type QrCodeInput, fetchBranches } from '@/lib/cms-queries'
 import type { QrCode } from '@/types/database'
 import type QRCodeStylingType from 'qr-code-styling'
 
@@ -103,11 +103,16 @@ function QrForm({
 }) {
   const qc = useQueryClient()
   const pushToast = useCmsStore((s) => s.pushToast)
+  const activeBranchId = useCmsStore((s) => s.activeBranchId)
   const initialUrl = siteUrl || (typeof window !== 'undefined' ? window.location.origin : '')
   
+  const { features } = getConfig()
+  const branchesQ = useQuery({ queryKey: qk.branches(businessId), queryFn: () => fetchBranches(businessId), enabled: features.multiBranch })
+
   const [label, setLabel] = useState(qr?.label ?? 'Table 1')
   const [url, setUrl] = useState(qr?.target_url ?? initialUrl)
   const [color, setColor] = useState(qr?.qr_color ?? businessThemeColor)
+  const [branchId, setBranchId] = useState<string | null>(qr?.branch_id ?? activeBranchId)
 
   const save = useMutation({
     mutationFn: async () => {
@@ -117,6 +122,7 @@ function QrForm({
         target_url: url.trim() || initialUrl,
         qr_color: color,
         qr_bg_color: '#FFFFFF',
+        branch_id: branchId,
       }
       if (qr) return updateQrCode(qr.id, input)
       return createQrCode(input)
@@ -168,6 +174,30 @@ function QrForm({
               <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-32" />
             </div>
           </div>
+
+          {features.multiBranch && (branchesQ.data?.length ?? 0) > 0 && (
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1.5">Branch</label>
+              <select
+                value={branchId || ''}
+                onChange={(e) => {
+                  const newBranch = e.target.value || null
+                  setBranchId(newBranch)
+                  if (newBranch) {
+                    setUrl(`${initialUrl}?branch=${newBranch}`)
+                  } else {
+                    setUrl(initialUrl)
+                  }
+                }}
+                className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
+              >
+                <option value="">All Branches</option>
+                {branchesQ.data?.map(b => (
+                  <option key={b.id} value={b.id}>{b.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
         <button
@@ -188,7 +218,7 @@ export function QRGenerator() {
   const bid = business.id
   const qc = useQueryClient()
   const pushToast = useCmsStore((s) => s.pushToast)
-  const { tier, siteUrl } = getConfig()
+  const { siteUrl } = getConfig()
   const [editing, setEditing] = useState<QrCode | null | 'new'>()
 
   const { data: qrs = [], isLoading } = useQuery({
@@ -207,7 +237,7 @@ export function QRGenerator() {
 
   if (isLoading) return <div className="h-32 animate-pulse rounded-2xl bg-neutral-100" />
 
-  const qrLimit = tier === 'premium' ? 9999 : tier === 'advanced' ? 5 : 1
+  const qrLimit = getConfig().limits.qrCodes
   const atLimit = qrs.length >= qrLimit
 
   return (
@@ -228,23 +258,31 @@ export function QRGenerator() {
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {qrs.map((qr) => (
-            <div key={qr.id} className="flex flex-col gap-3 rounded-xl bg-white p-5 ring-1 ring-black/5 relative">
-              <div className="flex items-start justify-between border-b border-neutral-100 pb-3 mb-1">
-                <div>
-                  <h3 className="font-semibold text-neutral-900 truncate pr-2" title={qr.label}>{qr.label}</h3>
-                  <p className="text-xs text-neutral-500 truncate mt-0.5" title={qr.target_url}>{qr.target_url}</p>
+          {qrs.map((qr, i) => {
+            const isOverLimit = i >= qrLimit;
+            return (
+              <div key={qr.id} className={`flex flex-col gap-3 rounded-xl p-5 ring-1 ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50 ring-black/5' : 'bg-white ring-black/5'} relative`}>
+                <div className="flex items-start justify-between border-b border-neutral-100 pb-3 mb-1">
+                  <div className="min-w-0 flex-1 pr-2">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-semibold text-neutral-900 truncate" title={qr.label}>{qr.label}</h3>
+                      {isOverLimit && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 shrink-0">LIMIT REACHED</span>}
+                    </div>
+                    <p className="text-xs text-neutral-500 truncate mt-0.5" title={qr.target_url}>{qr.target_url}</p>
+                  </div>
+                  <div className="flex items-center shrink-0">
+                    <button onClick={() => { if (confirm('Delete this QR code?')) deleteMutation.mutate(qr.id) }} className="text-red-400 hover:text-red-500 p-1">
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center">
-                  <button onClick={() => { if (confirm('Delete this QR code?')) deleteMutation.mutate(qr.id) }} className="text-red-400 hover:text-red-500 p-1">
-                    <Trash2 className="h-4 w-4" />
-                  </button>
+                
+                <div className={isOverLimit ? 'pointer-events-none' : ''}>
+                  <QrPreview url={`${siteUrl}/api/qr/${qr.id}`} color={qr.qr_color ?? '#111'} businessName={business.name} slug={business.slug} />
                 </div>
               </div>
-              
-              <QrPreview url={qr.target_url} color={qr.qr_color ?? '#111'} businessName={business.name} slug={business.slug} />
-            </div>
-          ))}
+            )
+          })}
         </div>
       )}
 

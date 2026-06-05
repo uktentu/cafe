@@ -1,3 +1,4 @@
+export const runtime = 'edge';
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
@@ -27,6 +28,8 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
+import { SecurityGuard } from '@/components/SecurityGuard';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -37,6 +40,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <SecurityGuard />
         {children}
       </body>
     </html>

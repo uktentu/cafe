@@ -43,6 +43,7 @@ jobs:
         run: pnpm build
         env:
           STATIC_EXPORT: "1"
+          NEXT_PUBLIC_DEMO_MODE: "true"
           NEXT_PUBLIC_CLIENT_SLUG: ${{ secrets.NEXT_PUBLIC_CLIENT_SLUG }}
           NEXT_PUBLIC_SITE_URL: https://uktentu.github.io/cafe
           NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
