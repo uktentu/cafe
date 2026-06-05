@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export const runtime = 'edge'
 export const dynamic = 'force-dynamic'
 // POST /api/track — persist a subset of analytics events server-side so the

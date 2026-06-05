@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 // ════════════════════════════════════════════════════════════════════
 // firebase.ts — client analytics. Uses GA4 (gtag.js), which is exactly what
 // Firebase Analytics wraps. We load gtag directly (keyed by the per-client

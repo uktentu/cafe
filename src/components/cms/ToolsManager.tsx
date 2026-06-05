@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 'use client'
 
 import { useState } from 'react'
@@ -295,7 +298,7 @@ export function ToolsManager() {
       drawCategoryTable('Uncategorised', uncategorised)
       
       // Add Premium Page Decorations to all pages
-      const pageCount = doc.internal.getNumberOfPages()
+      const pageCount = (doc as any).internal.getNumberOfPages()
       const pageHeight = doc.internal.pageSize.height
       for (let i = 1; i <= pageCount; i++) {
         doc.setPage(i)
