@@ -81,9 +81,10 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }
   }
 
   // ── image / icon block ─────────────────────────────────────────
-  const media = (rounded: string) => (
-    <div className={cn('relative overflow-hidden', rounded)} style={{ background: 'var(--sf2)' }}>
-      {hasImage ? (
+  const media = (rounded: string) => {
+    if (!hasImage) return null
+    return (
+      <div className={cn('relative overflow-hidden', rounded)} style={{ background: 'var(--sf2)' }}>
         <Image
           src={src!}
           alt={item.name}
@@ -92,44 +93,40 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }
           className={cn('object-cover transition-transform duration-500', soldOut && 'grayscale', 'group-hover:scale-105')}
           onError={() => setImgError(true)}
         />
-      ) : (
-        <div
-          className="flex h-full w-full items-center justify-center"
-          style={{
-            background: style.imageAccent
-              ? 'radial-gradient(80% 80% at 50% 40%, var(--brand-dim) 0%, transparent 70%)'
-              : 'var(--sf2)',
-          }}
-        >
-          <Icon
-            aria-hidden
-            className={variant === 'row' ? 'h-7 w-7' : 'h-9 w-9'}
-            style={{ color: 'var(--brand)', opacity: 0.55 }}
-            strokeWidth={1.5}
+        {item.badge && (
+          <ItemBadge badge={item.badge} className="absolute left-2 top-2 shadow-sm" />
+        )}
+        {soldOut && (
+          <span
+            className="absolute bottom-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
+            style={{ background: '#C0392B', color: '#fff' }}
+          >
+            Sold Out
+          </span>
+        )}
+        {theme === 'nocturne' && (
+          <div
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+            style={{ boxShadow: 'inset 0 0 0 1px var(--brand)', borderRadius: 'inherit' }}
           />
-        </div>
-      )}
-      {item.badge && (
-        <ItemBadge badge={item.badge} className="absolute left-2 top-2 shadow-sm" />
-      )}
-      {soldOut && (
-        <span
-          className="absolute bottom-2 left-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide"
-          style={{ background: '#C0392B', color: '#fff' }}
-        >
-          Sold Out
-        </span>
-      )}
+        )}
+      </div>
+    )
+  }
 
-      {/* Nocturne: glowing border on hover */}
-      {theme === 'nocturne' && (
-        <div
-          className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-          style={{ boxShadow: 'inset 0 0 0 1px var(--brand)', borderRadius: 'inherit' }}
-        />
-      )}
-    </div>
-  )
+  const BadgeFallback = () => {
+    if (hasImage) return null
+    return (
+      <div className="flex gap-2 mt-2">
+        {item.badge && <ItemBadge badge={item.badge} />}
+        {soldOut && (
+          <span className="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide" style={{ background: '#C0392B', color: '#fff' }}>
+            Sold Out
+          </span>
+        )}
+      </div>
+    )
+  }
 
   const PriceRow = (
     <div className="flex items-baseline gap-2">
@@ -160,14 +157,16 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }
         )}
         style={{ borderColor: 'var(--bdr)' }}
       >
-        {/* Image left — larger for editorial feel */}
-        <div className="relative h-[120px] w-[120px] shrink-0 overflow-hidden">
-          {media('h-full w-full')}
-        </div>
+        {hasImage && (
+          <div className="relative h-[120px] w-[120px] shrink-0 overflow-hidden">
+            {media('h-full w-full')}
+          </div>
+        )}
         <div className="flex min-w-0 flex-1 flex-col justify-between px-4 py-3">
           <div>
             <div className="flex items-center gap-2">
               <VegMark dietary={item.dietary} />
+              {!hasImage && <Icon className="h-4 w-4 shrink-0 text-neutral-400" />}
               <h3 style={{ ...nameStyle, fontSize: '1rem', lineHeight: 1.2 }}>{item.name}</h3>
             </div>
             {item.description && (
@@ -175,6 +174,7 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }
                 {item.description}
               </p>
             )}
+            <BadgeFallback />
           </div>
           {PriceRow}
         </div>
@@ -197,20 +197,32 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }
         )}
         style={{ background: 'var(--sf1)', borderColor: 'var(--bdr)' }}
       >
-        <div className="h-[88px] w-[88px] shrink-0">
-          {media(cn(style.radius, 'h-full w-full'))}
-        </div>
-        <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <div className="flex items-center gap-1.5">
-            <VegMark dietary={item.dietary} />
-            <h3 className="truncate text-[15px]" style={nameStyle}>{item.name}</h3>
+        {hasImage && (
+          <div className="h-[88px] w-[88px] shrink-0">
+            {media(cn(style.radius, 'h-full w-full'))}
           </div>
-          {item.description && (
-            <p className="line-clamp-2 text-xs" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>
-              {item.description}
-            </p>
-          )}
-          {PriceRow}
+        )}
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <div className="flex items-start gap-2">
+            {!hasImage && (
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-black/5">
+                <Icon className="h-4 w-4 opacity-60" style={{ color: 'var(--brand)' }} />
+              </div>
+            )}
+            <div className="flex-1">
+              <div className="flex items-center gap-1.5">
+                <VegMark dietary={item.dietary} />
+                <h3 className="truncate text-[15px]" style={nameStyle}>{item.name}</h3>
+              </div>
+              {item.description && (
+                <p className="line-clamp-2 text-xs mt-1" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>
+                  {item.description}
+                </p>
+              )}
+            </div>
+          </div>
+          <BadgeFallback />
+          <div className="mt-auto pt-1">{PriceRow}</div>
         </div>
       </m.button>
     )
@@ -230,14 +242,18 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }
         )}
         style={{ background: 'var(--sf1)', borderColor: 'var(--bdr2)' }}
       >
-        <div className="aspect-square w-full">
-          {media('h-full w-full')}
-        </div>
-        <div className="flex flex-1 flex-col gap-1 border-t p-3" style={{ borderColor: 'var(--bdr2)' }}>
+        {hasImage && (
+          <div className="aspect-square w-full">
+            {media('h-full w-full')}
+          </div>
+        )}
+        <div className="flex flex-1 flex-col gap-1 border-t p-3" style={{ borderColor: hasImage ? 'var(--bdr2)' : 'transparent' }}>
           <div className="flex items-start gap-1.5">
             <VegMark dietary={item.dietary} className="mt-1 shrink-0" />
+            {!hasImage && <Icon className="mt-0.5 h-4 w-4 shrink-0 opacity-60" style={{ color: 'var(--brand)' }} />}
             <h3 className="text-[13px] font-bold leading-tight" style={nameStyle}>{item.name}</h3>
           </div>
+          <BadgeFallback />
           <div className="mt-auto pt-1">
             <span
               className="inline-block border px-1.5 py-0.5 font-mono text-[11px] font-bold"
@@ -265,20 +281,28 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }
       )}
       style={{ background: 'var(--sf1)', borderColor: 'var(--bdr)' }}
     >
-      <div className="aspect-[4/3] w-full">
-        {media('h-full w-full')}
-      </div>
+      {hasImage && (
+        <div className="aspect-[4/3] w-full">
+          {media('h-full w-full')}
+        </div>
+      )}
       <div className="flex flex-1 flex-col gap-1 p-3">
         <div className="flex items-start gap-1.5">
           <VegMark dietary={item.dietary} className="mt-1 shrink-0" />
-          <h3 className="text-[15px] leading-tight" style={nameStyle}>{item.name}</h3>
+          {!hasImage && (
+            <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded bg-black/5">
+              <Icon className="h-3 w-3 opacity-70" style={{ color: 'var(--brand)' }} />
+            </div>
+          )}
+          <h3 className="text-[15px] leading-tight flex-1" style={nameStyle}>{item.name}</h3>
         </div>
         {item.description && (
-          <p className="line-clamp-2 text-xs" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>
+          <p className="line-clamp-2 text-xs mt-1" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>
             {item.description}
           </p>
         )}
-        <div className="mt-auto pt-1">{PriceRow}</div>
+        <BadgeFallback />
+        <div className="mt-auto pt-2">{PriceRow}</div>
       </div>
     </m.button>
   )

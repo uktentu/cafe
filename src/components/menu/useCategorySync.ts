@@ -19,6 +19,9 @@ export function useScrollCategorySync(categories: Cat[]) {
   const [activeId, setActiveId] = useState(categories[0]?.id ?? '')
   const refs = useRef<Record<string, HTMLElement | null>>({})
 
+  const isJumping = useRef(false)
+  const visibleSections = useRef(new Set<string>())
+
   const register = useCallback(
     (id: string) => (el: HTMLElement | null) => {
       refs.current[id] = el
@@ -28,17 +31,39 @@ export function useScrollCategorySync(categories: Cat[]) {
 
   // Scroll-spy — observes against the document viewport.
   useEffect(() => {
+    // A thin band starting 150px from top, ending 40% down. This perfectly catches
+    // tall sections that cover the screen, and short sections as they pass.
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0]
-        if (visible) {
-          const id = visible.target.getAttribute('data-cat') ?? ''
-          if (id) { setActiveId(id); setActive(id) }
+        entries.forEach((e) => {
+          const id = e.target.getAttribute('data-cat')
+          if (!id) return
+          if (e.isIntersecting) {
+            visibleSections.current.add(id)
+          } else {
+            visibleSections.current.delete(id)
+          }
+        })
+
+        if (isJumping.current) return
+
+        // Pick the top-most visible section based on DOM order or bounding box
+        // Since visibleSections is a Set, we map it to actual elements to sort by top position
+        const visibleArray = Array.from(visibleSections.current).map(id => ({
+          id,
+          top: refs.current[id]?.getBoundingClientRect().top ?? Infinity
+        }))
+
+        // Sort by closest to 150px (our header/dock area)
+        visibleArray.sort((a, b) => Math.abs(a.top - 150) - Math.abs(b.top - 150))
+
+        if (visibleArray.length > 0) {
+          const bestId = visibleArray[0].id
+          setActiveId(bestId)
+          setActive(bestId)
         }
       },
-      { threshold: [0, 0.25, 0.5], rootMargin: '-72px 0px -55% 0px' },
+      { threshold: 0, rootMargin: '-150px 0px -50% 0px' },
     )
     Object.values(refs.current).forEach((el) => el && observer.observe(el))
     return () => observer.disconnect()
@@ -49,8 +74,23 @@ export function useScrollCategorySync(categories: Cat[]) {
   useEffect(() => {
     if (!jump) return
     const el = refs.current[jump.id]
-    if (el) { setActiveId(jump.id); el.scrollIntoView({ behavior: 'smooth', block: 'start' }) }
+    if (el) { 
+      isJumping.current = true
+      setActiveId(jump.id)
+      setActive(jump.id)
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' }) 
+      setTimeout(() => { isJumping.current = false }, 1000) // Lock observer during smooth scroll
+    }
   }, [jump])
+
+  // Sync horizontal nav bar scroll position
+  useEffect(() => {
+    if (!activeId) return
+    const btn = document.getElementById(`nav-btn-${activeId}`)
+    if (btn) {
+      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' })
+    }
+  }, [activeId])
 
   return { activeId, register }
 }

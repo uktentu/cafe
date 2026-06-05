@@ -30,6 +30,7 @@ export interface SocialLinks {
   swiggy?: string | null
   zomato?: string | null
   google_maps?: string | null
+  multiple_menus_enabled?: boolean
 }
 
 export interface Business {

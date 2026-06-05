@@ -12,6 +12,7 @@ import { getConfig } from '@/lib/config'
 import type { Features } from '@/lib/config'
 import { createClient } from '@/lib/supabase/client'
 import { useCmsStore } from '@/stores/cms'
+import { useCms } from '@/components/cms/Providers'
 import { cn } from '@/lib/utils'
 
 interface NavItem {
@@ -67,6 +68,7 @@ function SidebarContent({ businessName, userEmail, onNavigate }: { businessName:
   const pathname = usePathname()
   const router = useRouter()
   const { features, siteUrl } = getConfig()
+  const { business } = useCms()
 
   async function signOut() {
     await createClient().auth.signOut()
@@ -89,7 +91,14 @@ function SidebarContent({ businessName, userEmail, onNavigate }: { businessName:
         ))}
         <div className="my-3 border-t border-white/10" />
         {GATED.map((item) => {
-          const enabled = item.feature ? features[item.feature] : true
+          let enabled = item.feature ? features[item.feature] : true
+          // If the feature is menus, we also check if the user has enabled it in settings
+          if (item.feature === 'menus' && enabled) {
+            enabled = business.social_links?.multiple_menus_enabled === true
+          }
+          // Do not render Menus if it's completely disabled by the user to keep sidebar clean
+          if (item.feature === 'menus' && !enabled) return null
+          
           return (
             <NavRow key={item.href} item={item} active={isActive(item.href)} locked={!enabled} onNavigate={onNavigate} />
           )

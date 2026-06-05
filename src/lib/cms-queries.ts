@@ -3,7 +3,7 @@
 'use client'
 
 import { createClient } from '@/lib/supabase/client'
-import type { Category, Item, StockImage, Business, Banner, Menu as MenuRow, AnalyticsEvent } from '@/types/database'
+import type { Category, Item, StockImage, Business, Banner, Menu as MenuRow, AnalyticsEvent, QrCode, StaffRole } from '@/types/database'
 
 let _client: ReturnType<typeof createClient> | null = null
 function db() {
@@ -18,6 +18,8 @@ export const qk = {
   banners: (bid: string) => ['banners', bid] as const,
   menus: (bid: string) => ['menus', bid] as const,
   analytics: (bid: string) => ['analytics', bid] as const,
+  qrs: (bid: string) => ['qr_codes', bid] as const,
+  staff: (bid: string) => ['staff', bid] as const,
 }
 
 // ── Reads ───────────────────────────────────────────────────────────
@@ -118,6 +120,13 @@ export async function updateItem(id: string, patch: Partial<Item>): Promise<Item
 export async function deleteItem(id: string): Promise<void> {
   const { error } = await db().from('items').delete().eq('id', id)
   if (error) throw error
+  revalidateMenu()
+}
+
+export async function reorderItems(ordered: { id: string; sort_order: number }[]): Promise<void> {
+  await Promise.all(
+    ordered.map((i) => db().from('items').update({ sort_order: i.sort_order }).eq('id', i.id)),
+  )
   revalidateMenu()
 }
 
@@ -254,6 +263,61 @@ export async function deleteMenu(id: string): Promise<void> {
   const { error } = await db().from('menus').delete().eq('id', id)
   if (error) throw error
   revalidateMenu()
+}
+
+// ── QR Code reads/writes ─────────────────────────────────────────────
+export async function fetchQrCodes(businessId: string): Promise<QrCode[]> {
+  const { data, error } = await db()
+    .from('qr_codes')
+    .select('*')
+    .eq('business_id', businessId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as QrCode[]
+}
+
+export type QrCodeInput = Partial<QrCode> & { business_id: string; target_url: string; label: string }
+
+export async function createQrCode(input: QrCodeInput): Promise<QrCode> {
+  const { data, error } = await db().from('qr_codes').insert(input).select('*').single()
+  if (error) throw error
+  return data as QrCode
+}
+
+export async function updateQrCode(id: string, patch: Partial<QrCode>): Promise<QrCode> {
+  const { data, error } = await db().from('qr_codes').update(patch).eq('id', id).select('*').single()
+  if (error) throw error
+  return data as QrCode
+}
+
+export async function deleteQrCode(id: string): Promise<void> {
+  const { error } = await db().from('qr_codes').delete().eq('id', id)
+  if (error) throw error
+}
+
+// ── Staff Accounts reads/writes ──────────────────────────────────────
+export interface StaffAccount {
+  id: string; business_id: string; user_id: string; role: StaffRole; name: string | null; is_active: boolean; created_at: string;
+}
+
+export async function fetchStaff(businessId: string): Promise<StaffAccount[]> {
+  const { data, error } = await db()
+    .from('staff_accounts')
+    .select('*')
+    .eq('business_id', businessId)
+    .order('created_at', { ascending: true })
+  if (error) throw error
+  return (data ?? []) as StaffAccount[]
+}
+
+export async function updateStaffRole(id: string, role: StaffRole): Promise<void> {
+  const { error } = await db().from('staff_accounts').update({ role }).eq('id', id)
+  if (error) throw error
+}
+
+export async function deleteStaff(id: string): Promise<void> {
+  const { error } = await db().from('staff_accounts').delete().eq('id', id)
+  if (error) throw error
 }
 
 // ── Analytics reads ──────────────────────────────────────────────────

@@ -52,9 +52,13 @@ export function VegMark({ dietary, className, size = 'sm' }: VegMarkProps) {
       border: '#B8860B',
       label: 'Contains egg',
       symbol: (
-        <svg width={s.dot} height={s.dot + 1} viewBox="0 0 8 9" aria-hidden>
-          {/* egg shape: oval */}
-          <ellipse cx="4" cy="5" rx="3" ry="3.8" fill="#B8860B" />
+        <svg width={s.dot} height={s.dot + 1} viewBox="0 0 10 11" aria-hidden>
+          {/* Full egg outline */}
+          <ellipse cx="5" cy="6.2" rx="3.8" ry="4.8" fill="#B8860B" opacity="0.18" stroke="#B8860B" strokeWidth="0.8"/>
+          {/* Top half filled (the visible half-cut portion) */}
+          <path d="M1.2 6.2 A3.8 4.8 0 0 1 8.8 6.2 Z" fill="#B8860B"/>
+          {/* Yolk circle */}
+          <circle cx="5" cy="6.2" r="1.5" fill="#DAA520"/>
         </svg>
       ),
     },
@@ -117,21 +121,16 @@ export function DietaryTag({ dietary, className }: { dietary: DietaryPreference;
 // ── Item badge chips ───────────────────────────────────────────────────────
 
 const BADGE_LABEL: Record<Badge, string> = {
-  bestseller:  'Bestseller',
-  chef_special: "Chef's Special",
-  new:         'New',
-  spicy:       'Spicy',
-}
-
-const BADGE_ICON: Record<Badge, string> = {
   bestseller:  '★',
-  chef_special: '👨‍🍳',
-  new:         '✦',
+  chef_special: '♥',
+  new:         'New',
   spicy:       '🌶',
 }
 
+// Removed separate BADGE_ICON — labels are now the icon for compact display
+
 const BADGE_STYLE: Record<Badge, { bg: string; fg: string }> = {
-  bestseller:  { bg: 'var(--brand2, var(--brand))', fg: 'var(--bg)' },
+  bestseller:  { bg: '#EAB308', fg: '#fff' }, // Solid gold for bestseller star
   chef_special: { bg: 'var(--brand)',              fg: '#fff' },
   new:         { bg: 'var(--brand3, #22C55E)',     fg: '#fff' },
   spicy:       { bg: '#C0392B',                    fg: '#fff' },
@@ -139,15 +138,16 @@ const BADGE_STYLE: Record<Badge, { bg: string; fg: string }> = {
 
 export function ItemBadge({ badge, className }: { badge: Badge; className?: string }) {
   const style = BADGE_STYLE[badge]
+  // Compact: just the symbol or very short label — never wide
   return (
     <span
       className={cn(
-        'dietary-badge inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow-sm',
+        'inline-flex shrink-0 items-center rounded-full px-1.5 py-0.5 text-[9px] font-bold leading-none',
         className,
       )}
-      style={{ background: style.bg, color: style.fg }}
+      style={{ background: style.bg, color: style.fg, letterSpacing: '0.02em' }}
+      title={badge === 'bestseller' ? 'Bestseller' : badge === 'chef_special' ? "Chef's Special" : badge === 'new' ? 'New' : 'Spicy'}
     >
-      <span aria-hidden className="text-[9px]">{BADGE_ICON[badge]}</span>
       {BADGE_LABEL[badge]}
     </span>
   )

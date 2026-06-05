@@ -4,31 +4,57 @@ import { memo, useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { useAutoAnimate } from '@formkit/auto-animate/react'
-import { Plus, Search, Pencil } from 'lucide-react'
+import { Plus, Search, Pencil, GripVertical } from 'lucide-react'
 import { useCms } from './Providers'
 import { getCategoryIcon } from '@/components/menu/categoryIcon'
 import { Toggle } from '@/components/ui/Toggle'
 import { useCmsStore } from '@/stores/cms'
 import { getConfig } from '@/lib/config'
 import {
-  qk, fetchItems, fetchCategories, toggleAvailability,
+  qk, fetchItems, fetchCategories, toggleAvailability, reorderItems,
 } from '@/lib/cms-queries'
 import { cdnUrl, itemImageKey, type Item } from '@/types/database'
 import { formatPrice } from '@/lib/utils'
+
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+  useSortable,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 
 interface ItemRowProps {
   item: Item
   catName: string | undefined
   catIcon: string | null | undefined
   onToggle: (id: string, value: boolean) => void
+  isSearchActive: boolean
 }
 
-const ItemRow = memo(function ItemRow({ item, catName, catIcon, onToggle }: ItemRowProps) {
+const SortableItemRow = memo(function SortableItemRow({ item, catName, catIcon, onToggle, isSearchActive }: ItemRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: item.id })
+  const style = { transform: CSS.Transform.toString(transform), transition, zIndex: isDragging ? 10 : 1 }
   const Icon = getCategoryIcon(catIcon)
   const thumb = cdnUrl(itemImageKey(item))
+  
   return (
-    <div className="flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-black/5">
+    <div ref={setNodeRef} style={style} className={`flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-black/5 ${isDragging ? 'shadow-lg ring-black/10' : ''}`}>
+      {!isSearchActive && (
+        <button {...attributes} {...listeners} className="flex h-8 w-8 cursor-grab items-center justify-center text-neutral-400 hover:text-neutral-600 active:cursor-grabbing" aria-label="Drag handle">
+          <GripVertical className="h-4 w-4" />
+        </button>
+      )}
       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
         {item.image_mode !== 'none' && thumb ? (
           <Image src={thumb} alt="" fill sizes="48px" className="object-cover" />
@@ -75,7 +101,6 @@ export function ItemsList() {
   const pushToast = useCmsStore((s) => s.pushToast)
   const { limits } = getConfig()
   const [search, setSearch] = useState('')
-  const [listRef] = useAutoAnimate<HTMLDivElement>()
 
   const itemsQ = useQuery({ queryKey: qk.items(bid), queryFn: () => fetchItems(bid) })
   const catsQ = useQuery({ queryKey: qk.categories(bid), queryFn: () => fetchCategories(bid) })
@@ -104,7 +129,6 @@ export function ItemsList() {
   })
 
   // Stable callback — won't invalidate ItemRow memo on parent re-renders.
-  // toggle.mutate is referentially stable across renders (TanStack Query).
   const mutate = toggle.mutate
   const handleToggle = useCallback(
     (id: string, value: boolean) => mutate({ id, value }),
@@ -114,6 +138,31 @@ export function ItemsList() {
   const items = itemsQ.data ?? []
   const filtered = items.filter((it) => it.name.toLowerCase().includes(search.toLowerCase().trim()))
   const atLimit = items.length >= limits.items
+  const isSearchActive = search.trim().length > 0
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  )
+
+  async function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event
+    if (!over || active.id === over.id || isSearchActive) return
+
+    const oldIndex = items.findIndex((i) => i.id === active.id)
+    const newIndex = items.findIndex((i) => i.id === over.id)
+    
+    const reordered = arrayMove(items, oldIndex, newIndex)
+    const payload = reordered.map((i, idx) => ({ id: i.id, sort_order: idx }))
+    qc.setQueryData<Item[]>(qk.items(bid), reordered.map((item, idx) => ({ ...item, sort_order: idx })))
+    
+    try {
+      await reorderItems(payload)
+    } catch {
+      await qc.invalidateQueries({ queryKey: qk.items(bid) })
+      pushToast('Reorder failed', 'error')
+    }
+  }
 
   return (
     <div className="space-y-5">
@@ -158,20 +207,25 @@ export function ItemsList() {
           </p>
         </div>
       ) : (
-        <div ref={listRef} className="space-y-2">
-          {filtered.map((it) => {
-            const cat = it.category_id ? catById.get(it.category_id) : null
-            return (
-              <ItemRow
-                key={it.id}
-                item={it}
-                catName={cat?.name}
-                catIcon={cat?.icon}
-                onToggle={handleToggle}
-              />
-            )
-          })}
-        </div>
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={filtered.map(it => it.id)} strategy={verticalListSortingStrategy}>
+            <div className="space-y-2">
+              {filtered.map((it) => {
+                const cat = it.category_id ? catById.get(it.category_id) : null
+                return (
+                  <SortableItemRow
+                    key={it.id}
+                    item={it}
+                    catName={cat?.name}
+                    catIcon={cat?.icon}
+                    onToggle={handleToggle}
+                    isSearchActive={isSearchActive}
+                  />
+                )
+              })}
+            </div>
+          </SortableContext>
+        </DndContext>
       )}
     </div>
   )

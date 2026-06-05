@@ -50,9 +50,12 @@ export function SettingsForm() {
   const [hours, setHours] = useState<OpeningHours>(() => structuredClone(business.opening_hours))
   const [theme, setTheme] = useState<Theme>(business.theme)
   const [brand, setBrand] = useState(business.theme_color || '#F59E0B')
+  const [multipleMenus, setMultipleMenus] = useState(business.social_links?.multiple_menus_enabled ?? false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [saving, setSaving] = useState(false)
+
+  const isAdvancedOrPremium = tierRank(tier) >= tierRank('advanced')
 
   const availableThemes = (Object.keys(THEMES) as Theme[]).filter(
     (t) => tierRank(THEMES[t].tier) <= tierRank(tier),
@@ -75,6 +78,7 @@ export function SettingsForm() {
         opening_hours: hours,
         theme,
         theme_color: brand,
+        social_links: { ...business.social_links, multiple_menus_enabled: multipleMenus }
       }
       if (logoFile) {
         const up = await uploadImage(logoFile, 'logo')
@@ -181,6 +185,20 @@ export function SettingsForm() {
           )
         })}
       </section>
+
+      {/* Advanced Features */}
+      {isAdvancedOrPremium && (
+        <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
+          <h2 className="text-sm font-semibold text-neutral-700">Advanced Features</h2>
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-medium text-neutral-800 text-sm">Multiple Menus</p>
+              <p className="text-xs text-neutral-500">Enable creating separate menus for Breakfast, Lunch, and Dinner with custom schedules.</p>
+            </div>
+            <Toggle checked={multipleMenus} onChange={setMultipleMenus} size="md" label="Multiple menus" />
+          </div>
+        </section>
+      )}
 
       <Button type="submit" loading={saving} className="w-full md:w-auto">Save settings</Button>
     </form>

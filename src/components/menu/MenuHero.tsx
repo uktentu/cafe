@@ -428,11 +428,17 @@ function StudioHero({ business }: { business: Business }) {
             <Image src={cover} alt="" fill sizes="60vw" className="object-cover" priority />
           ) : (
             <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage: 'repeating-linear-gradient(45deg, var(--bdr) 0px, var(--bdr) 1px, transparent 1px, transparent 12px)',
-              }}
-            />
+              className="absolute inset-0 flex items-center justify-center overflow-hidden"
+              style={{ background: 'var(--bg)' }}
+            >
+              <div
+                className="absolute inset-0 opacity-10"
+                style={{ backgroundImage: 'radial-gradient(var(--txt) 1px, transparent 1px)', backgroundSize: '16px 16px' }}
+              />
+              <span className="relative text-[160px] font-bold leading-none tracking-tighter opacity-5" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>
+                {initials(business.name)}
+              </span>
+            </div>
           )}
         </div>
       </div>

@@ -16,6 +16,7 @@ import { DeferredItemModal } from '@/components/menu/DeferredItemModal'
 
 export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 export const runtime = 'edge'
+export const revalidate = 0
 
 export async function generateMetadata(): Promise<Metadata> {
   const { slug, siteUrl } = getConfig()
