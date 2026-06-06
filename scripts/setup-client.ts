@@ -113,10 +113,12 @@ async function main() {
     { category_id: catId('Starters'), name: 'Garlic Bread', price: 120, image_mode: 'none' },
     { category_id: catId('Mains'), name: 'Chicken Biryani', price: 280, image_mode: 'stock', stock_image_key: 'stock/indian/biryani.webp', is_veg: false, is_featured: true, badge: 'bestseller' },
     { category_id: catId('Mains'), name: 'Dal Makhani', price: 190, image_mode: 'stock', stock_image_key: 'stock/indian/dal-makhani.webp', badge: 'chef_special' },
+    { category_id: catId('Mains'), name: 'Butter Naan', price: 45, image_mode: 'none' },
     { category_id: catId('Mains'), name: 'Veg Hakka Noodles', price: 170, image_mode: 'stock', stock_image_key: 'stock/chinese/hakka-noodles.webp' },
     { category_id: catId('Mains'), name: 'Margherita Pizza', price: 240, image_mode: 'none', badge: 'new' },
     { category_id: catId('Drinks'), name: 'Masala Chai', price: 40, image_mode: 'stock', stock_image_key: 'stock/drinks/chai.webp' },
     { category_id: catId('Drinks'), name: 'Cold Coffee', price: 130, image_mode: 'stock', stock_image_key: 'stock/drinks/cold-coffee.webp' },
+    { category_id: catId('Drinks'), name: 'Virgin Mojito', price: 110, image_mode: 'none' },
     { category_id: catId('Drinks'), name: 'Sweet Lassi', price: 90, image_mode: 'none' },
   ]
   const { error: itemErr } = await supabase
