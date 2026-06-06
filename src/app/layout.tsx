@@ -29,6 +29,7 @@ export const viewport: Viewport = {
 };
 
 import { SecurityGuard } from '@/components/SecurityGuard';
+import { ThemeProvider } from '@/components/ui/ThemeProvider';
 
 export default function RootLayout({
   children,
@@ -40,8 +41,10 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <SecurityGuard />
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <SecurityGuard />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

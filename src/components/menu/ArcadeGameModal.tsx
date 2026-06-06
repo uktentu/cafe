@@ -151,6 +151,34 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
   const stateRef = useRef<GameState>(gameState)
   stateRef.current = gameState
 
+  // Keyboard event listeners for a11y & physical keyboards
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.current.left = true
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.current.right = true
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.current.up = true
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.current.down = true
+      if (e.key === ' ' || e.key === 'Enter') keys.current.fire = true
+      if (e.key === 'Shift') keys.current.dash = true
+    }
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') keys.current.left = false
+      if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') keys.current.right = false
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') keys.current.up = false
+      if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') keys.current.down = false
+      if (e.key === ' ' || e.key === 'Enter') keys.current.fire = false
+      if (e.key === 'Shift') keys.current.dash = false
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('keyup', handleKeyUp)
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('keyup', handleKeyUp)
+    }
+  }, [])
+
   // For animation frames (walking)
   const [frameTick, setFrameTick] = useState(0)
 
@@ -428,6 +456,11 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
   return createPortal(
     <m.div layoutId="arcade-game-container" className="fixed inset-0 z-[99999] bg-black text-white overflow-hidden arcade-font select-none touch-none flex flex-col" style={{ borderRadius: 0 }}>
       
+      {/* Screen reader only instructions */}
+      <div className="sr-only">
+        Arcade Game. Use arrow keys or WASD to move. Press Space or Enter to fire. Press Shift to dash.
+      </div>
+      
       {/* Portrait Warning Overlay (Mobile only) */}
       <div className="hidden max-lg:portrait:flex absolute inset-0 z-[100000] bg-black flex-col items-center justify-center p-8 text-center">
          <h2 className="text-3xl lg:text-5xl text-yellow-400 mb-4 animate-pulse">ROTATE DEVICE 🔄</h2>
@@ -571,34 +604,34 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
       </div>
 
       {/* Controller Area */}
-      <div className="absolute bottom-4 inset-x-4 flex items-end justify-between pointer-events-none z-20 lg:relative lg:inset-auto lg:bottom-auto lg:h-64 lg:bg-neutral-900 lg:border-t-4 lg:border-neutral-700 lg:items-center lg:px-24">
+      <div className="absolute bottom-2 inset-x-2 flex items-end justify-between pointer-events-none z-20 lg:relative lg:inset-auto lg:bottom-auto lg:h-64 lg:bg-neutral-900 lg:border-t-4 lg:border-neutral-700 lg:items-center lg:px-24">
         {/* D-Pad */}
-        <div className="relative w-32 h-32 opacity-60 pointer-events-auto lg:w-48 lg:h-48 lg:opacity-100">
-          <div className="absolute inset-0 m-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-800" />
+        <div className="relative w-24 h-24 sm:w-32 sm:h-32 opacity-60 pointer-events-auto lg:w-48 lg:h-48 lg:opacity-100">
+          <div className="absolute inset-0 m-auto w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-neutral-800" />
           {/* UP */}
           <button 
-            className="absolute top-0 inset-x-0 mx-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-t-lg"
+            className="absolute top-0 inset-x-0 mx-auto w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-t-lg"
             onPointerDown={() => keys.current.up = true}
             onPointerUp={() => keys.current.up = false}
             onPointerLeave={() => keys.current.up = false}
           />
           {/* DOWN */}
           <button 
-            className="absolute bottom-0 inset-x-0 mx-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-b-lg"
+            className="absolute bottom-0 inset-x-0 mx-auto w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-b-lg"
             onPointerDown={() => keys.current.down = true}
             onPointerUp={() => keys.current.down = false}
             onPointerLeave={() => keys.current.down = false}
           />
           {/* LEFT */}
           <button 
-            className="absolute left-0 inset-y-0 my-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-l-lg"
+            className="absolute left-0 inset-y-0 my-auto w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-l-lg"
             onPointerDown={() => keys.current.left = true}
             onPointerUp={() => keys.current.left = false}
             onPointerLeave={() => keys.current.left = false}
           />
           {/* RIGHT */}
           <button 
-            className="absolute right-0 inset-y-0 my-auto w-12 h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-r-lg"
+            className="absolute right-0 inset-y-0 my-auto w-8 h-8 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-neutral-700 active:bg-neutral-500 rounded-r-lg"
             onPointerDown={() => keys.current.right = true}
             onPointerUp={() => keys.current.right = false}
             onPointerLeave={() => keys.current.right = false}
@@ -606,25 +639,25 @@ export function ArcadeGameModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-4 opacity-60 pointer-events-auto pb-4 pr-4 lg:gap-8 lg:opacity-100 lg:pb-0 lg:pr-0">
+        <div className="flex gap-2 sm:gap-4 opacity-60 pointer-events-auto pb-2 pr-2 sm:pb-4 sm:pr-4 lg:gap-8 lg:opacity-100 lg:pb-0 lg:pr-0">
           {/* DASH Button */}
           <button 
-            className="w-16 h-16 lg:w-20 lg:h-20 rounded-full bg-blue-600 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 active:bg-blue-500 shadow-lg flex items-center justify-center transition-all"
+            className="w-12 h-12 sm:w-16 sm:h-16 lg:w-20 lg:h-20 rounded-full bg-blue-600 border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 active:bg-blue-500 shadow-lg flex items-center justify-center transition-all"
             onPointerDown={() => keys.current.dash = true}
             onPointerUp={() => keys.current.dash = false}
             onPointerLeave={() => keys.current.dash = false}
           >
-            <span className="text-sm lg:text-lg font-bold tracking-widest">DASH</span>
+            <span className="text-[10px] sm:text-sm lg:text-lg font-bold tracking-widest">DASH</span>
           </button>
 
           {/* FIRE Button */}
           <button 
-            className="w-20 h-20 lg:w-24 lg:h-24 rounded-full bg-red-600 border-b-4 border-red-800 active:border-b-0 active:translate-y-1 active:bg-red-500 shadow-lg flex items-center justify-center transition-all"
+            className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full bg-red-600 border-b-4 border-red-800 active:border-b-0 active:translate-y-1 active:bg-red-500 shadow-lg flex items-center justify-center transition-all"
             onPointerDown={() => keys.current.fire = true}
             onPointerUp={() => keys.current.fire = false}
             onPointerLeave={() => keys.current.fire = false}
           >
-            <span className="text-xl lg:text-2xl font-bold tracking-widest">FIRE</span>
+            <span className="text-sm sm:text-xl lg:text-2xl font-bold tracking-widest">FIRE</span>
           </button>
         </div>
       </div>

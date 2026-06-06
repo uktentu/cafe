@@ -77,7 +77,7 @@ function QrPreview({ url, color, businessName, slug }: { url: string; color: str
 
   return (
     <div className="flex flex-col items-center gap-4">
-      <div className="flex items-center justify-center rounded-2xl bg-white p-4 ring-1 ring-black/5 w-full max-w-[200px] mx-auto">
+      <div className="flex items-center justify-center rounded-2xl bg-white dark:bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10 w-full max-w-[200px] mx-auto">
         <div ref={containerRef} className="h-[150px] w-[150px] [&>*]:!h-full [&>*]:!w-full" />
       </div>
       <div className="flex flex-wrap gap-2 justify-center">
@@ -138,9 +138,9 @@ function QrForm({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-md rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-2xl">
+      <div className="relative z-10 w-full max-w-md rounded-t-3xl bg-white dark:bg-neutral-900 p-6 shadow-2xl sm:rounded-2xl">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-neutral-900">{qr ? 'Edit QR Code' : 'New QR Code'}</h2>
+          <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">{qr ? 'Edit QR Code' : 'New QR Code'}</h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100">
             <X className="h-5 w-5" />
           </button>
@@ -148,36 +148,36 @@ function QrForm({
 
         <div className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1.5">Label (e.g. Table 1, Counter)</label>
+            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1.5">Label (e.g. Table 1, Counter)</label>
             <input
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder="Table 1"
-              className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
+              className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1.5">Target URL</label>
+            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1.5">Target URL</label>
             <input
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               placeholder="https://..."
-              className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
+              className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1.5">QR Colour</label>
+            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1.5">QR Colour</label>
             <div className="flex items-center gap-3">
-              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-10 w-12 cursor-pointer rounded border border-neutral-300" />
+              <input type="color" value={color} onChange={(e) => setColor(e.target.value)} className="h-10 w-12 cursor-pointer rounded border border-neutral-300 dark:border-neutral-700" />
               <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-32" />
             </div>
           </div>
 
           {features.multiBranch && (branchesQ.data?.length ?? 0) > 0 && (
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1.5">Branch</label>
+              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1.5">Branch</label>
               <select
                 value={branchId || ''}
                 onChange={(e) => {
@@ -189,7 +189,7 @@ function QrForm({
                     setUrl(initialUrl)
                   }
                 }}
-                className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
+                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
               >
                 <option value="">All Branches</option>
                 {branchesQ.data?.map(b => (
@@ -243,17 +243,17 @@ export function QRGenerator() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-2xl font-semibold text-neutral-900">QR codes</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">QR codes</h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           Print these on tables, counters, or packaging. 
           {qrLimit < 9999 && ` (${qrs.length} / ${qrLimit} used)`}
         </p>
       </header>
 
       {qrs.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 py-16">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-800 py-16">
           <QrIcon className="mb-3 h-10 w-10 text-neutral-300" />
-          <p className="font-medium text-neutral-600">No QR codes yet</p>
+          <p className="font-medium text-neutral-600 dark:text-neutral-400">No QR codes yet</p>
           <p className="mt-1 text-sm text-neutral-400">Create a QR code for your menu.</p>
         </div>
       ) : (
@@ -261,14 +261,14 @@ export function QRGenerator() {
           {qrs.map((qr, i) => {
             const isOverLimit = i >= qrLimit;
             return (
-              <div key={qr.id} className={`flex flex-col gap-3 rounded-xl p-5 ring-1 ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50 ring-black/5' : 'bg-white ring-black/5'} relative`}>
+              <div key={qr.id} className={`flex flex-col gap-3 rounded-xl p-5 ring-1 ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50 dark:bg-neutral-800/50 ring-black/5 dark:ring-white/10' : 'bg-white dark:bg-neutral-900 ring-black/5 dark:ring-white/10'} relative`}>
                 <div className="flex items-start justify-between border-b border-neutral-100 pb-3 mb-1">
                   <div className="min-w-0 flex-1 pr-2">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-semibold text-neutral-900 truncate" title={qr.label}>{qr.label}</h3>
+                      <h3 className="font-semibold text-neutral-900 dark:text-neutral-100 truncate" title={qr.label}>{qr.label}</h3>
                       {isOverLimit && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 shrink-0">LIMIT REACHED</span>}
                     </div>
-                    <p className="text-xs text-neutral-500 truncate mt-0.5" title={qr.target_url}>{qr.target_url}</p>
+                    <p className="text-xs text-neutral-500 dark:text-neutral-400 truncate mt-0.5" title={qr.target_url}>{qr.target_url}</p>
                   </div>
                   <div className="flex items-center shrink-0">
                     <button onClick={() => { if (confirm('Delete this QR code?')) deleteMutation.mutate(qr.id) }} className="text-red-400 hover:text-red-500 p-1">

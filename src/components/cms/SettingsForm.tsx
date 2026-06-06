@@ -133,11 +133,11 @@ export function SettingsForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <h1 className="text-2xl font-semibold text-neutral-900">Settings</h1>
+      <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">Settings</h1>
 
       {/* Business info */}
-      <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <h2 className="text-sm font-semibold text-neutral-700">Business info</h2>
+      <section className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Business info</h2>
         <Field label="Restaurant name" required><Input {...register('name', { required: true })} /></Field>
         <Field label="Tagline"><Input {...register('tagline')} placeholder="Good food, good vibes." /></Field>
         <div className="grid grid-cols-2 gap-4">
@@ -153,7 +153,7 @@ export function SettingsForm() {
             <select
               value={secondaryLocale}
               onChange={(e) => setSecondaryLocaleState(e.target.value)}
-              className="w-full rounded border border-neutral-300 p-2 text-sm focus:border-black focus:outline-none focus:ring-1 focus:ring-black"
+              className="w-full rounded border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 p-2 text-sm focus:border-amber-500 focus:outline-none focus:ring-[3px] focus:ring-amber-500/20"
             >
               <option value="">None (English Only)</option>
               {SUPPORTED_LOCALES.map((loc) => (
@@ -169,29 +169,29 @@ export function SettingsForm() {
       </section>
 
       {/* Branding */}
-      <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <h2 className="text-sm font-semibold text-neutral-700">Branding</h2>
+      <section className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Branding</h2>
         <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          <div className="w-32 shrink-0">
-            <p className="mb-1 text-sm font-medium text-neutral-700">Logo</p>
+          <div className="w-40 shrink-0">
+            <p className="mb-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">Logo</p>
             <ImageUpload file={logoFile} existingUrl={cdnUrl(business.logo_r2_key)} onChange={setLogoFile} aspect="aspect-square" />
           </div>
-          <div className="flex-1 sm:max-w-md">
-            <p className="mb-1 text-sm font-medium text-neutral-700">Cover Image</p>
+          <div className="flex-1">
+            <p className="mb-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">Cover Image</p>
             <ImageUpload file={coverFile} existingUrl={cdnUrl(business.cover_r2_key)} onChange={setCoverFile} aspect="aspect-video" />
           </div>
         </div>
         <Field label="Brand colour">
           <div className="flex items-center gap-3">
-            <input type="color" value={brand} onChange={(e) => setBrand(e.target.value)} className="h-10 w-12 cursor-pointer rounded border border-neutral-300" />
+            <input type="color" value={brand} onChange={(e) => setBrand(e.target.value)} className="h-10 w-12 cursor-pointer rounded border border-neutral-300 dark:border-neutral-700 bg-transparent" />
             <Input value={brand} onChange={(e) => setBrand(e.target.value)} className="w-32" />
           </div>
         </Field>
       </section>
 
       {/* Theme */}
-      <section className="space-y-3 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <h2 className="text-sm font-semibold text-neutral-700">Template</h2>
+      <section className="space-y-3 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Template</h2>
         <div className="grid grid-cols-3 gap-3">
           {availableThemes.map((t) => {
             const meta = THEMES[t]
@@ -201,13 +201,13 @@ export function SettingsForm() {
                 key={t}
                 type="button"
                 onClick={() => setTheme(t)}
-                className={cn('rounded-xl border-2 p-3 text-left', active ? 'border-amber-500' : 'border-neutral-200')}
+                className={cn('rounded-xl border-2 p-3 text-left', active ? 'border-amber-500' : 'border-neutral-200 dark:border-neutral-800')}
               >
                 <span className="mb-2 flex gap-1">
                   <span className="h-5 w-5 rounded-full" style={{ background: meta.colors.brand }} />
                   <span className="h-5 w-5 rounded-full" style={{ background: meta.colors.bg, border: '1px solid #ddd' }} />
                 </span>
-                <span className="text-sm font-medium capitalize text-neutral-800">{t}</span>
+                <span className="text-sm font-medium capitalize text-neutral-800 dark:text-neutral-200">{t}</span>
               </button>
             )
           })}
@@ -215,21 +215,21 @@ export function SettingsForm() {
       </section>
 
       {/* Hours */}
-      <section className="space-y-2 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <h2 className="text-sm font-semibold text-neutral-700">Opening hours</h2>
+      <section className="space-y-2 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Opening hours</h2>
         {DAYS.map(({ key, label }) => {
           const d = hours[key] ?? { open: '09:00', close: '22:00', closed: false }
           return (
             <div key={key} className="flex items-center gap-3 py-1.5">
-              <span className="w-10 text-sm text-neutral-600">{label}</span>
+              <span className="w-10 text-sm text-neutral-600 dark:text-neutral-400">{label}</span>
               <Toggle checked={!d.closed} onChange={(open) => setDay(key, { closed: !open })} size="sm" label={`${label} open`} />
               {d.closed ? (
                 <span className="text-sm text-neutral-400">Closed</span>
               ) : (
                 <div className="flex items-center gap-2">
-                  <input type="time" value={d.open} onChange={(e) => setDay(key, { open: e.target.value })} className="h-9 rounded-lg border border-neutral-300 px-2 text-sm" />
+                  <input type="time" value={d.open} onChange={(e) => setDay(key, { open: e.target.value })} className="h-9 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 px-2 text-sm" />
                   <span className="text-neutral-400">–</span>
-                  <input type="time" value={d.close} onChange={(e) => setDay(key, { close: e.target.value })} className="h-9 rounded-lg border border-neutral-300 px-2 text-sm" />
+                  <input type="time" value={d.close} onChange={(e) => setDay(key, { close: e.target.value })} className="h-9 rounded-lg border border-neutral-300 dark:border-neutral-700 bg-transparent dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 px-2 text-sm" />
                 </div>
               )}
             </div>
@@ -238,13 +238,13 @@ export function SettingsForm() {
       </section>
 
       {/* Advanced Features */}
-      <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <h2 className="text-sm font-semibold text-neutral-700">Advanced Features</h2>
+      <section className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Advanced Features</h2>
         {isAdvancedOrPremium ? (
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="font-medium text-neutral-800 text-sm">Multiple Menus</p>
-              <p className="text-xs text-neutral-500">Enable creating separate menus for Breakfast, Lunch, and Dinner with custom schedules.</p>
+              <p className="font-medium text-neutral-800 dark:text-neutral-200 text-sm">Multiple Menus</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Enable creating separate menus for Breakfast, Lunch, and Dinner with custom schedules.</p>
             </div>
             <Toggle checked={multipleMenus} onChange={setMultipleMenus} size="md" label="Multiple menus" />
           </div>
@@ -254,15 +254,15 @@ export function SettingsForm() {
       </section>
 
       {/* SEO settings */}
-      <section className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <h2 className="text-sm font-semibold text-neutral-700">SEO Settings</h2>
+      <section className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">SEO Settings</h2>
         {isPremium ? (
           <>
             <Field label="SEO Title"><Input {...register('seo_title')} placeholder={`e.g. ${business.name} | Best Cafe in Town`} /></Field>
             <Field label="SEO Description"><Input {...register('seo_description')} placeholder="e.g. Come visit our beautiful cafe..." /></Field>
             <div className="w-full sm:w-96">
-              <p className="mb-1 text-sm font-medium text-neutral-700">SEO Image (OG Image)</p>
-              <p className="mb-3 text-xs text-neutral-500">Appears when the link is shared on iMessage, WhatsApp, Twitter, etc.</p>
+              <p className="mb-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">SEO Image (OG Image)</p>
+              <p className="mb-3 text-xs text-neutral-500 dark:text-neutral-400">Appears when the link is shared on iMessage, WhatsApp, Twitter, etc.</p>
               <ImageUpload file={seoOgFile} existingUrl={cdnUrl(business.seo_og_r2_key)} onChange={setSeoOgFile} aspect="aspect-[1.91/1]" />
             </div>
           </>

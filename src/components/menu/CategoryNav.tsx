@@ -76,7 +76,7 @@ function PillsNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyle'>
               ref={(el) => { pillRefs.current[c.id] = el }}
               onClick={() => goTo(c.id, businessId)}
               aria-current={isActive ? 'true' : undefined}
-              className="relative shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors"
+              className="relative shrink-0 whitespace-nowrap rounded-full px-4 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
               style={{ color: isActive ? 'var(--bg)' : 'var(--txt2)', fontFamily: 'var(--font-body)', border: isActive ? 'none' : '1px solid var(--bdr2)' }}
             >
               {isActive && (
@@ -116,7 +116,7 @@ function TextNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyle'>)
               ref={(el) => { pillRefs.current[c.id] = el }}
               onClick={() => goTo(c.id, businessId)}
               aria-current={isActive ? 'true' : undefined}
-              className="relative shrink-0 whitespace-nowrap pb-3 text-sm font-medium transition-colors"
+              className="relative shrink-0 whitespace-nowrap pb-3 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-t-sm"
               style={{
                 fontFamily: 'var(--font-body)',
                 color: isActive ? 'var(--txt)' : 'var(--txt2)',
@@ -160,7 +160,7 @@ function SectionsNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyl
                 id={`nav-btn-${c.id}`}
                 onClick={() => goTo(c.id, businessId)}
                 aria-current={isActive ? 'true' : undefined}
-                className="whitespace-nowrap px-2 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors"
+                className="whitespace-nowrap px-2 py-1.5 text-xs font-semibold uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded"
                 style={{
                   fontFamily: 'var(--font-body)',
                   color: isActive ? 'var(--brand)' : 'var(--txt2)',
@@ -195,7 +195,7 @@ function BlocksNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyle'
               id={`nav-btn-${c.id}`}
               onClick={() => goTo(c.id, businessId)}
               aria-current={isActive ? 'true' : undefined}
-              className="relative shrink-0 whitespace-nowrap px-5 py-3 text-sm font-bold uppercase tracking-widest transition-colors"
+              className="relative shrink-0 whitespace-nowrap px-5 py-3 text-sm font-bold uppercase tracking-widest transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:-outline-offset-2"
               style={{
                 fontFamily: 'var(--font-display)',
                 color: isActive ? 'var(--bg)' : 'var(--txt2)',
@@ -241,7 +241,7 @@ function VerticalNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyl
                 id={`nav-btn-${c.id}`}
                 onClick={() => goTo(c.id, businessId)}
                 aria-current={isActive ? 'true' : undefined}
-                className="relative shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wider transition-colors"
+                className="relative shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium uppercase tracking-wider transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
                 style={{
                   fontFamily: 'var(--font-body)',
                   color: isActive ? 'var(--bg)' : 'var(--txt2)',
@@ -268,7 +268,7 @@ function VerticalNav({ categories, businessId }: Omit<CategoryNavProps, 'navStyl
               key={c.id}
               onClick={() => goTo(c.id, businessId)}
               aria-current={isActive ? 'true' : undefined}
-              className="group flex items-center gap-2 py-1 text-left"
+              className="group flex items-center gap-2 py-1 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand rounded-sm"
             >
               <m.span
                 className="h-px"

@@ -77,9 +77,9 @@ function BannerForm({
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-center sm:items-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 w-full max-w-lg rounded-t-3xl bg-white p-6 shadow-2xl sm:rounded-2xl">
+      <div className="relative z-10 w-full max-w-lg rounded-t-3xl bg-white dark:bg-neutral-900 p-6 shadow-2xl sm:rounded-2xl">
         <div className="mb-5 flex items-center justify-between">
-          <h2 className="text-lg font-bold text-neutral-900">{banner ? 'Edit banner' : 'New banner'}</h2>
+          <h2 className="text-lg font-bold text-neutral-900 dark:text-neutral-100">{banner ? 'Edit banner' : 'New banner'}</h2>
           <button onClick={onClose} className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100">
             <X className="h-5 w-5" />
           </button>
@@ -88,7 +88,7 @@ function BannerForm({
         <div className="space-y-4 overflow-y-auto max-h-[65vh]">
           {/* Image */}
           <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-500">Image</p>
+            <p className="mb-2 text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400">Image</p>
             {previewUrl ? (
               <div className="relative h-36 w-full overflow-hidden rounded-xl">
                 <Image src={previewUrl} alt="Banner preview" fill className="object-cover" />
@@ -100,7 +100,7 @@ function BannerForm({
                 </button>
               </div>
             ) : (
-              <label className="flex h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 text-sm text-neutral-400 hover:border-amber-400 hover:text-amber-500 transition-colors">
+              <label className="flex h-24 cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 dark:border-neutral-800 text-sm text-neutral-400 hover:border-amber-400 hover:text-amber-500 transition-colors">
                 <ImageIcon className="h-6 w-6" />
                 {uploading ? 'Uploading…' : 'Upload image'}
                 <input type="file" accept="image/*" className="hidden" onChange={handleImagePick} disabled={uploading} />
@@ -109,31 +109,31 @@ function BannerForm({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1">Title</label>
-            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Summer sale!" className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
+            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1">Title</label>
+            <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Summer sale!" className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
           </div>
           <div>
-            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1">Subtitle</label>
-            <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="20% off all desserts this weekend" className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
+            <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1">Subtitle</label>
+            <input value={subtitle} onChange={(e) => setSubtitle(e.target.value)} placeholder="20% off all desserts this weekend" className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1">CTA text</label>
-              <input value={ctaText} onChange={(e) => setCtaText(e.target.value)} placeholder="Order now" className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
+              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1">CTA text</label>
+              <input value={ctaText} onChange={(e) => setCtaText(e.target.value)} placeholder="Order now" className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1">CTA URL</label>
-              <input value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} placeholder="https://…" className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
+              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1">CTA URL</label>
+              <input value={ctaUrl} onChange={(e) => setCtaUrl(e.target.value)} placeholder="https://…" className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1">Starts at</label>
-              <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
+              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1">Starts at</label>
+              <input type="datetime-local" value={startsAt} onChange={(e) => setStartsAt(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
             </div>
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-1">Ends at</label>
-              <input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
+              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1">Ends at</label>
+              <input type="datetime-local" value={endsAt} onChange={(e) => setEndsAt(e.target.value)} className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none" />
             </div>
           </div>
         </div>
@@ -184,9 +184,9 @@ export function BannersManager() {
   return (
     <div className="space-y-4">
       {banners.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 py-16">
+        <div className="flex flex-col items-center justify-center rounded-2xl border-2 border-dashed border-neutral-200 dark:border-neutral-800 py-16">
           <Megaphone className="mb-3 h-10 w-10 text-neutral-300" />
-          <p className="font-medium text-neutral-600">No banners yet</p>
+          <p className="font-medium text-neutral-600 dark:text-neutral-400">No banners yet</p>
           <p className="mt-1 text-sm text-neutral-400">Create a promotional banner that shows on your menu.</p>
         </div>
       ) : (
@@ -194,7 +194,7 @@ export function BannersManager() {
           {banners.map((banner) => {
             const img = cdnUrl(banner.image_r2_key)
             return (
-              <div key={banner.id} className="flex items-center gap-3 rounded-xl bg-white p-3 ring-1 ring-black/5">
+              <div key={banner.id} className="flex items-center gap-3 rounded-xl bg-white dark:bg-neutral-900 p-3 ring-1 ring-black/5 dark:ring-white/10">
                 <div className="relative h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
                   {img ? (
                     <Image src={img} alt="" fill className="object-cover" sizes="80px" />
@@ -205,8 +205,8 @@ export function BannersManager() {
                   )}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate font-medium text-neutral-900">{banner.title ?? 'Untitled banner'}</p>
-                  {banner.subtitle && <p className="truncate text-xs text-neutral-500">{banner.subtitle}</p>}
+                  <p className="truncate font-medium text-neutral-900 dark:text-neutral-100">{banner.title ?? 'Untitled banner'}</p>
+                  {banner.subtitle && <p className="truncate text-xs text-neutral-500 dark:text-neutral-400">{banner.subtitle}</p>}
                   {(banner.starts_at || banner.ends_at) && (
                     <p className="text-xs text-neutral-400 mt-0.5">
                       {banner.starts_at ? new Date(banner.starts_at).toLocaleDateString('en-IN') : '—'}
@@ -246,7 +246,7 @@ export function BannersManager() {
       ) : (
         <button
           onClick={() => setEditing('new')}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 py-4 text-sm font-semibold text-neutral-500 hover:border-amber-400 hover:text-amber-500 transition-colors"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-neutral-200 dark:border-neutral-800 py-4 text-sm font-semibold text-neutral-500 dark:text-neutral-400 hover:border-amber-400 hover:text-amber-500 transition-colors"
         >
           <Plus className="h-4 w-4" /> New banner
         </button>

@@ -135,7 +135,7 @@ export function BranchManager() {
       )}
 
       {isLoading ? (
-        <div className="flex h-32 items-center justify-center text-sm text-neutral-500">Loading branches...</div>
+        <div className="flex h-32 items-center justify-center text-sm text-neutral-500 dark:text-neutral-400">Loading branches...</div>
       ) : branches.length === 0 ? (
         <div className="rounded-xl border border-dashed border-neutral-800 p-8 text-center">
           <p className="text-sm text-neutral-400">No branches added yet.</p>

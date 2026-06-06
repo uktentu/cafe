@@ -56,7 +56,7 @@ export function ImageUpload({ file, existingUrl, onChange, aspect = 'aspect-[4/3
           pick(e.dataTransfer.files?.[0])
         }}
         className={cn(
-          'relative flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50',
+          'relative flex cursor-pointer items-center justify-center overflow-hidden rounded-xl border-2 border-dashed border-neutral-300 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800/50',
           aspect,
         )}
       >

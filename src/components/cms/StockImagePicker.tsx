@@ -49,7 +49,7 @@ export function StockImagePicker({
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Search stock photos…"
-          className="h-10 w-full rounded-lg border border-neutral-300 bg-white pl-9 pr-3 text-[16px] outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
+          className="h-10 w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 pl-9 pr-3 text-[16px] outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
         />
       </div>
 
@@ -61,7 +61,7 @@ export function StockImagePicker({
             onClick={() => setCat(c.value)}
             className={cn(
               'shrink-0 rounded-full px-3 py-1 text-xs font-medium',
-              cat === c.value ? 'bg-amber-500 text-white' : 'bg-neutral-100 text-neutral-600',
+              cat === c.value ? 'bg-amber-500 text-white' : 'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400',
             )}
           >
             {c.label}
@@ -72,7 +72,7 @@ export function StockImagePicker({
       {isLoading ? (
         <div className="grid grid-cols-4 gap-2">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-square animate-pulse rounded-lg bg-neutral-200" />
+            <div key={i} className="aspect-square animate-pulse rounded-lg bg-neutral-200 dark:bg-neutral-800" />
           ))}
         </div>
       ) : isError ? (
@@ -98,7 +98,7 @@ export function StockImagePicker({
                   <Image src={cdnUrl(img.r2_key)!} alt={img.name} fill sizes="80px" className="object-cover" />
                 ) : (
                   // CDN not configured yet — show name as text placeholder
-                  <span className="flex h-full w-full items-center justify-center bg-neutral-100 text-[10px] text-neutral-400 p-1 text-center">
+                  <span className="flex h-full w-full items-center justify-center bg-neutral-100 dark:bg-neutral-800 text-[10px] text-neutral-400 dark:text-neutral-500 p-1 text-center">
                     {img.name}
                   </span>
                 )}

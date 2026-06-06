@@ -87,16 +87,16 @@ export default function UpgradePage({ searchParams }: { searchParams: { feature?
           <div className="flex h-20 w-20 items-center justify-center rounded-2xl bg-amber-500/10 text-amber-500">
             <Lock className="h-10 w-10" />
           </div>
-          <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white ring-4 ring-[#F7F8FA]">
+          <div className="absolute -bottom-2 -right-2 flex h-8 w-8 items-center justify-center rounded-full bg-white dark:bg-neutral-900 ring-4 ring-[#F7F8FA]">
             <Sparkles className="h-4 w-4 text-amber-500" />
           </div>
         </div>
 
-        <h1 className="mb-3 text-3xl font-bold tracking-tight text-neutral-900 sm:text-4xl">
+        <h1 className="mb-3 text-3xl font-bold tracking-tight text-neutral-900 dark:text-neutral-100 sm:text-4xl">
           Unlock {pitch.title}
         </h1>
         
-        <p className="mx-auto mb-10 max-w-lg text-lg text-neutral-500">
+        <p className="mx-auto mb-10 max-w-lg text-lg text-neutral-500 dark:text-neutral-400">
           {pitch.subtitle}
         </p>
 
@@ -107,7 +107,7 @@ export default function UpgradePage({ searchParams }: { searchParams: { feature?
                 <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-600">
                   <CheckCircle2 className="h-4 w-4" />
                 </div>
-                <span className="text-neutral-700">{benefit}</span>
+                <span className="text-neutral-700 dark:text-neutral-300">{benefit}</span>
               </div>
             ))}
           </div>
@@ -138,7 +138,7 @@ export default function UpgradePage({ searchParams }: { searchParams: { feature?
         </div>
 
         <Link href="/cms/dashboard">
-          <Button variant="secondary" className="text-neutral-500">Return to Dashboard</Button>
+          <Button variant="secondary" className="text-neutral-500 dark:text-neutral-400">Return to Dashboard</Button>
         </Link>
       </div>
     </div>

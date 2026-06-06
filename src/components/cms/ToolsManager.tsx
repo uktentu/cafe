@@ -337,14 +337,14 @@ export function ToolsManager() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* JSON Export */}
-        <div className="rounded-2xl bg-white p-6 ring-1 ring-black/5 flex flex-col gap-4">
+        <div className="rounded-2xl bg-white dark:bg-neutral-900 p-6 ring-1 ring-black/5 dark:ring-white/10 flex flex-col gap-4">
           <div className="flex items-start gap-4">
             <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
               <Database className="h-6 w-6" />
             </div>
             <div>
-              <h3 className="font-semibold text-neutral-900">Data Backup (JSON)</h3>
-              <p className="text-sm text-neutral-500 mt-1">
+              <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Data Backup (JSON)</h3>
+              <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                 Download a complete JSON export of your business data, categories, items, and settings. Useful for migrations or offline backups.
               </p>
             </div>
@@ -359,14 +359,14 @@ export function ToolsManager() {
 
         {/* PDF Reports */}
         {isPremium ? (
-          <div className="rounded-2xl bg-white p-6 ring-1 ring-black/5 flex flex-col gap-4">
+          <div className="rounded-2xl bg-white dark:bg-neutral-900 p-6 ring-1 ring-black/5 dark:ring-white/10 flex flex-col gap-4">
             <div className="flex items-start gap-4">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-emerald-50 text-emerald-600">
                 <FileText className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="font-semibold text-neutral-900">Menu PDF Report</h3>
-                <p className="text-sm text-neutral-500 mt-1">
+                <h3 className="font-semibold text-neutral-900 dark:text-neutral-100">Menu PDF Report</h3>
+                <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
                   Generate a printable PDF version of your menu layout and pricing.
                 </p>
               </div>

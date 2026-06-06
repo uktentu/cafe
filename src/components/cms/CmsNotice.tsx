@@ -30,10 +30,10 @@ const COPY: Record<string, { title: string; body: React.ReactNode; cta?: { href:
 export function CmsNotice({ state }: { state: string }) {
   const c = COPY[state] ?? COPY.unconfigured
   return (
-    <main className="flex min-h-[100svh] items-center justify-center bg-[#F7F8FA] px-4">
-      <div className="w-full max-w-md rounded-2xl bg-white p-7 text-center shadow-sm ring-1 ring-black/5">
+    <main className="flex min-h-[100svh] items-center justify-center bg-[#F7F8FA] dark:bg-neutral-950 px-4">
+      <div className="w-full max-w-md rounded-2xl bg-white dark:bg-neutral-900 p-7 text-center shadow-sm ring-1 ring-black/5 dark:ring-white/10">
         <h1 className="text-lg font-semibold text-[#1A1917]">{c.title}</h1>
-        <p className="mt-2 text-sm leading-relaxed text-neutral-500">{c.body}</p>
+        <p className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">{c.body}</p>
         {c.cta && (
           <Link
             href={c.cta.href}

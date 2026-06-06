@@ -4,6 +4,7 @@ import { memo, useCallback, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { AnimatePresence, m } from 'framer-motion'
 import { Plus, Search, Pencil, GripVertical } from 'lucide-react'
 import { useCms } from './Providers'
 import { getCategoryIcon } from '@/components/menu/categoryIcon'
@@ -50,27 +51,27 @@ const SortableItemRow = memo(function SortableItemRow({ item, catName, catIcon, 
   const thumb = cdnUrl(itemImageKey(item))
   
   return (
-    <div ref={setNodeRef} style={style} className={`flex items-center gap-3 rounded-xl p-3 ring-1 ${isDragging ? 'shadow-lg ring-black/10 bg-white' : 'ring-black/5 bg-white'} ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50' : ''}`}>
+    <div ref={setNodeRef} style={style} className={`flex items-center gap-3 rounded-xl p-3 ring-1 ${isDragging ? 'shadow-lg ring-black/10 dark:ring-white/20 bg-white dark:bg-neutral-900' : 'ring-black/5 dark:ring-white/10 bg-white dark:bg-neutral-900'} ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50 dark:bg-neutral-800/50' : ''}`}>
       {!isSearchActive && (
-        <button {...attributes} {...listeners} className="flex h-8 w-8 cursor-grab items-center justify-center text-neutral-400 hover:text-neutral-600 active:cursor-grabbing" aria-label="Drag handle">
+        <button {...attributes} {...listeners} className="flex h-8 w-8 cursor-grab items-center justify-center text-neutral-400 hover:text-neutral-600 dark:text-neutral-400 active:cursor-grabbing" aria-label="Drag handle">
           <GripVertical className="h-4 w-4" />
         </button>
       )}
-      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
+      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-neutral-100 dark:bg-neutral-800">
         {item.image_mode !== 'none' && thumb ? (
           <Image src={thumb} alt="" fill sizes="48px" className="object-cover" />
         ) : (
-          <span className="flex h-full w-full items-center justify-center text-neutral-400">
+          <span className="flex h-full w-full items-center justify-center text-neutral-400 dark:text-neutral-500">
             <Icon className="h-5 w-5" />
           </span>
         )}
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          <p className="truncate font-medium text-neutral-900">{item.name}</p>
+          <p className="truncate font-medium text-neutral-900 dark:text-neutral-100">{item.name}</p>
           {isOverLimit && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">LIMIT REACHED</span>}
         </div>
-        <p className="text-xs text-neutral-500">
+        <p className="text-xs text-neutral-500 dark:text-neutral-400">
           {catName ?? 'Uncategorised'} · {formatPrice(item.price)}
         </p>
       </div>
@@ -89,7 +90,7 @@ const SortableItemRow = memo(function SortableItemRow({ item, catName, catIcon, 
         </div>
         <Link
           href={`/cms/items/${item.id}`}
-          className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-500 hover:bg-neutral-100"
+          className="flex h-9 w-9 items-center justify-center rounded-lg text-neutral-500 dark:text-neutral-400 hover:bg-neutral-100"
           aria-label={`Edit ${item.name}`}
         >
           <Pencil className="h-4 w-4" />
@@ -183,8 +184,8 @@ export function ItemsList() {
     <div className="space-y-5">
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-semibold text-neutral-900">Items</h1>
-          <p className="mt-1 text-sm text-neutral-500">
+          <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">Items</h1>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
             {items.length}
             {limits.items < 9999 ? ` / ${limits.items}` : ''} items
           </p>
@@ -192,7 +193,7 @@ export function ItemsList() {
         <Link
           href="/cms/items/new"
           aria-disabled={atLimit}
-          className={`inline-flex h-[42px] items-center gap-2 rounded-lg px-4 text-sm font-medium text-white ${atLimit ? 'pointer-events-none bg-neutral-300' : 'bg-amber-500'}`}
+          className={`inline-flex h-[42px] items-center gap-2 rounded-lg px-4 text-sm font-medium text-white ${atLimit ? 'pointer-events-none bg-neutral-300 dark:bg-neutral-700 dark:text-neutral-500' : 'bg-amber-500'}`}
           title={atLimit ? 'Item limit reached — upgrade to add more' : undefined}
         >
           <Plus className="h-4 w-4" /> Add item
@@ -206,13 +207,13 @@ export function ItemsList() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search items…"
-            className="h-[42px] w-full rounded-lg border border-neutral-300 bg-white pl-9 pr-3 text-[16px] outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
+            className="h-[42px] w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 pl-9 pr-3 text-[16px] outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
           />
         </div>
         <select
           value={catFilter}
           onChange={(e) => setCatFilter(e.target.value)}
-          className="h-[42px] w-full sm:w-auto min-w-[160px] rounded-lg border border-neutral-300 bg-white px-3 text-sm outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
+          className="h-[42px] w-full sm:w-auto min-w-[160px] rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-sm outline-none focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20"
         >
           <option value="all">All Categories</option>
           {Array.from(catById.entries()).map(([id, cat]) => (
@@ -224,13 +225,13 @@ export function ItemsList() {
 
       {itemsQ.isLoading ? (
         <div className="space-y-2">
-          {[0, 1, 2].map((i) => <div key={i} className="h-[72px] animate-pulse rounded-xl bg-neutral-200" />)}
+          {[0, 1, 2].map((i) => <div key={i} className="h-[72px] animate-pulse rounded-xl bg-neutral-200 dark:bg-neutral-800" />)}
         </div>
       ) : itemsQ.isError ? (
-        <p className="rounded-xl bg-red-50 p-4 text-sm text-red-600">Failed to load items.</p>
+        <p className="rounded-xl bg-red-50 dark:bg-red-950/50 p-4 text-sm text-red-600 dark:text-red-400">Failed to load items.</p>
       ) : filtered.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center ring-1 ring-black/5">
-          <p className="text-sm text-neutral-500">
+        <div className="rounded-2xl bg-white dark:bg-neutral-900 p-10 text-center ring-1 ring-black/5 dark:ring-white/10">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">
             {items.length === 0 ? 'No items yet. Add your first menu item.' : 'No items match your filters.'}
           </p>
         </div>
@@ -238,22 +239,32 @@ export function ItemsList() {
         <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
           <SortableContext items={filtered.map(it => it.id)} strategy={verticalListSortingStrategy}>
             <div className="space-y-2">
-              {filtered.map((it) => {
-                const cat = it.category_id ? catById.get(it.category_id) : null
-                const originalIndex = items.findIndex(i => i.id === it.id)
-                const isOverLimit = originalIndex >= limits.items
-                return (
-                  <SortableItemRow
-                    key={it.id}
-                    item={it}
-                    catName={cat?.name}
-                    catIcon={cat?.icon}
-                    onToggle={handleToggle}
-                    isSearchActive={isSearchActive}
-                    isOverLimit={isOverLimit}
-                  />
-                )
-              })}
+              <AnimatePresence initial={false}>
+                {filtered.map((it) => {
+                  const cat = it.category_id ? catById.get(it.category_id) : null
+                  const originalIndex = items.findIndex(i => i.id === it.id)
+                  const isOverLimit = originalIndex >= limits.items
+                  return (
+                    <m.div
+                      key={it.id}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2 }}
+                      className="block"
+                    >
+                      <SortableItemRow
+                        item={it}
+                        catName={cat?.name}
+                        catIcon={cat?.icon}
+                        onToggle={handleToggle}
+                        isSearchActive={isSearchActive}
+                        isOverLimit={isOverLimit}
+                      />
+                    </m.div>
+                  )
+                })}
+              </AnimatePresence>
             </div>
           </SortableContext>
         </DndContext>

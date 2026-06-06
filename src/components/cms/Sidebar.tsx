@@ -16,6 +16,7 @@ import { qk, fetchBranches } from '@/lib/cms-queries'
 import { useCmsStore } from '@/stores/cms'
 import { useCms } from '@/components/cms/Providers'
 import { cn } from '@/lib/utils'
+import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 interface NavItem {
   href: string
@@ -52,7 +53,7 @@ function NavRow({ item, active, locked, onNavigate }: { item: NavItem; active: b
     return (
       <button 
         type="button"
-        className={cn(base, 'w-full text-left cursor-not-allowed text-neutral-500 bg-transparent border-0 hover:bg-white/5 hover:text-white transition-colors')} 
+        className={cn(base, 'w-full text-left cursor-not-allowed text-neutral-500 dark:text-neutral-400 bg-transparent border-0 hover:bg-white/5 hover:text-white transition-colors')} 
         onClick={() => {
           onNavigate()
           router.push(`/cms/upgrade?feature=${encodeURIComponent(item.label)}`)
@@ -69,10 +70,18 @@ function NavRow({ item, active, locked, onNavigate }: { item: NavItem; active: b
     <Link
       href={item.href}
       onClick={onNavigate}
-      className={cn(base, active ? 'bg-amber-500/15 font-medium text-amber-400' : 'text-neutral-300 hover:bg-white/5 hover:text-white')}
+      className={cn(base, 'relative', active ? 'text-amber-400 font-medium' : 'text-neutral-300 hover:text-white')}
     >
-      <Icon className="h-[18px] w-[18px]" />
-      <span>{item.label}</span>
+      {active && (
+        <m.div
+          layoutId="sidebar-active-bg"
+          className="absolute inset-0 rounded-lg bg-amber-500/15"
+          initial={false}
+          transition={{ type: 'spring', stiffness: 350, damping: 30 }}
+        />
+      )}
+      <Icon className="relative z-10 h-[18px] w-[18px]" />
+      <span className="relative z-10">{item.label}</span>
     </Link>
   )
 }
@@ -156,6 +165,9 @@ function SidebarContent({ businessName, userEmail, onNavigate }: { businessName:
       </nav>
 
       <div className="space-y-1 border-t border-white/10 p-3">
+        <div className="flex items-center gap-2 px-3 py-2">
+          <ThemeToggle className="w-full flex-1 border-white/10 bg-white/5 hover:bg-white/10 hover:text-white" />
+        </div>
         <a
           href={siteUrl || '/'}
           target="_blank"
@@ -220,11 +232,11 @@ export function MobileTopbar({ businessName }: { businessName: string }) {
   const toggle = useCmsStore((s) => s.toggleSidebar)
   const open = useCmsStore((s) => s.sidebarOpen)
   return (
-    <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-neutral-200 bg-white px-4 py-3 md:hidden">
-      <button onClick={toggle} aria-label="Toggle menu" className="text-neutral-700">
+    <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 md:hidden">
+      <button onClick={toggle} aria-label="Toggle menu" className="text-neutral-700 dark:text-neutral-300">
         {open ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
       </button>
-      <span className="font-semibold text-neutral-800">{businessName}</span>
+      <span className="font-semibold text-neutral-800 dark:text-neutral-200">{businessName}</span>
     </div>
   )
 }

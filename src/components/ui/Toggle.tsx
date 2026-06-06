@@ -38,7 +38,7 @@ export function Toggle({ checked, onChange, disabled, label, size = 'md' }: Togg
       onClick={handleClick}
       className={cn(
         'relative inline-flex shrink-0 items-center rounded-full transition-colors duration-150 disabled:opacity-50',
-        optimistic ? 'bg-green-500' : 'bg-neutral-300',
+        optimistic ? 'bg-green-500' : 'bg-neutral-300 dark:bg-neutral-600',
       )}
       style={{ width: dims.w, height: dims.h }}
     >

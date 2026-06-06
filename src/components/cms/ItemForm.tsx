@@ -223,7 +223,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
   }
 
   if (editing && itemQ.isLoading) {
-    return <div className="h-64 animate-pulse rounded-2xl bg-neutral-200" />
+    return <div className="h-64 animate-pulse rounded-2xl bg-neutral-200 dark:bg-neutral-800" />
   }
 
   const dietaryFlags: [string, boolean, (v: boolean) => void][] = [
@@ -234,7 +234,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold text-neutral-900">{editing ? 'Edit item' : 'Add item'}</h1>
+        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">{editing ? 'Edit item' : 'Add item'}</h1>
         {editing && (
           <Button type="button" variant="ghost" onClick={onDelete} className="text-red-500">
             <Trash2 className="h-4 w-4" /> Delete
@@ -242,7 +242,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         )}
       </header>
 
-      <div className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
+      <div className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
         <Field label="Name" required error={errors.name?.message}>
           <Input {...register('name')} placeholder="e.g. Paneer Tikka" />
         </Field>
@@ -303,8 +303,8 @@ export function ItemForm({ itemId }: { itemId?: string }) {
       </div>
 
       {/* Image section */}
-      <div className="space-y-3 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <p className="text-sm font-medium text-neutral-700">Photo</p>
+      <div className="space-y-3 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Photo</p>
         <div className="flex gap-2">
           {IMAGE_TABS.map((t) => {
             const Icon = t.icon
@@ -315,7 +315,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
                 onClick={() => { setImageMode(t.mode); setImgErr(null) }}
                 className={cn(
                   'flex flex-1 items-center justify-center gap-1.5 rounded-lg border py-2 text-sm font-medium',
-                  imageMode === t.mode ? 'border-amber-500 bg-amber-50 text-amber-600' : 'border-neutral-200 text-neutral-600',
+                  imageMode === t.mode ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500' : 'border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400',
                 )}
               >
                 <Icon className="h-4 w-4" /> {t.label}
@@ -325,7 +325,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         </div>
 
         {imageMode === 'none' && (
-          <p className="rounded-lg bg-neutral-50 p-3 text-xs text-neutral-500">
+          <p className="rounded-lg bg-neutral-50 dark:bg-neutral-800/50 p-3 text-xs text-neutral-500 dark:text-neutral-400">
             Text-only — the card shows the category icon. Looks intentional, not broken.
           </p>
         )}
@@ -343,8 +343,8 @@ export function ItemForm({ itemId }: { itemId?: string }) {
       </div>
 
       {/* Dietary + featured */}
-      <div className="space-y-4 rounded-2xl bg-white p-5 ring-1 ring-black/5">
-        <p className="text-sm font-medium text-neutral-700">Dietary</p>
+      <div className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Dietary</p>
         
         <Field label="Dietary Preference">
           <Select value={dietary} onChange={(e) => setDietary(e.target.value as DietaryPreference)}>
@@ -358,15 +358,15 @@ export function ItemForm({ itemId }: { itemId?: string }) {
 
         <div className="grid grid-cols-2 gap-3 mt-3">
           {dietaryFlags.map(([label, val, set]) => (
-            <div key={label} className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2.5">
-              <span className="text-sm text-neutral-700">{label}</span>
+            <div key={label} className="flex items-center justify-between rounded-lg bg-neutral-50 dark:bg-neutral-800/50 px-3 py-2.5">
+              <span className="text-sm text-neutral-700 dark:text-neutral-300">{label}</span>
               <Toggle checked={val} onChange={set} label={label} size="sm" />
             </div>
           ))}
         </div>
-        <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-2.5">
+        <div className="flex items-center justify-between rounded-lg bg-neutral-50 dark:bg-neutral-800/50 px-3 py-2.5">
           <div>
-            <span className="text-sm font-medium text-neutral-700">Featured</span>
+            <span className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Featured</span>
             <p className="text-xs text-neutral-400">Show in the bestsellers strip</p>
           </div>
           <Toggle checked={featured} onChange={setFeatured} label="Featured" size="sm" />

@@ -32,7 +32,7 @@ function StatusBadge({ business, theme, align = 'center' }: { business: Business
         <BookTableButton theme={theme} />
         <button
           onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
-          className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
+          className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
           style={{ background: 'var(--glass)', color: 'var(--txt)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
           aria-label="Shop Information"
         >
@@ -55,7 +55,7 @@ function StatusBadge({ business, theme, align = 'center' }: { business: Business
       <BookTableButton theme={theme} />
       <button
         onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
-        className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
+        className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
         style={{ background: 'var(--glass)', color: 'var(--txt)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
         aria-label="Shop Information"
       >
@@ -781,10 +781,16 @@ function ArcadeHero({ business }: { business: Business }) {
             onPointerDown={startPress}
             onPointerUp={cancelPress}
             onPointerLeave={cancelPress}
-            className="relative w-full cursor-pointer transition-transform hover:scale-[1.02] active:scale-95"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                setIsGameOpen(true)
+              }
+            }}
+            className="relative w-full cursor-pointer transition-transform hover:scale-[1.02] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg)]"
             role="button"
             tabIndex={0}
-            aria-label="Hold to Play Arcade Game"
+            aria-label="Hold to Play Arcade Game or press Enter"
             style={{ borderRadius: '1rem', overflow: 'hidden' }}
           >
             <ArcadeScene />

@@ -73,9 +73,9 @@ function SortableCategory({
   const Icon = getCategoryIcon(category.icon)
 
   return (
-    <div ref={setNodeRef} style={style} className={`flex flex-col gap-2 rounded-xl border p-3 transition-shadow ${isDragging ? 'shadow-md border-neutral-300 bg-white' : 'border-neutral-200 bg-white hover:shadow-md'} ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50' : ''}`}>
+    <div ref={setNodeRef} style={style} className={`flex flex-col gap-2 rounded-xl border p-3 transition-shadow ${isDragging ? 'shadow-md border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900' : 'border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 hover:shadow-md'} ${isOverLimit ? 'opacity-60 grayscale bg-neutral-50 dark:bg-neutral-800/50' : ''}`}>
       <div className="flex items-center gap-3">
-        <button {...attributes} {...listeners} className="cursor-grab text-neutral-400 hover:text-black active:cursor-grabbing">
+        <button {...attributes} {...listeners} className="cursor-grab text-neutral-400 hover:text-black dark:text-white active:cursor-grabbing">
           <GripVertical className="h-5 w-5" />
         </button>
         
@@ -119,15 +119,15 @@ function SortableCategory({
           </div>
         ) : (
           <>
-            {Icon && <Icon className="h-5 w-5 text-neutral-500" />}
-            <span className="flex-1 font-medium text-neutral-900 flex items-center gap-2">
+            {Icon && <Icon className="h-5 w-5 text-neutral-500 dark:text-neutral-400" />}
+            <span className="flex-1 font-medium text-neutral-900 dark:text-neutral-100 flex items-center gap-2">
               {category.name}
               {menus.length > 0 && category.menu_id && (
-                <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] uppercase text-amber-700">
+                <span className="rounded bg-amber-100 dark:bg-amber-500/10 px-1.5 py-0.5 text-[10px] uppercase text-amber-700 dark:text-amber-500">
                   {menus.find(m => m.id === category.menu_id)?.name ?? 'Unknown Menu'}
                 </span>
               )}
-              {isOverLimit && <span className="rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">LIMIT REACHED</span>}
+              {isOverLimit && <span className="rounded bg-amber-100 dark:bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-500">LIMIT REACHED</span>}
             </span>
             <div className="flex items-center gap-1">
               <Button size="sm" variant="ghost" onClick={() => setEditId(category.id)}>
@@ -275,14 +275,14 @@ export function CategoryManager() {
   return (
     <div className="space-y-5">
       <header>
-        <h1 className="text-2xl font-semibold text-neutral-900">Categories</h1>
-        <p className="mt-1 text-sm text-neutral-500">
+        <h1 className="text-2xl font-semibold text-neutral-900 dark:text-neutral-100">Categories</h1>
+        <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
           {cats.length}{limits.categories < 99 ? ` / ${limits.categories}` : ''} categories
         </p>
       </header>
 
       {/* Add */}
-      <div className="flex flex-wrap items-end gap-2 rounded-2xl bg-white p-4 ring-1 ring-black/5">
+      <div className="flex flex-wrap items-end gap-2 rounded-2xl bg-white dark:bg-neutral-900 p-4 ring-1 ring-black/5 dark:ring-white/10">
         <div className="min-w-[140px] flex-1">
           <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="New category name" />
         </div>
@@ -303,9 +303,9 @@ export function CategoryManager() {
 
       {/* List */}
       {catsQ.isLoading ? (
-        <div className="h-40 animate-pulse rounded-2xl bg-neutral-200" />
+        <div className="h-40 animate-pulse rounded-2xl bg-neutral-200 dark:bg-neutral-800" />
       ) : cats.length === 0 ? (
-        <div className="rounded-2xl bg-white p-10 text-center text-sm text-neutral-500 ring-1 ring-black/5">
+        <div className="rounded-2xl bg-white dark:bg-neutral-900 p-10 text-center text-sm text-neutral-500 dark:text-neutral-400 ring-1 ring-black/5 dark:ring-white/10">
           No categories yet.
         </div>
       ) : (

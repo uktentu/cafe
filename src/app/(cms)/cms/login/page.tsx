@@ -45,33 +45,33 @@ function LoginForm() {
   }
 
   return (
-    <main className="flex min-h-[100svh] items-center justify-center bg-[#F7F8FA] px-4">
-      <div className="w-full max-w-sm rounded-2xl bg-white p-7 shadow-sm ring-1 ring-black/5">
+    <main className="flex min-h-[100svh] items-center justify-center bg-[#F7F8FA] dark:bg-neutral-950 px-4">
+      <div className="w-full max-w-sm rounded-2xl bg-white dark:bg-neutral-900 p-7 shadow-sm ring-1 ring-black/5 dark:ring-white/10">
         <div className="mb-6">
           <h1 className="text-xl font-semibold text-[#1A1917]">MenuOS</h1>
-          <p className="mt-1 text-sm text-neutral-500">Sign in to manage your menu.</p>
+          <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">Sign in to manage your menu.</p>
         </div>
         <form onSubmit={onSubmit} className="space-y-4">
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-neutral-700">Email</span>
+            <span className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Email</span>
             <input
               type="email"
               required
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="h-[42px] w-full rounded-lg border border-neutral-300 px-3 text-[16px] outline-none focus:ring-[3px] focus:ring-amber-500/20 focus:border-amber-500"
+              className="h-[42px] w-full rounded-lg border border-neutral-300 dark:border-neutral-700 px-3 text-[16px] outline-none focus:ring-[3px] focus:ring-amber-500/20 focus:border-amber-500"
             />
           </label>
           <label className="block">
-            <span className="mb-1 block text-sm font-medium text-neutral-700">Password</span>
+            <span className="mb-1 block text-sm font-medium text-neutral-700 dark:text-neutral-300">Password</span>
             <input
               type="password"
               required
               autoComplete="current-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="h-[42px] w-full rounded-lg border border-neutral-300 px-3 text-[16px] outline-none focus:ring-[3px] focus:ring-amber-500/20 focus:border-amber-500"
+              className="h-[42px] w-full rounded-lg border border-neutral-300 dark:border-neutral-700 px-3 text-[16px] outline-none focus:ring-[3px] focus:ring-amber-500/20 focus:border-amber-500"
             />
           </label>
 

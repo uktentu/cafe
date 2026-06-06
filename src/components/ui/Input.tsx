@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 
 // 16px font prevents iOS Safari auto-zoom; 42px height per the UI brief.
 const FIELD =
-  'h-[42px] w-full rounded-lg border border-neutral-300 bg-white px-3 text-[16px] text-neutral-900 outline-none transition focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20 disabled:bg-neutral-100'
+  'h-[42px] w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-900 px-3 text-[16px] text-neutral-900 dark:text-neutral-100 outline-none transition focus:border-amber-500 focus:ring-[3px] focus:ring-amber-500/20 disabled:bg-neutral-100 dark:disabled:bg-neutral-800'
 
 export const Input = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   function Input({ className, ...rest }, ref) {
@@ -50,7 +50,7 @@ export function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 flex items-center gap-1 text-sm font-medium text-neutral-700">
+      <span className="mb-1 flex items-center gap-1 text-sm font-medium text-neutral-700 dark:text-neutral-300">
         {label}
         {required && <span className="text-red-500">*</span>}
       </span>

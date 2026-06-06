@@ -49,14 +49,14 @@ export function ReservationsManager() {
     onError: (err: unknown) => pushToast((err as Error).message, 'error')
   })
 
-  if (isLoading) return <div className="flex h-32 items-center justify-center text-sm text-neutral-500">Loading reservations...</div>
+  if (isLoading) return <div className="flex h-32 items-center justify-center text-sm text-neutral-500 dark:text-neutral-400">Loading reservations...</div>
 
   if (reservations.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-neutral-800 p-12 text-center">
-        <Clock className="mx-auto h-8 w-8 text-neutral-600 mb-3" />
+        <Clock className="mx-auto h-8 w-8 text-neutral-600 dark:text-neutral-400 mb-3" />
         <p className="text-sm text-neutral-400 font-medium">No reservations yet.</p>
-        <p className="text-xs text-neutral-500 mt-1">When customers book a table, they will appear here.</p>
+        <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">When customers book a table, they will appear here.</p>
       </div>
     )
   }
@@ -91,22 +91,22 @@ export function ReservationsManager() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-neutral-400">
                   <div className="flex items-center gap-1.5 text-neutral-300 font-medium">
-                    <Clock className="h-4 w-4 text-neutral-500" />
+                    <Clock className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
                     {res.date} at {res.time}
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Phone className="h-4 w-4 text-neutral-500" />
+                    <Phone className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
                     {res.phone}
                   </div>
                   {res.email && (
                     <div className="flex items-center gap-1.5">
-                      <Mail className="h-4 w-4 text-neutral-500" />
+                      <Mail className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
                       {res.email}
                     </div>
                   )}
                   {res.notes && (
                     <div className="flex items-start gap-1.5 sm:col-span-2 mt-1">
-                      <FileText className="h-4 w-4 text-neutral-500 mt-0.5" />
+                      <FileText className="h-4 w-4 text-neutral-500 dark:text-neutral-400 mt-0.5" />
                       <span className="italic">&quot;{res.notes}&quot;</span>
                     </div>
                   )}

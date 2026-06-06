@@ -264,3 +264,20 @@ export function resolveTheme(userTier: Tier, requestedTheme: Theme | null | unde
   }
   return requestedTheme
 }
+
+/** Predefined inverse pairs for light/dark mode overrides */
+export const INVERSE_THEMES: Record<Theme, Theme> = {
+  mercado: 'provenance',
+  provenance: 'mercado',
+  terrain: 'mercado',
+  bazaar: 'coastal',
+  nocturne: 'aether',
+  coastal: 'bazaar',
+  aether: 'nocturne',
+  onyx: 'studio',
+  studio: 'onyx',
+  sakura: 'ember',
+  frost: 'arcade',
+  ember: 'sakura',
+  arcade: 'frost',
+}
