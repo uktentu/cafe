@@ -180,7 +180,7 @@ export function EmberLayout({ categories, items, businessId: _businessId }: Layo
                 >
                   {imgUrl ? (
                     <>
-                      <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
+                      <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
                       <div
                         className="absolute inset-x-0 bottom-0 p-2 pt-8 pointer-events-none"
                         style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.88) 0%, transparent 100%)' }}

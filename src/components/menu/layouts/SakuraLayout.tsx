@@ -217,7 +217,7 @@ export function SakuraLayout({ categories, items, businessId: _businessId }: Lay
                     />
                     {imgUrl && (
                       <div className="relative shrink-0 overflow-hidden z-10" style={{ borderRadius: 22, background: 'var(--sf2)', width: 88, height: 88 }}>
-                        <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="88px" />
+                        <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="88px" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
                       </div>
                     )}
                     <div className="min-w-0 flex-1 relative z-10">

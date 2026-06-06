@@ -105,7 +105,7 @@ export function AetherLayout({ categories, items, businessId: _businessId }: Lay
                       {hasImage ? (
                         <>
                           <div className="relative aspect-[4/3] shrink-0 overflow-hidden" style={{ borderRadius: '24px 24px 0 0' }}>
-                            <Image src={imgUrl!} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" />
+                            <Image src={imgUrl!} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
                           </div>
                           <div className="flex flex-col flex-1 p-4">
                             <h3 className="text-sm font-semibold leading-snug" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</h3>

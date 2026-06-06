@@ -389,7 +389,7 @@ export function ArcadeLayout({ categories, items, businessId: _businessId }: Lay
                     <>
                       {/* Image */}
                       <div className="relative overflow-hidden" style={{ aspectRatio: '16/9', background: 'var(--sf2)' }}>
-                        <Image src={imgUrl} alt={item.name} fill className="object-cover transition-transform duration-300 hover:scale-105" sizes="(max-width:640px) 95vw, (max-width:768px) 50vw, 33vw" />
+                        <Image src={imgUrl} alt={item.name} fill className="object-cover transition-transform duration-300 hover:scale-105" sizes="(max-width:640px) 95vw, (max-width:768px) 50vw, 33vw" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
                         {/* Scanlines overlay on image */}
                         <div
                           className="pointer-events-none absolute inset-0"

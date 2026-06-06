@@ -177,7 +177,7 @@ export function TerrainLayout({ categories, items, businessId: _businessId }: La
                             {imgUrl ? (
                               <>
                                 <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded md:h-24 md:w-24" style={{ background: 'var(--sf2)' }}>
-                                  <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 80px, 96px" />
+                                  <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 80px, 96px" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-baseline justify-between gap-2">

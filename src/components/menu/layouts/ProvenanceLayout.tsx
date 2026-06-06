@@ -121,8 +121,11 @@ export function ProvenanceLayout({ categories, items, businessId: _businessId }:
                         src={imgUrl} 
                         alt={item.name} 
                         fill 
-                        className="object-cover transition-all duration-700 sepia-[0.8] group-hover:sepia-0 group-hover:scale-105" 
-                        sizes="(max-width:768px) 96px, 128px" 
+                        className="object-cover transition-transform duration-700 group-hover:scale-110" 
+                        sizes="(max-width:768px) 100vw, 50vw" 
+                        loading={idx < 4 ? "eager" : "lazy"} 
+                        fetchPriority={idx < 4 ? "high" : "auto"} 
+                        unoptimized={idx < 4}
                       />
                     </div>
                   )}

@@ -92,7 +92,7 @@ function CategoryStrip({
           className="flex gap-4 overflow-x-auto px-4 pb-8 pt-4 md:px-8"
           style={{ scrollSnapType: 'x mandatory', clipPath: 'inset(-40px 0px -40px 0px)' }}
         >
-          {catItems.map((item) => {
+          {catItems.map((item, idx) => {
             const imgUrl = cdnUrl(itemImageKey(item))
             return (
               <m.button
@@ -125,7 +125,7 @@ function CategoryStrip({
               >
                 {imgUrl ? (
                   <>
-                    <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="168px" />
+                    <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="168px" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
                     <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
                     <div className="absolute inset-x-0 bottom-0 p-2.5">
                       <p className="truncate text-sm font-bold leading-tight text-white" style={{ fontFamily: 'var(--font-display)' }}>{item.name}</p>
