@@ -92,6 +92,7 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado', 
           fill
           loading={priority ? "eager" : "lazy"}
           fetchPriority={priority ? "high" : "auto"}
+          unoptimized={priority}
           sizes={variant === 'row' ? '88px' : '(min-width:768px) 30vw, 45vw'}
           className={cn('object-cover transition-transform duration-500', soldOut && 'grayscale', 'group-hover:scale-105')}
           onError={() => setImgError(true)}

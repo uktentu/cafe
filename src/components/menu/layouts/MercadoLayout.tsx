@@ -119,7 +119,7 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
                     >
                         {imgUrl ? (
                         <>
-                          <Image src={imgUrl} alt={item.name} fill loading={isPriority ? "eager" : "lazy"} fetchPriority={isPriority ? "high" : "auto"} className="object-cover transition-transform duration-500 hover:scale-105" sizes="(max-width:768px) 50vw, (max-width:1024px) 33vw, 25vw" />
+                          <Image src={imgUrl} alt={item.name} fill loading={isPriority ? "eager" : "lazy"} fetchPriority={isPriority ? "high" : "auto"} unoptimized={isPriority} className="object-cover transition-transform duration-500 hover:scale-105" sizes="(max-width:768px) 50vw, (max-width:1024px) 33vw, 25vw" />
                           <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 to-transparent pointer-events-none" />
 
                           {/* Sold-out diagonal stripe overlay */}

@@ -187,7 +187,7 @@ export function FrostLayout({ categories, items, businessId: _businessId }: Layo
                   {imgUrl ? (
                     <>
                       <div className="relative overflow-hidden" style={{ aspectRatio: '1', borderRadius: '50% 50% 0 0 / 60% 60% 0 0', background: 'var(--sf2)' }}>
-                        <Image src={imgUrl} alt={item.name} fill loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width:768px) 50vw, 33vw" />
+                        <Image src={imgUrl} alt={item.name} fill loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width:768px) 50vw, 33vw" />
                       </div>
                       <div className="flex flex-col gap-1.5 p-4 w-full">
                         <p className="text-sm font-bold leading-snug" style={{ fontFamily: 'var(--font-display)', color: 'var(--txt)' }}>{item.name}</p>

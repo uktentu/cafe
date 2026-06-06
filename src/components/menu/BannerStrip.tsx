@@ -34,7 +34,7 @@ export function BannerStrip({ banners, theme = 'mercado' }: { banners: Banner[],
           >
             {imgUrl ? (
               <>
-                <Image src={imgUrl} alt="" fill className="object-cover blur-md opacity-30" sizes="(max-width: 768px) 100vw, 80vw" loading={isFirst ? "eager" : "lazy"} fetchPriority={isFirst ? "high" : "auto"} />
+                <Image src={imgUrl} alt="" fill className="object-cover blur-md opacity-30" sizes="(max-width: 768px) 100vw, 80vw" loading={isFirst ? "eager" : "lazy"} fetchPriority={isFirst ? "high" : "auto"} unoptimized={isFirst} />
                 <Image 
                   src={imgUrl} 
                   alt={b.title || ''} 
@@ -43,6 +43,7 @@ export function BannerStrip({ banners, theme = 'mercado' }: { banners: Banner[],
                   sizes="(max-width: 768px) 100vw, 80vw"
                   loading={isFirst ? "eager" : "lazy"}
                   fetchPriority={isFirst ? "high" : "auto"}
+                  unoptimized={isFirst}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent p-4 md:p-6 flex flex-col justify-end">
                   <h3 
