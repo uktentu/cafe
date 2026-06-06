@@ -13,6 +13,11 @@ This document tracks improvements needed for every phase completion. As we advan
 - **Font Rendering Bug:** Fixed a missing `@import` bug in `globals.css` where custom theme Google Fonts were failing to download and falling back to system sans-serif.
 - **Edge Build Integrity:** Preserved `set-runtime.js` as a critical AST build hook for Next.js to compile correctly for Cloudflare's Edge architecture.
 
+### Phase 9: Quality Assurance & Polish
+- **Edge Runtime Compatibility:** Discovered and fixed a critical bug where `next/image` with `priority` props and manually injected `<head>` tags crashed the Cloudflare `next-on-pages` edge worker (throwing a 500 Internal Server Error due to React AST serialization failures).
+- **Lighthouse Font Optimization:** Reverted manual `<link>` preloads for Google Fonts back to CSS `@import` in `globals.css` to prevent edge build corruption while maintaining acceptable LCP times.
+- **Repository Hygiene:** Executed a clean-up to remove LLM prompt artifacts, development load-testing scripts, and ignored local build directories to streamline the `main` branch.
+
 ### UI/UX & Layout Fixes (Phases 0-6)
 - **General (No Photos State):** Integrated category icon fallbacks across all themes seamlessly.
 - **General (Compare Price):** Universally applied `compare_price` to all themes for regular items, standardized horizontal inline placement.
