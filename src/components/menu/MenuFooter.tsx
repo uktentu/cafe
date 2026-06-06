@@ -6,7 +6,6 @@ import { track } from '@/lib/firebase'
 import { getConfig } from '@/lib/config'
 import { Clock } from 'lucide-react'
 import { useLanguage } from './LanguageProvider'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 const DAYS = [
   { key: 'mon', label: 'Monday' },
@@ -134,9 +133,6 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
           {business.name}
         </p>
 
-        <div className="mt-8 flex justify-center">
-          <ThemeToggle className="!w-12 !h-12 !rounded-full !bg-transparent !border !border-[var(--bdr2)] text-[var(--txt)] hover:!bg-[var(--sf1)] hover:scale-110 active:scale-95 transition-all shadow-sm" />
-        </div>
       </div>
     </footer>
   )
