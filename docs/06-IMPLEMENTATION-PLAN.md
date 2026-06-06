@@ -303,7 +303,7 @@ Do phases in order. Each phase must pass its done-check before starting the next
 
 ## Phase 9: QA
 
-- [ ] Lighthouse mobile ≥ 92 on all 9 themes (deployed on Cloudflare Pages)
+- [ ] Lighthouse mobile ≥ 92 on all 13 themes (deployed on Cloudflare Pages)
 - [ ] LCP < 1.2s on real 4G (use WebPageTest or Chrome DevTools throttle)
 - [ ] CLS < 0.05 on all themes
 - [ ] Test: text-only mode — all 9 themes look intentional without photos

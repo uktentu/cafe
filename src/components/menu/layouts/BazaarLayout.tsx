@@ -125,7 +125,7 @@ function CategoryStrip({
               >
                 {imgUrl ? (
                   <>
-                    <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="168px" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
+                    <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="168px" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} />
                     <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent pointer-events-none" />
                     <div className="absolute inset-x-0 bottom-0 p-2.5">
                       <p className="truncate text-sm font-bold leading-tight text-white" style={{ fontFamily: 'var(--font-display)' }}>{item.name}</p>

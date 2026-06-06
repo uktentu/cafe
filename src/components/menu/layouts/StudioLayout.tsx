@@ -67,7 +67,7 @@ function GalleryCell({ item, Icon, idx }: { item: Item; Icon: LucideIcon; idx: n
       <div className="absolute inset-0 pointer-events-none opacity-20 mix-blend-overlay z-50" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E")' }} />
       {imgUrl ? (
         <>
-          <Image src={imgUrl} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width:768px) 50vw, (max-width:1024px) 33vw, 25vw" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
+          <Image src={imgUrl} alt={item.name} fill className="object-cover transition-transform duration-500 group-hover:scale-105" sizes="(max-width:768px) 50vw, (max-width:1024px) 33vw, 25vw" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} />
           {!item.is_available && (
             <div className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase" style={{ background: 'rgba(0,0,0,0.6)', color: '#fff' }}>Out</div>
           )}

@@ -220,13 +220,53 @@ export interface UploadResult {
   r2_key?: string
 }
 
+function compressImage(file: File): Promise<File> {
+  return new Promise((resolve) => {
+    // Only compress massive images (e.g., > 1MB) and only JPEG/PNG/WebP
+    if (!file.type.startsWith('image/') || file.type.includes('svg') || file.type.includes('gif') || file.size < 1024 * 1024) {
+      return resolve(file)
+    }
+    const img = new Image()
+    img.src = URL.createObjectURL(file)
+    img.onload = () => {
+      URL.revokeObjectURL(img.src)
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return resolve(file)
+
+      const MAX = 1600
+      let { width, height } = img
+      if (width > height && width > MAX) {
+        height = Math.round(height * (MAX / width))
+        width = MAX
+      } else if (height > MAX) {
+        width = Math.round(width * (MAX / height))
+        height = MAX
+      }
+
+      canvas.width = width
+      canvas.height = height
+      ctx.drawImage(img, 0, 0, width, height)
+
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const newName = file.name.replace(/\.[^/.]+$/, '') + '.webp'
+          resolve(new File([blob], newName, { type: 'image/webp' }))
+        } else resolve(file)
+      }, 'image/webp', 0.8)
+    }
+    img.onerror = () => resolve(file)
+  })
+}
+
 export async function uploadImage(
   file: File,
   type: 'item' | 'logo' | 'cover' | 'banner' | 'seo_og',
   id?: string,
 ): Promise<UploadResult> {
+  const compressedFile = await compressImage(file)
   const form = new FormData()
-  form.append('file', file)
+  form.append('file', compressedFile)
   form.append('type', type)
   if (id) form.append('id', id)
   const res = await fetch('/api/upload', { method: 'POST', body: form })

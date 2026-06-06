@@ -18,13 +18,13 @@ const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
 
 async function main() {
   console.log('🧹 Starting analytics cleanup cron...')
-  const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000).toISOString()
-  console.log(`Deleting events older than: ${ninetyDaysAgo}`)
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()
+  console.log(`Deleting events older than: ${thirtyDaysAgo}`)
 
   const { data, error, count } = await supabase
     .from('analytics_events')
     .delete({ count: 'exact' })
-    .lt('created_at', ninetyDaysAgo)
+    .lt('created_at', thirtyDaysAgo)
 
   if (error) {
     console.error('✗ Cleanup failed:', error.message)

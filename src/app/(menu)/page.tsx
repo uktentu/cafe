@@ -9,7 +9,7 @@ import { cdnUrl } from '@/types/database'
 import { MenuLayoutClient } from '@/components/menu/MenuLayoutClient'
 
 export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'auto'
-export const revalidate = 30
+export const revalidate = 3600
 
 export async function generateMetadata(): Promise<Metadata> {
   const { slug, siteUrl, features } = getConfig()

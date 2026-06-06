@@ -32,7 +32,7 @@ const nextConfig = {
     : (isStaticExport ? '/cafe' : ''),
   // Static export requires unoptimized images (no image API).
   images: {
-    unoptimized: isStaticExport,
+    unoptimized: true,
     remotePatterns: isStaticExport ? remotePatterns : remotePatterns,
     formats: ['image/webp'],
   },

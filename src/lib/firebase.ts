@@ -69,18 +69,12 @@ export interface TrackParams {
 }
 
 let analyticsQueue: any[] = []
-let flushTimeout: ReturnType<typeof setTimeout> | null = null
 
 function flushAnalytics() {
   if (analyticsQueue.length === 0) return
   
   const payload = JSON.stringify(analyticsQueue)
   analyticsQueue = [] // Clear immediately
-  
-  if (flushTimeout) {
-    clearTimeout(flushTimeout)
-    flushTimeout = null
-  }
 
   try {
     if (navigator.sendBeacon) {
@@ -123,9 +117,5 @@ export function track(eventType: AnalyticsEventType, params: TrackParams = {}): 
       item_id: params.item_id ?? null,
       session_id: sid,
     })
-    
-    if (!flushTimeout) {
-      flushTimeout = setTimeout(flushAnalytics, 5000) // Flush every 5 seconds
-    }
   }
 }

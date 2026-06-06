@@ -133,7 +133,7 @@ function ItemGrid({ activeCat, catItems, openItem }: { activeCat: Category | und
               {imgUrl ? (
                 <>
                   <div className="relative aspect-[4/3] w-full overflow-hidden" style={{ background: 'var(--sf2)' }}>
-                    <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} unoptimized={idx < 4} />
+                    <Image src={imgUrl} alt={item.name} fill className="object-cover" sizes="(max-width:768px) 50vw, 33vw" loading={idx < 4 ? "eager" : "lazy"} fetchPriority={idx < 4 ? "high" : "auto"} />
                   </div>
                   <div className="flex-1 p-3 w-full flex flex-col">
                     <div className="flex items-start justify-between gap-1 mb-1">
