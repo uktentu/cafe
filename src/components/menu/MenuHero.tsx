@@ -75,7 +75,7 @@ function LogoOrInitials({ business, size = 72 }: { business: Business; size?: nu
         alt={`${business.name} logo`}
         width={size}
         height={size}
-        priority
+        loading="eager" fetchPriority="high" unoptimized={true}
         className="rounded-full object-cover"
         style={{ width: size, height: size, boxShadow: '0 0 0 2px var(--brand)' }}
       />
@@ -102,7 +102,7 @@ function MercadoHero({ business }: { business: Business }) {
     <header className="relative isolate overflow-hidden" style={{ minHeight: 'min(75vw, 380px)' }}>
       {cover ? (
         <>
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(0,0,0,0.4) 0%, var(--bg) 100%)' }} />
         </>
       ) : (
@@ -140,7 +140,7 @@ function ProvenanceHero({ business }: { business: Business }) {
     <header className="relative" style={{ background: 'var(--bg)' }}>
       {cover && (
         <div className="relative h-[200px] w-full overflow-hidden md:h-[260px] lg:h-[320px]">
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-80" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover opacity-80" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 50%, var(--bg) 100%)' }} />
         </div>
       )}
@@ -199,7 +199,7 @@ function TerrainHero({ business }: { business: Business }) {
         </div>
         {cover && (
           <div className="relative h-[220px] overflow-hidden md:h-auto md:min-h-[320px]">
-            <Image src={cover} alt="" fill sizes="50vw" className="object-cover" priority />
+            <Image src={cover} alt="" fill sizes="50vw" className="object-cover" loading="eager" fetchPriority="high" unoptimized={true} />
           </div>
         )}
       </div>
@@ -214,7 +214,7 @@ function BazaarHero({ business }: { business: Business }) {
     <header className="relative isolate overflow-hidden" style={{ minHeight: 'min(80vw, 400px)' }}>
       {cover ? (
         <>
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(13,8,0,0.5) 0%, rgba(13,8,0,0.1) 40%, var(--bg) 100%)' }} />
         </>
       ) : (
@@ -258,7 +258,7 @@ function NocturneHero({ business }: { business: Business }) {
     <header className="relative isolate overflow-hidden" style={{ minHeight: 'min(90vw, 460px)', background: 'var(--sf1)' }}>
       {cover ? (
         <>
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-40" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover opacity-40" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, var(--bg) 0%, transparent 30%, var(--bg) 100%)' }} />
         </>
       ) : (
@@ -302,7 +302,7 @@ function CoastalHero({ business }: { business: Business }) {
     <header className="relative isolate overflow-hidden" style={{ minHeight: 'min(80vw, 420px)' }}>
       {cover ? (
         <>
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(to top right, rgba(22,32,48,0.9) 0%, rgba(22,32,48,0.3) 60%, transparent 100%)' }} />
         </>
       ) : (
@@ -343,7 +343,7 @@ function AetherHero({ business }: { business: Business }) {
     <header className="relative overflow-hidden" style={{ background: 'var(--bg)' }}>
       {cover && (
         <div className="relative mx-auto mt-8 h-[220px] w-full max-w-lg overflow-hidden rounded-3xl md:h-[280px] lg:h-[340px] lg:max-w-2xl">
-          <Image src={cover} alt="" fill priority sizes="512px" className="object-cover" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="512px" className="object-cover" />
         </div>
       )}
       {/* Blob accent */}
@@ -382,7 +382,7 @@ function OnyxHero({ business }: { business: Business }) {
     <header className="relative isolate overflow-hidden" style={{ minHeight: 'clamp(50vh, 85svh, 100svh)', background: 'var(--bg)' }}>
       {cover ? (
         <>
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-30" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover opacity-30" />
           <div className="absolute inset-0" style={{ background: 'var(--bg)', opacity: 0.6 }} />
         </>
       ) : (
@@ -468,7 +468,7 @@ function StudioHero({ business }: { business: Business }) {
         {/* Right: cover image or pattern */}
         <div className="relative h-[180px] md:h-auto" style={{ background: 'var(--sf1)' }}>
           {cover ? (
-            <Image src={cover} alt="" fill sizes="60vw" className="object-cover" priority />
+            <Image src={cover} alt="" fill sizes="60vw" className="object-cover" loading="eager" fetchPriority="high" unoptimized={true} />
           ) : (
             <div
               className="absolute inset-0 flex items-center justify-center overflow-hidden"
@@ -496,7 +496,7 @@ function SakuraHero({ business }: { business: Business }) {
     <header className="relative overflow-hidden" style={{ background: 'var(--bg)' }}>
       {cover && (
         <div className="relative h-[180px] w-full overflow-hidden">
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-70" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover opacity-70" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, transparent 40%, var(--bg) 100%)' }} />
         </div>
       )}
@@ -560,7 +560,7 @@ function EmberHero({ business }: { business: Business }) {
     <header className="relative isolate overflow-hidden" style={{ minHeight: 'min(80vw, 380px)', background: 'var(--sf1)' }}>
       {cover ? (
         <>
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-30" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover opacity-30" />
           <div className="absolute inset-0" style={{ background: 'linear-gradient(180deg, rgba(10,0,0,0.5) 0%, var(--bg) 100%)' }} />
         </>
       ) : (
@@ -739,7 +739,7 @@ function ArcadeHero({ business }: { business: Business }) {
     <header className="relative isolate overflow-hidden" style={{ background: 'var(--bg)' }}>
       {cover && (
         <div className="relative h-[160px] overflow-hidden md:h-[220px] lg:h-[280px]">
-          <Image src={cover} alt="" fill priority sizes="100vw" className="object-cover opacity-20" />
+          <Image src={cover} alt="" fill loading="eager" fetchPriority="high" unoptimized={true} sizes="100vw" className="object-cover opacity-20" />
         </div>
       )}
       {/* CRT scanlines */}
