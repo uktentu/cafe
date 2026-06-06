@@ -116,7 +116,7 @@ export function FrostLayout({ categories, items, businessId: _businessId }: Layo
 
       {/* Rainbow pill nav */}
       <div
-        className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex gap-2 overflow-x-auto px-4 py-3 relative"
+        className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex gap-2 overflow-x-auto px-4 py-3"
         style={{ background: 'var(--glass)', backdropFilter: 'blur(16px)', borderBottom: '1px solid var(--bdr)' }}
       >
         {categories.map((cat, i) => {
