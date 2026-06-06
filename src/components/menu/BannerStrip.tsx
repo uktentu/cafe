@@ -19,8 +19,9 @@ export function BannerStrip({ banners, theme = 'mercado' }: { banners: Banner[],
 
   return (
     <div className={`w-full overflow-x-auto hide-scrollbar snap-x snap-mandatory flex gap-4 px-4 py-4 pt-6 ${banners.length === 1 ? 'md:justify-center' : ''}`}>
-      {banners.map((b) => {
+      {banners.map((b, idx) => {
         const imgUrl = cdnUrl(b.image_r2_key)
+        const isFirst = idx === 0
         return (
           <div 
             key={b.id} 
@@ -33,13 +34,15 @@ export function BannerStrip({ banners, theme = 'mercado' }: { banners: Banner[],
           >
             {imgUrl ? (
               <>
-                <Image src={imgUrl} alt="" fill className="object-cover blur-md opacity-30" sizes="(max-width: 768px) 100vw, 80vw" />
+                <Image src={imgUrl} alt="" fill className="object-cover blur-md opacity-30" sizes="(max-width: 768px) 100vw, 80vw" loading={isFirst ? "eager" : "lazy"} fetchPriority={isFirst ? "high" : "auto"} />
                 <Image 
                   src={imgUrl} 
                   alt={b.title || ''} 
                   fill 
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 80vw"
+                  loading={isFirst ? "eager" : "lazy"}
+                  fetchPriority={isFirst ? "high" : "auto"}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent p-4 md:p-6 flex flex-col justify-end">
                   <h3 

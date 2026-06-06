@@ -36,7 +36,7 @@ export function BestsellerStrip({ items, categories, theme, title = 'Bestsellers
         {translatedTitle}
       </h2>
       <div className="-mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 lg:-mx-6 lg:px-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-        {featured.map((it) => {
+        {featured.map((it, idx) => {
           const cat = catOf(it.category_id)
           const translatedItem = {
             ...it,
@@ -51,7 +51,7 @@ export function BestsellerStrip({ items, categories, theme, title = 'Bestsellers
 
           return (
             <div key={it.id} className="w-[160px] shrink-0 snap-start lg:w-[200px]">
-              <ItemCard item={translatedItem} category={translatedCat} variant="grid" theme={theme} />
+              <ItemCard item={translatedItem} category={translatedCat} variant="grid" theme={theme} priority={idx < 2} />
             </div>
           )
         })}
