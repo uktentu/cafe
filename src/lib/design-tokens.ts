@@ -232,6 +232,9 @@ export function themeCssVars(theme: Theme, brandOverride?: string | null): Recor
   const vars: Record<string, string> = {}
   for (const [k, v] of Object.entries(BASE_VARS)) vars[`--${k}`] = v
   for (const [k, v] of Object.entries(colors)) vars[`--${k}`] = v
+  
+  vars['--font-display'] = `"${meta.displayFont}", system-ui, sans-serif`
+  vars['--font-body'] = `"${meta.bodyFont}", system-ui, sans-serif`
 
   const rgb = hexToRgb(colors.brand)
   if (rgb) {
