@@ -321,8 +321,8 @@ Do phases in order. Each phase must pass its done-check before starting the next
 
 ## Done Criteria
 
-- [ ] All 9 templates mobile Lighthouse ≥ 92
-- [ ] All 9 templates text-only mode looks great (no photos required)
+- [ ] All 13 templates mobile Lighthouse ≥ 92
+- [ ] All 13 templates text-only mode looks great (no photos required)
 - [ ] New client deployed in < 30 minutes
 - [ ] Owner can manage all content without developer after setup
 - [ ] Sold-out toggle reflects within 30 seconds

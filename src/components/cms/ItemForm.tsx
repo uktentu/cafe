@@ -59,7 +59,8 @@ export function ItemForm({ itemId }: { itemId?: string }) {
   const catsQ = useQuery({ queryKey: qk.categories(business.id), queryFn: () => fetchCategories(business.id) })
   const itemQ = useQuery({ queryKey: ['item', itemId], queryFn: () => fetchItem(itemId!), enabled: editing })
   const { features } = getConfig()
-  const branchesQ = useQuery({ queryKey: qk.branches(business.id), queryFn: () => fetchBranches(business.id), enabled: features.multiBranch })
+  const isBranchesEnabled = features.multiBranch && business.social_links?.multiple_branches_enabled === true
+  const branchesQ = useQuery({ queryKey: qk.branches(business.id), queryFn: () => fetchBranches(business.id), enabled: isBranchesEnabled })
   const transQ = useQuery({ queryKey: qk.translations(business.id), queryFn: () => fetchTranslations(business.id) })
   const activeBranchId = useCmsStore((s) => s.activeBranchId)
 
@@ -288,7 +289,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
           </Field>
         </div>
         
-        {features.multiBranch && (branchesQ.data?.length ?? 0) > 0 && (
+        {isBranchesEnabled && (branchesQ.data?.length ?? 0) > 0 && (
           <div className="grid grid-cols-2 gap-4">
             <Field label="Branch">
               <Select {...register('branch_id')}>

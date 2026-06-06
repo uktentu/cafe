@@ -5,11 +5,11 @@ import { useMenuStore } from '@/stores/menu'
 import { getConfig } from '@/lib/config'
 import type { Theme } from '@/types/database'
 
-export function BookTableButton({ theme }: { theme?: Theme }) {
+export function BookTableButton({ theme, tenantEnabled }: { theme?: Theme, tenantEnabled?: boolean }) {
   const { features } = getConfig()
   const setReservationModal = useMenuStore((s) => s.setReservationModal)
 
-  if (!features.reservations) return null
+  if (!features.reservations || !tenantEnabled) return null
 
   const isArcade = theme === 'arcade'
   const isOnyx = theme === 'onyx'

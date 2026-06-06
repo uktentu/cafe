@@ -31,6 +31,8 @@ export interface SocialLinks {
   zomato?: string | null
   google_maps?: string | null
   multiple_menus_enabled?: boolean
+  reservations_enabled?: boolean
+  multiple_branches_enabled?: boolean
 }
 
 export interface Business {

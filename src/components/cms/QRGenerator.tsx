@@ -107,7 +107,9 @@ function QrForm({
   const initialUrl = siteUrl || (typeof window !== 'undefined' ? window.location.origin : '')
   
   const { features } = getConfig()
-  const branchesQ = useQuery({ queryKey: qk.branches(businessId), queryFn: () => fetchBranches(businessId), enabled: features.multiBranch })
+  const { business } = useCms()
+  const isBranchesEnabled = features.multiBranch && business?.social_links?.multiple_branches_enabled === true
+  const branchesQ = useQuery({ queryKey: qk.branches(businessId), queryFn: () => fetchBranches(businessId), enabled: isBranchesEnabled })
 
   const [label, setLabel] = useState(qr?.label ?? 'Table 1')
   const [url, setUrl] = useState(qr?.target_url ?? initialUrl)
@@ -175,7 +177,7 @@ function QrForm({
             </div>
           </div>
 
-          {features.multiBranch && (branchesQ.data?.length ?? 0) > 0 && (
+          {isBranchesEnabled && (branchesQ.data?.length ?? 0) > 0 && (
             <div>
               <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1.5">Branch</label>
               <select

@@ -57,6 +57,8 @@ export function SettingsForm() {
   const [theme, setTheme] = useState<Theme>(business.theme)
   const [brand, setBrand] = useState(business.theme_color || '#F59E0B')
   const [multipleMenus, setMultipleMenus] = useState(business.social_links?.multiple_menus_enabled ?? false)
+  const [reservationsEnabled, setReservationsEnabled] = useState(business.social_links?.reservations_enabled ?? false)
+  const [multipleBranchesEnabled, setMultipleBranchesEnabled] = useState(business.social_links?.multiple_branches_enabled ?? false)
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [seoOgFile, setSeoOgFile] = useState<File | null>(null)
@@ -101,7 +103,12 @@ export function SettingsForm() {
         opening_hours: hours,
         theme,
         theme_color: brand,
-        social_links: { ...business.social_links, multiple_menus_enabled: multipleMenus },
+        social_links: { 
+          ...business.social_links, 
+          multiple_menus_enabled: multipleMenus,
+          reservations_enabled: reservationsEnabled,
+          multiple_branches_enabled: multipleBranchesEnabled,
+        },
         seo_title: values.seo_title || null,
         seo_description: values.seo_description || null,
       }
@@ -240,6 +247,8 @@ export function SettingsForm() {
       {/* Advanced Features */}
       <section className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
         <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Advanced Features</h2>
+        
+        {/* Multiple Menus (Advanced or Premium) */}
         {isAdvancedOrPremium ? (
           <div className="flex items-center justify-between gap-4">
             <div>
@@ -250,6 +259,36 @@ export function SettingsForm() {
           </div>
         ) : (
           <UpgradePrompt feature="Multiple Menus" description="Create separate menus for Breakfast, Lunch, and Dinner with custom automated schedules." />
+        )}
+
+        <div className="my-4 border-t border-black/5 dark:border-white/10" />
+
+        {/* Reservations (Premium only) */}
+        {isPremium ? (
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-medium text-neutral-800 dark:text-neutral-200 text-sm">Table Reservations</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Allow customers to book a table directly from your menu.</p>
+            </div>
+            <Toggle checked={reservationsEnabled} onChange={setReservationsEnabled} size="md" label="Table reservations" />
+          </div>
+        ) : (
+          <UpgradePrompt feature="Table Reservations" description="Allow customers to request table bookings straight from your digital menu." />
+        )}
+
+        <div className="my-4 border-t border-black/5 dark:border-white/10" />
+
+        {/* Multiple Branches (Premium only) */}
+        {isPremium ? (
+          <div className="flex items-center justify-between gap-4">
+            <div>
+              <p className="font-medium text-neutral-800 dark:text-neutral-200 text-sm">Multiple Branches</p>
+              <p className="text-xs text-neutral-500 dark:text-neutral-400">Manage multiple outlet locations and branch-specific item availability.</p>
+            </div>
+            <Toggle checked={multipleBranchesEnabled} onChange={setMultipleBranchesEnabled} size="md" label="Multiple branches" />
+          </div>
+        ) : (
+          <UpgradePrompt feature="Multiple Branches" description="Expand your menu to support multiple outlets and branch-specific stock." />
         )}
       </section>
 

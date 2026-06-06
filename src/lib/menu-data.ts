@@ -149,7 +149,8 @@ async function _getMenuData(slug: string): Promise<MenuData | null> {
   const limitedCategories = (rawCats ?? []).map(normaliseCategory).slice(0, limits.categories)
   const limitedItems = (rawItems ?? []).map(normaliseItem).slice(0, limits.items)
   const activeBanners = features.banners ? (rawBanners ?? []).slice(0, limits.banners) : []
-  const activeBranches = features.multiBranch ? (rawBranches ?? []) : []
+  const isBranchesEnabled = features.multiBranch && business.social_links?.multiple_branches_enabled === true
+  const activeBranches = isBranchesEnabled ? (rawBranches ?? []) : []
   const activeMenus = features.menus ? (rawMenus ?? []) : []
 
   return {

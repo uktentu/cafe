@@ -29,7 +29,7 @@ function StatusBadge({ business, theme, align = 'center' }: { business: Business
   if (!status.label) {
     return (
       <div className={`flex items-center gap-3 mt-1 flex-wrap ${justifyClass}`}>
-        <BookTableButton theme={theme} />
+        <BookTableButton theme={theme} tenantEnabled={business.social_links?.reservations_enabled === true} />
         <button
           onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
           className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
@@ -52,7 +52,7 @@ function StatusBadge({ business, theme, align = 'center' }: { business: Business
         <span className={isArcade ? "h-1 w-1 rounded-none" : "h-1.5 w-1.5 rounded-full"} style={{ background: status.open ? '#22C55E' : '#EF4444' }} />
         {status.label}
       </div>
-      <BookTableButton theme={theme} />
+      <BookTableButton theme={theme} tenantEnabled={business.social_links?.reservations_enabled === true} />
       <button
         onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
         className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}

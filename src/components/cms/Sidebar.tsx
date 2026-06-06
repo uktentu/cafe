@@ -92,13 +92,15 @@ function BranchSwitcher() {
   const activeBranchId = useCmsStore((s) => s.activeBranchId)
   const setActiveBranch = useCmsStore((s) => s.setActiveBranch)
   
+  const isTenantEnabled = business.social_links?.multiple_branches_enabled === true
+  
   const { data: branches = [] } = useQuery({
     queryKey: qk.branches(business.id),
     queryFn: () => fetchBranches(business.id),
-    enabled: features.multiBranch
+    enabled: features.multiBranch && isTenantEnabled
   })
 
-  if (!features.multiBranch || branches.length === 0) return null
+  if (!features.multiBranch || !isTenantEnabled || branches.length === 0) return null
 
   return (
     <div className="px-5 pb-4">
@@ -143,6 +145,17 @@ function SidebarContent({ businessName, userEmail, onNavigate }: { businessName:
       <nav className="flex-1 space-y-1 overflow-y-auto p-3">
         {PRIMARY.map((item) => {
           const isLockedByTier = item.feature ? !features[item.feature] : false
+          let isHiddenByUser = false
+
+          if (item.feature === 'multiBranch' && !isLockedByTier) {
+            if (business.social_links?.multiple_branches_enabled !== true) isHiddenByUser = true
+          }
+          if (item.feature === 'reservations' && !isLockedByTier) {
+            if (business.social_links?.reservations_enabled !== true) isHiddenByUser = true
+          }
+
+          if (isHiddenByUser) return null
+
           return <NavRow key={item.href} item={item} active={isActive(item.href)} locked={isLockedByTier} onNavigate={onNavigate} />
         })}
         <div className="my-3 border-t border-white/10" />

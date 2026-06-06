@@ -100,9 +100,9 @@ function resolveFeatures(tier: Tier): Features {
     socialLinks: advancedUp,
     dragReorder: advancedUp,
     staffAccounts: advancedUp,
-    // Premium features are opt-in via env toggle (default false even on premium).
-    reservations: premium && envBool(process.env.NEXT_PUBLIC_RESERVATIONS),
-    multiBranch: premium && envBool(process.env.NEXT_PUBLIC_MULTI_BRANCH),
+    // Premium features
+    reservations: premium,
+    multiBranch: premium,
     bilingual: premium && envBool(process.env.NEXT_PUBLIC_BILINGUAL),
     customDomain: premium,
     dynamicQr: premium,
