@@ -33,12 +33,11 @@ export function BannerStrip({ banners, theme = 'mercado' }: { banners: Banner[],
           >
             {imgUrl ? (
               <>
-                <Image src={imgUrl} alt="" fill priority className="object-cover blur-md opacity-30" sizes="(max-width: 768px) 100vw, 80vw" />
+                <Image src={imgUrl} alt="" fill className="object-cover blur-md opacity-30" sizes="(max-width: 768px) 100vw, 80vw" />
                 <Image 
                   src={imgUrl} 
                   alt={b.title || ''} 
                   fill 
-                  priority
                   className="object-contain"
                   sizes="(max-width: 768px) 100vw, 80vw"
                 />

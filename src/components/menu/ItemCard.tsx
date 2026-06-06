@@ -17,7 +17,6 @@ interface ItemCardProps {
   category?: Pick<Category, 'icon'> | null
   variant?: CardVariant
   theme?: Theme
-  priority?: boolean
 }
 
 // Themes that force uppercase name
@@ -53,7 +52,7 @@ const THEME_CARD_STYLE: Record<Theme, CardStyle> = {
   arcade:     { radius: 'rounded-xl',   hoverY: -2, tapScale: 0.96, imageAccent: true },
 }
 
-export function ItemCard({ item, category, variant = 'grid', theme = 'mercado', priority = false }: ItemCardProps) {
+export function ItemCard({ item, category, variant = 'grid', theme = 'mercado' }: ItemCardProps) {
   const openItem = useMenuStore((s) => s.openItem)
   const [imgError, setImgError] = useState(false)
 
@@ -90,7 +89,6 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado', 
           src={src!}
           alt={item.name}
           fill
-          priority={priority}
           sizes={variant === 'row' ? '88px' : '(min-width:768px) 30vw, 45vw'}
           className={cn('object-cover transition-transform duration-500', soldOut && 'grayscale', 'group-hover:scale-105')}
           onError={() => setImgError(true)}
