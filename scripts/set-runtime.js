@@ -4,7 +4,7 @@ const path = require('path')
 let targetRuntime = process.argv[2] // 'edge', 'remove', or 'auto'
 
 if (targetRuntime === 'auto') {
-  targetRuntime = process.env.STATIC_EXPORT === '1' ? 'remove' : 'edge'
+  targetRuntime = 'remove'
 }
 
 if (!['edge', 'remove'].includes(targetRuntime)) {
@@ -22,7 +22,9 @@ function walk(dir) {
       results = results.concat(walk(file))
     } else {
       if (file.endsWith('page.tsx') || file.endsWith('route.ts')) {
-        results.push(file)
+        if (!file.includes('(menu)/page.tsx')) {
+          results.push(file)
+        }
       }
     }
   })

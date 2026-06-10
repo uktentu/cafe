@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "node scripts/set-runtime.js auto && next build",
-    "pages:build": "npx @cloudflare/next-on-pages",
+    "build": "node scripts/set-runtime.js edge && next build",
+    "pages:build": "npx @cloudflare/next-on-pages && node scripts/patch-routes.js",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",

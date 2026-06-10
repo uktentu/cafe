@@ -116,6 +116,15 @@ function QrForm({
   const [color, setColor] = useState(qr?.qr_color ?? businessThemeColor)
   const [branchId, setBranchId] = useState<string | null>(qr?.branch_id ?? activeBranchId)
 
+  // Auto-embed table label in QR URL when label looks like a table designation
+  function applyTableParam(newLabel: string, currentUrl: string) {
+    if (!newLabel.trim() || !currentUrl) return currentUrl
+    const base = currentUrl.split('?')[0]
+    const params = new URLSearchParams(currentUrl.includes('?') ? currentUrl.split('?')[1] : '')
+    params.set('table', newLabel.trim())
+    return `${base}?${params.toString()}`
+  }
+
   const save = useMutation({
     mutationFn: async () => {
       const input: QrCodeInput = {
@@ -153,10 +162,15 @@ function QrForm({
             <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1.5">Label (e.g. Table 1, Counter)</label>
             <input
               value={label}
-              onChange={(e) => setLabel(e.target.value)}
+              onChange={(e) => {
+                const newLabel = e.target.value
+                setLabel(newLabel)
+                setUrl(applyTableParam(newLabel, initialUrl))
+              }}
               placeholder="Table 1"
               className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
             />
+            <p className="mt-1 text-[11px] text-neutral-400">Label is embedded in the URL — customers who scan get a pre-filled WhatsApp message with this label.</p>
           </div>
 
           <div>

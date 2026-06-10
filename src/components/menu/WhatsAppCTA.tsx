@@ -8,16 +8,15 @@ interface WhatsAppCTAProps {
   whatsapp: string
   businessId: string
   businessName: string
+  tableLabel?: string | null
 }
 
-/**
- * Fixed WhatsApp button with a permanent CSS pulse ring (.wa-pulse in
- * globals.css). Always visible, respects the safe-area inset on notched phones.
- */
-export function WhatsAppCTA({ whatsapp, businessId, businessName }: WhatsAppCTAProps) {
+export function WhatsAppCTA({ whatsapp, businessId, businessName, tableLabel }: WhatsAppCTAProps) {
   if (!whatsapp) return null
-  const text = encodeURIComponent(`Hi ${businessName}, I'm viewing your menu.`)
-  const href = `https://wa.me/${whatsapp}?text=${text}`
+  const msg = tableLabel
+    ? `Hi ${businessName}, I'm at ${tableLabel} and would like to order:`
+    : `Hi ${businessName}, I'm viewing your menu.`
+  const href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`
 
   return (
     <div

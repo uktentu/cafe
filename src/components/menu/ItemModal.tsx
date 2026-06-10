@@ -15,9 +15,10 @@ interface ItemModalProps {
   businessName: string
   whatsapp: string
   theme?: Theme
+  tableLabel?: string | null
 }
 
-export function ItemModal({ businessName, whatsapp, theme = 'mercado' }: ItemModalProps) {
+export function ItemModal({ businessName, whatsapp, theme = 'mercado', tableLabel }: ItemModalProps) {
   const { tUi } = useLanguage()
   const selected = useMenuStore((s) => s.selectedItem)
   const close = useMenuStore((s) => s.closeItem)
@@ -40,7 +41,11 @@ export function ItemModal({ businessName, whatsapp, theme = 'mercado' }: ItemMod
   const variant = theme === 'onyx' ? 'center' : 'sheet'
 
   const orderHref = item && whatsapp
-    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(`Hi ${businessName}, I'd like to order: ${item.name}`)}`
+    ? `https://wa.me/${whatsapp}?text=${encodeURIComponent(
+        tableLabel
+          ? `Hi ${businessName}, I'm at ${tableLabel} and would like to order: ${item.name} (₹${item.price})`
+          : `Hi ${businessName}, I'd like to order: ${item.name} (₹${item.price})`
+      )}`
     : null
 
   return (

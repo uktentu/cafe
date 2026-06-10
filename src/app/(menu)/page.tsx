@@ -2,19 +2,19 @@
 // from the Cloudflare edge cache, so 50K visitors/day cost ~0 DB reads; a CMS
 // save calls revalidatePath('/') to push changes live within 30s.
 import type { Metadata } from 'next'
-import { notFound } from 'next/navigation'
 import { getConfig } from '@/lib/config'
 import { getMenuData } from '@/lib/menu-data'
 import { cdnUrl } from '@/types/database'
 import { MenuLayoutClient } from '@/components/menu/MenuLayoutClient'
 
-export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'auto'
-export const revalidate = 3600
+export const dynamic = 'force-static'
+export const revalidate = 30
 
 export async function generateMetadata(): Promise<Metadata> {
   const { slug, siteUrl, features } = getConfig()
   const data = await getMenuData(slug)
-  if (!data) return { title: 'Menu' }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((data as any)?._error || !data?.business) return { title: 'Menu' }
   const { business } = data
   const hasSeo = features.seo
   const title = (hasSeo && business.seo_title) || `${business.name}${business.tagline ? ` · ${business.tagline}` : ''}`
@@ -39,7 +39,8 @@ import { resolveTheme } from '@/lib/design-tokens'
 export default async function MenuPage() {
   const { slug, theme: envTheme, tier } = getConfig()
   const data = await getMenuData(slug)
-  if (!data?.business) notFound()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((data as any)?._error || !data?.business) return <div><h1>ERROR DEBUG</h1><pre>{JSON.stringify(data, null, 2)}</pre></div>
   const theme = resolveTheme(tier, data.business.theme ?? envTheme)
 
   const { business, categories, items, translations, banners, branches, menus, demo } = data
@@ -83,5 +84,3 @@ export default async function MenuPage() {
 }
 
 
-
-export const runtime = "edge";

@@ -4,6 +4,8 @@ import { useMemo, useEffect, useState } from 'react'
 import type { Category, Item, Theme, DietaryPreference, Menu } from '@/types/database'
 import { useMenuStore } from '@/stores/menu'
 import { ThumbDock } from '@/components/menu/ThumbDock'
+import { SearchBar } from '@/components/menu/SearchBar'
+import { ItemCard } from '@/components/menu/ItemCard'
 import {
   MercadoLayout,
   ProvenanceLayout,
@@ -54,6 +56,8 @@ export function MenuContent({ categories, items, businessId, theme, menus, multi
   const { t } = useLanguage()
   const dietary = useMenuStore((s) => s.dietary)
   const Layout = LAYOUT_MAP[theme] ?? MercadoLayout
+  const [searchQuery, setSearchQuery] = useState('')
+  const showSearch = items.length >= 6
 
   const presentDietary = useMemo(() => {
     const set = new Set<DietaryPreference>()
@@ -100,6 +104,15 @@ export function MenuContent({ categories, items, businessId, theme, menus, multi
     [items, dietary, t],
   )
 
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return []
+    const q = searchQuery.toLowerCase()
+    return filteredItems.filter(it =>
+      it.name.toLowerCase().includes(q) ||
+      (it.description ?? '').toLowerCase().includes(q)
+    )
+  }, [filteredItems, searchQuery])
+
   const visibleCategories = useMemo(
     () => {
       // First, filter categories by active menu ONLY IF multiple menus is explicitly turned on AND menus exist
@@ -128,14 +141,15 @@ export function MenuContent({ categories, items, businessId, theme, menus, multi
   )
 
   const hasSidebar = ['provenance', 'onyx', 'sakura', 'coastal'].includes(theme)
-  
+
   // Only show tabs if there are multiple menus, OR if there is 1 menu and it's not the default one
   const showTabs = multipleMenusEnabled && menus.length > 0 && (menus.length > 1 || menus[0].name.toLowerCase() !== 'default menu')
+  const isSearching = searchQuery.trim().length > 0
 
   return (
     <main id="menu" className="pb-28" style={{ '--menu-tabs-offset': showTabs ? '54px' : '0px' } as React.CSSProperties}>
       {showTabs && (
-        <div 
+        <div
           className={`sticky top-0 z-40 overflow-x-auto hide-scrollbar shadow-sm min-h-[54px] flex items-center ${hasSidebar ? "md:ml-[220px]" : "w-full"}`}
           style={{ background: 'var(--bg)', borderBottom: '1px solid var(--bdr)' }}
         >
@@ -164,7 +178,33 @@ export function MenuContent({ categories, items, businessId, theme, menus, multi
           </div>
         </div>
       )}
-      <Layout categories={visibleCategories} items={filteredItems} businessId={businessId} />
+
+      {showSearch && (
+        <div className={hasSidebar ? 'md:ml-[220px]' : ''}>
+          <SearchBar
+            query={searchQuery}
+            onChange={setSearchQuery}
+            resultCount={searchResults.length}
+          />
+        </div>
+      )}
+
+      {isSearching ? (
+        <div className={`px-4 pt-4 space-y-2 ${hasSidebar ? 'md:ml-[220px]' : ''}`}>
+          {searchResults.length === 0 ? (
+            <p className="py-16 text-center text-sm" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>
+              No items matched &ldquo;{searchQuery}&rdquo;
+            </p>
+          ) : (
+            searchResults.map(item => (
+              <ItemCard key={item.id} item={item} variant="row" theme={theme} />
+            ))
+          )}
+        </div>
+      ) : (
+        <Layout categories={visibleCategories} items={filteredItems} businessId={businessId} />
+      )}
+
       <ThumbDock categories={visibleCategories} presentDietary={presentDietary} />
     </main>
   )

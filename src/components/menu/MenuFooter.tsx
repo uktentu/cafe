@@ -1,6 +1,6 @@
 'use client'
 
-import { Phone, MapPin } from 'lucide-react'
+import { Phone, MapPin, Share2 } from 'lucide-react'
 import type { Business, Theme } from '@/types/database'
 import { track } from '@/lib/firebase'
 import { getConfig } from '@/lib/config'
@@ -129,7 +129,27 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
           )}
         </div>
 
-        <p className="text-xs uppercase tracking-widest mt-4 opacity-50" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>
+        {/* Share menu button */}
+        <button
+          onClick={() => {
+            const url = window.location.href.split('?')[0]
+            const shareData = { title: `${business.name} — Menu`, text: `Check out the menu at ${business.name}`, url }
+            if (typeof navigator !== 'undefined' && navigator.share) {
+              navigator.share(shareData).catch(() => {})
+            } else {
+              navigator.clipboard?.writeText(url).then(() => {
+                // brief visual feedback handled by CSS
+              })
+            }
+          }}
+          className="flex items-center gap-2 text-xs px-4 py-2 rounded-full border transition-transform hover:scale-105 active:scale-95"
+          style={{ borderColor: 'var(--bdr2)', color: 'var(--txt2)', background: 'var(--sf1)', fontFamily: 'var(--font-body)' }}
+        >
+          <Share2 className="h-3.5 w-3.5" />
+          Share this menu
+        </button>
+
+        <p className="text-xs uppercase tracking-widest mt-2 opacity-40" style={{ color: 'var(--txt2)', fontFamily: 'var(--font-body)' }}>
           {business.name}
         </p>
 

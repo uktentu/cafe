@@ -41,3 +41,6 @@ next-env.d.ts
 # reports
 lh-report.json
 
+# secrets dump (never commit — use .env.local or Cloudflare env vars)
+secrets.json
+

@@ -100,14 +100,14 @@ async function _getMenuData(slug: string): Promise<MenuData | null> {
 
   const supabase = createAnonClient()
 
-  const { data: raw } = await supabase
+  const { data: raw, error } = await supabase
     .from('businesses')
     .select('*')
     .eq('slug', slug)
     .eq('is_active', true)
     .maybeSingle()
 
-  if (!raw) return null
+  if (!raw) return { _error: error, _slug: slug, _supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL } as unknown as MenuData
   const business = normaliseBusiness(raw)
 
   const [{ data: rawCats }, { data: rawItems }, { data: rawTrans }, { data: rawBanners }, { data: rawBranches }, { data: rawMenus }] = await Promise.all([

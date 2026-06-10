@@ -113,11 +113,16 @@ export function MenuLayoutClient({ business, categories, items, translations, ba
 
   const [showDemo, setShowDemo] = useState(false)
   useEffect(() => {
-    // Show demo toggle if backend tells us we're in demo mode, or via env
     if (isDemo || process.env.NEXT_PUBLIC_DEMO_MODE === 'true') {
       setShowDemo(true)
     }
   }, [isDemo])
+
+  const [tableLabel, setTableLabel] = useState<string | null>(null)
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get('table')
+    if (t) setTableLabel(decodeURIComponent(t))
+  }, [])
 
   return (
     <>
@@ -155,8 +160,9 @@ export function MenuLayoutClient({ business, categories, items, translations, ba
           whatsapp={business.whatsapp ?? ''}
           businessId={business.id}
           businessName={business.name}
+          tableLabel={tableLabel}
         />
-        <DeferredItemModal businessName={business.name} whatsapp={business.whatsapp ?? ''} theme={theme} />
+        <DeferredItemModal businessName={business.name} whatsapp={business.whatsapp ?? ''} theme={theme} tableLabel={tableLabel} />
         <DeferredReservationModal businessId={business.id} businessName={business.name} branchId={selectedBranchId ?? undefined} theme={theme} />
       </LanguageProvider>
     </>
