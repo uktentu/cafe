@@ -41,9 +41,9 @@ function DemoThemeSwitcher({ currentTheme, setTheme }: { currentTheme: Theme; se
       {open && (
         <div 
           className="flex flex-col gap-1 rounded-2xl p-2 border shadow-lg max-h-[60vh] overflow-y-auto"
-          style={{ 
-            background: 'var(--bg)', 
-            borderColor: 'var(--border)',
+          style={{
+            background: 'var(--bg)',
+            borderColor: 'var(--bdr)',
             color: 'var(--txt)'
           }}
         >
@@ -67,9 +67,9 @@ function DemoThemeSwitcher({ currentTheme, setTheme }: { currentTheme: Theme; se
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center justify-center w-12 h-12 rounded-full shadow-lg border transition-transform hover:scale-105 active:scale-95"
-        style={{ 
-          background: 'var(--glass)', 
-          borderColor: 'var(--border)',
+        style={{
+          background: 'var(--glass)',
+          borderColor: 'var(--bdr)',
           backdropFilter: 'blur(12px)',
           color: 'var(--txt)'
         }}

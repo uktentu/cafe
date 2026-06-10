@@ -73,33 +73,49 @@ const ALL_FONTS = [
   syne, playfair, jost, spaceMono,
 ]
 
-/** className that registers all font variables on the wrapper element. */
+/** className that registers all font variables + emits the @font-face/preload. */
 export const FONT_VARS_CLASS = ALL_FONTS.map((f) => f.variable).join(' ')
 
-interface ThemeFontPair { display: string; body: string }
+// We map each theme to the *concrete* family name next/font generates
+// (e.g. "__Bebas_Neue_abc123", "__Bebas_Neue_Fallback_abc123") via `.style.fontFamily`,
+// NOT to `var(--font-x)`. CSS custom-property substitution resolves `var()` on the
+// element where the property is *declared* — and we declare --font-display on :root,
+// where the next/font `--font-x` variables (defined on the wrapper) don't exist.
+// Using the concrete family name sidesteps that cascade trap entirely.
+type FontFamilySource = { style: { fontFamily: string } }
+interface ThemeFontPair { display: FontFamilySource; body: FontFamilySource }
 
 const THEME_FONTS: Record<Theme, ThemeFontPair> = {
   // Basic
-  mercado:    { display: 'var(--font-bebas)',        body: 'var(--font-dm-sans)' },
-  provenance: { display: 'var(--font-dm-serif)',     body: 'var(--font-dm-sans)' },
-  terrain:    { display: 'var(--font-space-grotesk)', body: 'var(--font-inter)' },
+  mercado:    { display: bebas,        body: dmSans },
+  provenance: { display: dmSerif,      body: dmSans },
+  terrain:    { display: spaceGrotesk, body: inter },
   // Advanced
-  bazaar:     { display: 'var(--font-anton)',        body: 'var(--font-dm-sans)' },
-  nocturne:   { display: 'var(--font-cormorant)',    body: 'var(--font-outfit)' },
-  coastal:    { display: 'var(--font-fraunces)',     body: 'var(--font-plus-jakarta)' },
+  bazaar:     { display: anton,        body: dmSans },
+  nocturne:   { display: cormorant,    body: outfit },
+  coastal:    { display: fraunces,     body: plusJakarta },
   // Premium
-  aether:     { display: 'var(--font-syne)',         body: 'var(--font-inter)' },
-  onyx:       { display: 'var(--font-playfair)',     body: 'var(--font-jost)' },
-  studio:     { display: 'var(--font-space-mono)',   body: 'var(--font-inter)' },
+  aether:     { display: syne,         body: inter },
+  onyx:       { display: playfair,     body: jost },
+  studio:     { display: spaceMono,    body: inter },
   // Specialty
-  sakura:     { display: 'var(--font-cormorant)',    body: 'var(--font-dm-sans)' },
-  frost:      { display: 'var(--font-space-grotesk)', body: 'var(--font-dm-sans)' },
-  ember:      { display: 'var(--font-playfair)',     body: 'var(--font-jost)' },
-  arcade:     { display: 'var(--font-space-grotesk)', body: 'var(--font-dm-sans)' },
+  sakura:     { display: cormorant,    body: dmSans },
+  frost:      { display: spaceGrotesk, body: dmSans },
+  ember:      { display: playfair,     body: jost },
+  arcade:     { display: spaceGrotesk, body: dmSans },
 }
 
-/** CSS vars to set on the menu wrapper so components can use var(--font-display). */
-export function themeFontVars(theme: Theme): Record<string, string> {
+/** Concrete font-family stacks (with a system fallback) for a theme. */
+export function themeFontFamilies(theme: Theme): { display: string; body: string } {
   const pair = THEME_FONTS[theme] ?? THEME_FONTS.mercado
-  return { '--font-display': pair.display, '--font-body': pair.body }
+  return {
+    display: `${pair.display.style.fontFamily}, system-ui, sans-serif`,
+    body: `${pair.body.style.fontFamily}, system-ui, sans-serif`,
+  }
+}
+
+/** CSS vars to set so components can use var(--font-display) / var(--font-body). */
+export function themeFontVars(theme: Theme): Record<string, string> {
+  const { display, body } = themeFontFamilies(theme)
+  return { '--font-display': display, '--font-body': body }
 }

@@ -5,6 +5,7 @@
 // to look award-winning text-only (no photos).
 // ════════════════════════════════════════════════════════════════════
 import type { Theme, Tier } from '@/types/database'
+import { themeFontFamilies } from '@/lib/fonts'
 
 export type CategoryNavStyle = 'pills' | 'text' | 'sections' | 'blocks' | 'vertical'
 export type ColorScheme = 'dark' | 'light'
@@ -232,9 +233,12 @@ export function themeCssVars(theme: Theme, brandOverride?: string | null): Recor
   const vars: Record<string, string> = {}
   for (const [k, v] of Object.entries(BASE_VARS)) vars[`--${k}`] = v
   for (const [k, v] of Object.entries(colors)) vars[`--${k}`] = v
-  
-  vars['--font-display'] = `"${meta.displayFont}", system-ui, sans-serif`
-  vars['--font-body'] = `"${meta.bodyFont}", system-ui, sans-serif`
+
+  // Concrete next/font family names (NOT "Bebas Neue" literals — those never match
+  // next/font's hashed family names, and NOT var(--font-x) which breaks at :root).
+  const fonts = themeFontFamilies(theme)
+  vars['--font-display'] = fonts.display
+  vars['--font-body'] = fonts.body
 
   const rgb = hexToRgb(colors.brand)
   if (rgb) {

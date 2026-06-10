@@ -35,12 +35,13 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 import { resolveTheme } from '@/lib/design-tokens'
+import { notFound } from 'next/navigation'
 
 export default async function MenuPage() {
   const { slug, theme: envTheme, tier } = getConfig()
   const data = await getMenuData(slug)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if ((data as any)?._error || !data?.business) return <div><h1>ERROR DEBUG</h1><pre>{JSON.stringify(data, null, 2)}</pre></div>
+  if ((data as any)?._error || !data?.business) notFound()
   const theme = resolveTheme(tier, data.business.theme ?? envTheme)
 
   const { business, categories, items, translations, banners, branches, menus, demo } = data
