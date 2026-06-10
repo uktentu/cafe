@@ -45,6 +45,11 @@ export function createAnonClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     supabaseAnonKey(),
-    { auth: { autoRefreshToken: false, persistSession: false } },
+    { 
+      auth: { autoRefreshToken: false, persistSession: false },
+      global: {
+        fetch: (url, init) => fetch(url, { ...init, cache: 'no-store' })
+      }
+    },
   )
 }
