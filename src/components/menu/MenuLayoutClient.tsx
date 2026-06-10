@@ -11,7 +11,8 @@ import { MenuHero } from './MenuHero'
 import { BestsellerStrip } from './BestsellerStrip'
 import { MenuContent } from './MenuContent'
 import { MenuFooter } from './MenuFooter'
-import { WhatsAppCTA } from './WhatsAppCTA'
+import { CartButton } from './CartButton'
+import { CartDrawer } from './CartDrawer'
 import { DeferredItemModal } from './DeferredItemModal'
 import { DeferredReservationModal } from './DeferredReservationModal'
 import { Palette } from 'lucide-react'
@@ -156,13 +157,15 @@ export function MenuLayoutClient({ business, categories, items, translations, ba
           <MenuFooter business={business} theme={theme} />
         </div>
 
-        <WhatsAppCTA
+        <CartButton />
+        <CartDrawer
           whatsapp={business.whatsapp ?? ''}
           businessId={business.id}
           businessName={business.name}
+          googleMapsUrl={business.social_links?.google_maps}
           tableLabel={tableLabel}
         />
-        <DeferredItemModal businessName={business.name} whatsapp={business.whatsapp ?? ''} theme={theme} tableLabel={tableLabel} />
+        <DeferredItemModal theme={theme} />
         <DeferredReservationModal businessId={business.id} businessName={business.name} branchId={selectedBranchId ?? undefined} theme={theme} />
       </LanguageProvider>
     </>

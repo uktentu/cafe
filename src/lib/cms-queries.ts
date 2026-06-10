@@ -50,6 +50,9 @@ function normaliseItem(raw: any): Item {
   return { ...raw, image_mode, stock_image_key: raw.stock_image_key ?? null, custom_r2_key, custom_thumb_key,
     compare_price: raw.compare_price ?? null, badge: raw.badge ?? null,
     allergens: raw.allergens ?? [], is_featured: raw.is_featured ?? false,
+    is_special: raw.is_special ?? false,
+    show_from: raw.show_from ?? null, show_until: raw.show_until ?? null,
+    add_ons: raw.add_ons ?? [],
     dietary: raw.dietary ?? 'none' } as Item
 }
 

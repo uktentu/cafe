@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import type { Tier } from '@/types/database'
 
-export const runtime = 'edge'
+
 
 const SEED_CATEGORIES = [
   { name: 'Starters', icon: 'soup', sort_order: 1 },
@@ -141,3 +141,5 @@ function generatePassword() {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$'
   return Array.from({ length: 16 }, () => chars[Math.floor(Math.random() * chars.length)]).join('')
 }
+
+export const runtime = "edge";

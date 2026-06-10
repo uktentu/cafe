@@ -61,6 +61,10 @@ const base = {
   custom_r2_key: null as string | null,
   custom_thumb_key: null as string | null,
   is_available: true,
+  is_special: false,
+  show_from: null as string | null,
+  show_until: null as string | null,
+  add_ons: [] as import('@/types/database').AddOn[],
   view_count: 0,
 }
 

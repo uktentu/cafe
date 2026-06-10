@@ -4,7 +4,7 @@ import { createAdminClient } from '@/lib/supabase/server'
 import { AdminClient } from './AdminClient'
 import type { Business } from '@/types/database'
 
-export const dynamic = 'force-dynamic'
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 
 export default async function AdminPage() {
   const ctx = await getCmsContext()
@@ -40,3 +40,5 @@ export default async function AdminPage() {
     />
   )
 }
+
+export const runtime = "edge";

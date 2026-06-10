@@ -3,6 +3,8 @@ import { getConfig } from '@/lib/config'
 import { redirect } from 'next/navigation'
 import { Check, X, Zap, Star, Crown } from 'lucide-react'
 
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
+
 const TIERS = [
   {
     id: 'basic',
@@ -273,3 +275,5 @@ export default async function PlansPage() {
     </div>
   )
 }
+
+export const runtime = "edge";

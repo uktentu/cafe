@@ -62,6 +62,7 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado', 
   const hasImage = item.image_mode !== 'none' && Boolean(src) && !imgError
   const Icon = getCategoryIcon(category?.icon)
   const soldOut = !item.is_available
+  const isSpecial = item.is_special === true
   const upper = UPPERCASE_THEMES.has(theme)
   const style = THEME_CARD_STYLE[theme] ?? THEME_CARD_STYLE.mercado
 
@@ -98,6 +99,11 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado', 
         />
         {item.badge && (
           <ItemBadge badge={item.badge} className="absolute left-2 top-2 shadow-sm" />
+        )}
+        {isSpecial && !item.badge && (
+          <span className="absolute left-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide shadow-sm" style={{ background: '#F59E0B', color: '#fff' }}>
+            ✦ Special
+          </span>
         )}
         {soldOut && (
           <span

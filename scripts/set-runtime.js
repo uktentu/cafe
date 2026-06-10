@@ -12,6 +12,13 @@ if (!['edge', 'remove'].includes(targetRuntime)) {
   process.exit(1)
 }
 
+// Static export (GitHub Pages demo) cannot prerender edge-runtime pages in Node.js.
+// When STATIC_EXPORT=1 and the caller asked for 'edge', strip instead of injecting.
+if (targetRuntime === 'edge' && process.env.STATIC_EXPORT === '1') {
+  console.log('STATIC_EXPORT=1 — stripping edge runtime for static build')
+  targetRuntime = 'remove'
+}
+
 function walk(dir) {
   let results = []
   const list = fs.readdirSync(dir)
@@ -22,7 +29,8 @@ function walk(dir) {
       results = results.concat(walk(file))
     } else {
       if (file.endsWith('page.tsx') || file.endsWith('route.ts')) {
-        if (!file.includes('(menu)/page.tsx')) {
+        // Exclude the entire (menu) route group — those pages use ISR/static, not edge.
+        if (!file.includes('/(menu)/')) {
           results.push(file)
         }
       }

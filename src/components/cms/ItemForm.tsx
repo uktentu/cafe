@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Trash2, ImageOff, Images, Upload } from 'lucide-react'
+import { Trash2, ImageOff, Images, Upload, Plus, X } from 'lucide-react'
 import { useCms } from './Providers'
 import { StockImagePicker } from './StockImagePicker'
 import { ImageUpload } from './ImageUpload'
@@ -18,7 +18,7 @@ import {
   qk, fetchItem, fetchCategories, createItem, updateItem, deleteItem, uploadImage, fetchBranches,
   fetchTranslations, upsertTranslation
 } from '@/lib/cms-queries'
-import { cdnUrl, type Badge, type ImageMode, type Item, type DietaryPreference } from '@/types/database'
+import { cdnUrl, type Badge, type ImageMode, type Item, type DietaryPreference, type AddOn } from '@/types/database'
 import { getConfig } from '@/lib/config'
 import { cn } from '@/lib/utils'
 
@@ -77,6 +77,12 @@ export function ItemForm({ itemId }: { itemId?: string }) {
   const [jain, setJain] = useState(false)
   const [gf, setGf] = useState(false)
   const [featured, setFeatured] = useState(false)
+  const [isSpecial, setIsSpecial] = useState(false)
+  const [showFrom, setShowFrom] = useState('')
+  const [showUntil, setShowUntil] = useState('')
+  const [allergens, setAllergens] = useState<string[]>([])
+  const [addOns, setAddOns] = useState<AddOn[]>([])
+  const [newAddOn, setNewAddOn] = useState({ name: '', price: '' })
   const [saving, setSaving] = useState(false)
   const [imgErr, setImgErr] = useState<string | null>(null)
 
@@ -106,6 +112,11 @@ export function ItemForm({ itemId }: { itemId?: string }) {
     setExisting({ custom_r2_key: it.custom_r2_key, custom_thumb_key: it.custom_thumb_key })
     setDietary(it.dietary); setJain(it.is_jain); setGf(it.is_gluten_free)
     setFeatured(it.is_featured)
+    setIsSpecial(it.is_special ?? false)
+    setShowFrom(it.show_from ?? '')
+    setShowUntil(it.show_until ?? '')
+    setAllergens(it.allergens ?? [])
+    setAddOns(it.add_ons ?? [])
   }, [itemQ.data, transQ.data, reset])
 
   async function onSubmit(values: FormValues) {
@@ -134,6 +145,11 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         badge: (values.badge || null) as Badge | null,
         dietary, is_jain: jain, is_gluten_free: gf,
         is_featured: featured,
+        is_special: isSpecial,
+        show_from: showFrom || null,
+        show_until: showUntil || null,
+        allergens,
+        add_ons: addOns,
       }
 
       // Image fields that don't require an upload.
@@ -371,6 +387,99 @@ export function ItemForm({ itemId }: { itemId?: string }) {
             <p className="text-xs text-neutral-400">Show in the bestsellers strip</p>
           </div>
           <Toggle checked={featured} onChange={setFeatured} label="Featured" size="sm" />
+        </div>
+        <div className="flex items-center justify-between rounded-lg bg-amber-50 dark:bg-amber-500/10 px-3 py-2.5">
+          <div>
+            <span className="text-sm font-medium text-amber-700 dark:text-amber-400">✦ Today&apos;s Special</span>
+            <p className="text-xs text-neutral-400">Shows amber badge on item card</p>
+          </div>
+          <Toggle checked={isSpecial} onChange={setIsSpecial} label="Today's Special" size="sm" />
+        </div>
+        {isSpecial && (
+          <div className="grid grid-cols-2 gap-3">
+            <Field label="Show from (HH:MM)">
+              <Input type="time" value={showFrom} onChange={(e) => setShowFrom(e.target.value)} placeholder="09:00" />
+            </Field>
+            <Field label="Hide after (HH:MM)">
+              <Input type="time" value={showUntil} onChange={(e) => setShowUntil(e.target.value)} placeholder="22:00" />
+            </Field>
+          </div>
+        )}
+      </div>
+
+      {/* Allergens */}
+      <div className="space-y-3 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Allergens</p>
+        <div className="flex flex-wrap gap-2">
+          {['Gluten', 'Nuts', 'Peanuts', 'Dairy', 'Eggs', 'Soy', 'Shellfish', 'Fish'].map((a) => {
+            const active = allergens.includes(a)
+            return (
+              <button
+                key={a}
+                type="button"
+                onClick={() => setAllergens(active ? allergens.filter(x => x !== a) : [...allergens, a])}
+                className={cn(
+                  'rounded-full border px-3 py-1 text-xs font-medium transition-colors',
+                  active
+                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-500/15 text-amber-700 dark:text-amber-400'
+                    : 'border-neutral-200 dark:border-neutral-700 text-neutral-500 dark:text-neutral-400 hover:border-amber-300'
+                )}
+              >
+                {a}
+              </button>
+            )
+          })}
+        </div>
+        {allergens.length > 0 && (
+          <p className="text-xs text-neutral-400">Tagged: {allergens.join(', ')}</p>
+        )}
+      </div>
+
+      {/* Add-ons */}
+      <div className="space-y-3 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <p className="text-sm font-medium text-neutral-700 dark:text-neutral-300">Add-ons / Modifiers</p>
+        <p className="text-xs text-neutral-400">Customers can select these in the item modal before adding to cart.</p>
+        <div className="space-y-2">
+          {addOns.map((ao) => (
+            <div key={ao.id} className="flex items-center gap-2 rounded-lg bg-neutral-50 dark:bg-neutral-800/50 px-3 py-2">
+              <span className="flex-1 text-sm text-neutral-700 dark:text-neutral-300">{ao.name}</span>
+              <span className="text-sm font-semibold text-amber-600">{ao.price > 0 ? `+₹${ao.price}` : 'Free'}</span>
+              <button
+                type="button"
+                onClick={() => setAddOns(addOns.filter(a => a.id !== ao.id))}
+                className="rounded p-0.5 text-neutral-400 hover:text-red-500"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          ))}
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Add-on name (e.g. Extra Cheese)"
+              value={newAddOn.name}
+              onChange={(e) => setNewAddOn(n => ({ ...n, name: e.target.value }))}
+              className="flex-1 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-amber-500 focus:outline-none"
+            />
+            <input
+              type="number"
+              placeholder="₹0"
+              value={newAddOn.price}
+              onChange={(e) => setNewAddOn(n => ({ ...n, price: e.target.value }))}
+              className="w-20 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-3 py-2 text-sm text-neutral-900 dark:text-white focus:border-amber-500 focus:outline-none"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (!newAddOn.name.trim()) return
+                setAddOns([...addOns, { id: crypto.randomUUID(), name: newAddOn.name.trim(), price: Number(newAddOn.price) || 0 }])
+                setNewAddOn({ name: '', price: '' })
+              }}
+              className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-500 text-white hover:bg-amber-600"
+            >
+              <Plus className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       </div>
 

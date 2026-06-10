@@ -94,7 +94,16 @@ export function MenuContent({ categories, items, businessId, theme, menus, multi
 
   const filteredItems = useMemo(
     () => {
-      const base = dietary === 'all' ? items : items.filter((it) => it.dietary === dietary)
+      const now = new Date()
+      const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`
+      const base = (dietary === 'all' ? items : items.filter((it) => it.dietary === dietary))
+        .filter((it) => {
+          // Timed visibility: hide item outside its show window
+          if (it.show_from && it.show_until) {
+            return hhmm >= it.show_from && hhmm <= it.show_until
+          }
+          return true
+        })
       return base.map(it => ({
         ...it,
         name: t('item', it.id, 'name', it.name),

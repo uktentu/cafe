@@ -175,6 +175,41 @@ export function DietaryFlags({ item }: { item: Item }) {
   )
 }
 
+// ── Allergen tags ─────────────────────────────────────────────────────────
+
+const ALLERGEN_COLORS: Record<string, { bg: string; text: string }> = {
+  gluten:    { bg: 'rgba(217,119,6,0.1)',   text: '#D97706' },
+  nuts:      { bg: 'rgba(180,83,9,0.1)',    text: '#B45309' },
+  peanuts:   { bg: 'rgba(180,83,9,0.1)',    text: '#B45309' },
+  dairy:     { bg: 'rgba(59,130,246,0.1)',  text: '#3B82F6' },
+  eggs:      { bg: 'rgba(245,158,11,0.1)', text: '#F59E0B' },
+  soy:       { bg: 'rgba(5,150,105,0.1)',  text: '#059669' },
+  shellfish: { bg: 'rgba(239,68,68,0.1)',  text: '#EF4444' },
+  fish:      { bg: 'rgba(14,165,233,0.1)', text: '#0EA5E9' },
+}
+
+export function AllergenTags({ allergens }: { allergens: string[] }) {
+  if (!allergens || allergens.length === 0) return null
+  return (
+    <div className="flex flex-wrap items-center gap-1.5">
+      <span className="text-[10px] uppercase tracking-wider opacity-40">Contains:</span>
+      {allergens.map((a) => {
+        const key = a.toLowerCase()
+        const colors = ALLERGEN_COLORS[key] ?? { bg: 'rgba(100,116,139,0.1)', text: '#64748B' }
+        return (
+          <span
+            key={a}
+            className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold capitalize"
+            style={{ background: colors.bg, color: colors.text }}
+          >
+            {a}
+          </span>
+        )
+      })}
+    </div>
+  )
+}
+
 // ── Compact dietary row for cards ─────────────────────────────────────────
 
 export function CardDietaryRow({ item, className }: { item: Item; className?: string }) {

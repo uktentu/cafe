@@ -25,6 +25,12 @@ export interface DayHours {
 }
 export type OpeningHours = Record<string, DayHours>
 
+export interface AddOn {
+  id: string
+  name: string
+  price: number
+}
+
 export interface SocialLinks {
   instagram?: string | null
   swiggy?: string | null
@@ -33,6 +39,8 @@ export interface SocialLinks {
   multiple_menus_enabled?: boolean
   reservations_enabled?: boolean
   multiple_branches_enabled?: boolean
+  wait_time?: string | null
+  wait_time_label?: string | null
 }
 
 export interface Business {
@@ -93,6 +101,10 @@ export interface Item {
   badge: Badge | null
   is_available: boolean
   is_featured: boolean
+  is_special: boolean
+  show_from: string | null
+  show_until: string | null
+  add_ons: AddOn[]
   sort_order: number
   view_count: number
   created_at?: string
@@ -187,6 +199,7 @@ export interface Translation {
 export type AnalyticsEventType =
   | 'page_view' | 'item_view' | 'whatsapp_click' | 'call_click'
   | 'share' | 'maps_click' | 'reservation_submit' | 'category_tap'
+  | 'add_to_cart' | 'cart_order'
 
 export interface AnalyticsEvent {
   id: string

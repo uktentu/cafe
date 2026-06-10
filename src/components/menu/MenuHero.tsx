@@ -9,7 +9,7 @@ import { m, AnimatePresence } from 'framer-motion'
 import { isOpenNow } from '@/lib/hours'
 import { ArcadeGameModal } from './ArcadeGameModal'
 import { BookTableButton } from './BookTableButton'
-import { Info } from 'lucide-react'
+import { Info, Clock } from 'lucide-react'
 
 function initials(name: string): string {
   return name.split(/\s+/).slice(0, 2).map((w) => w[0]?.toUpperCase() ?? '').join('')
@@ -25,43 +25,50 @@ function StatusBadge({ business, theme, align = 'center' }: { business: Business
   const isOnyx = theme === 'onyx'
   const isProvenance = theme === 'provenance'
   const radiusClass = (isArcade || isOnyx || isProvenance) ? 'rounded-none' : 'rounded-full'
+  const waitTime = business.social_links?.wait_time
 
-  if (!status.label) {
-    return (
-      <div className={`flex items-center gap-3 mt-1 flex-wrap ${justifyClass}`}>
-        <BookTableButton theme={theme} tenantEnabled={business.social_links?.reservations_enabled === true} />
-        <button
-          onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
-          className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
-          style={{ background: 'var(--glass)', color: 'var(--txt)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
-          aria-label="Shop Information"
-        >
-          <Info className={isArcade ? "h-3 w-3" : "h-4 w-4"} />
-          Info
-        </button>
-      </div>
-    )
+  const sharedBadgeStyle: React.CSSProperties = {
+    background: 'var(--glass)', backdropFilter: 'blur(8px)',
+    fontFamily: isArcade ? undefined : 'var(--font-body)',
   }
 
+  const infoBtn = (
+    <button
+      onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
+      className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
+      style={{ ...sharedBadgeStyle, color: 'var(--txt)' }}
+      aria-label="Shop Information"
+    >
+      <Info className={isArcade ? "h-3 w-3" : "h-4 w-4"} />
+      Info
+    </button>
+  )
+
   return (
-    <div className={`flex items-center gap-3 mt-1 flex-wrap ${justifyClass}`}>
-      <div
-        className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-white/10 ${radiusClass} ${isArcade ? 'arcade-font text-[8px] uppercase border-[var(--txt2)]' : ''}`}
-        style={{ background: 'var(--glass)', color: 'var(--txt2)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
-      >
-        <span className={isArcade ? "h-1 w-1 rounded-none" : "h-1.5 w-1.5 rounded-full"} style={{ background: status.open ? '#22C55E' : '#EF4444' }} />
-        {status.label}
+    <div className={`flex flex-col items-${align === 'start' ? 'start' : 'center'} gap-2 mt-1`}>
+      {/* Wait time widget */}
+      {waitTime && (
+        <div
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-amber-400/30 ${radiusClass}`}
+          style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', fontFamily: sharedBadgeStyle.fontFamily }}
+        >
+          <Clock className="h-3.5 w-3.5" />
+          ~{waitTime} wait tonight
+        </div>
+      )}
+      <div className={`flex items-center gap-3 flex-wrap ${justifyClass}`}>
+        {status.label && (
+          <div
+            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-white/10 ${radiusClass} ${isArcade ? 'arcade-font text-[8px] uppercase border-[var(--txt2)]' : ''}`}
+            style={{ ...sharedBadgeStyle, color: 'var(--txt2)' }}
+          >
+            <span className={isArcade ? "h-1 w-1 rounded-none" : "h-1.5 w-1.5 rounded-full"} style={{ background: status.open ? '#22C55E' : '#EF4444' }} />
+            {status.label}
+          </div>
+        )}
+        <BookTableButton theme={theme} tenantEnabled={business.social_links?.reservations_enabled === true} />
+        {infoBtn}
       </div>
-      <BookTableButton theme={theme} tenantEnabled={business.social_links?.reservations_enabled === true} />
-      <button
-        onClick={() => document.getElementById('footer')?.scrollIntoView({ behavior: 'smooth' })}
-        className={`inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border border-white/10 transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand ${radiusClass} ${isArcade ? 'arcade-font text-[10px] uppercase border-[var(--txt)]' : ''}`}
-        style={{ background: 'var(--glass)', color: 'var(--txt)', backdropFilter: 'blur(8px)', fontFamily: isArcade ? undefined : 'var(--font-body)' }}
-        aria-label="Shop Information"
-      >
-        <Info className={isArcade ? "h-3 w-3" : "h-4 w-4"} />
-        Info
-      </button>
     </div>
   )
 }

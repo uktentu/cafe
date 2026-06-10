@@ -34,10 +34,13 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Strip Edge Runtime for Static Export
-        # Next.js static export fails to prerender routes marked as 'edge' because it
-        # evaluates them in Node.js where 'self' is not defined. We strip the edge
-        # export dynamically just for the GitHub Pages static build.
-        run: find src/app -type f \( -name "*.tsx" -o -name "*.ts" \) -exec perl -pi -e "s/export const runtime = 'edge'//g" {} +
+        # Next.js static export fails to prerender routes marked as 'edge' because
+        # edge bundles reference `self` which doesn't exist in the Node.js runtime.
+        # set-runtime.js also exits early when STATIC_EXPORT=1 so it won't re-inject.
+        # This step strips any committed edge runtime declarations (both quote styles).
+        run: |
+          find src/app -type f \( -name "*.tsx" -o -name "*.ts" \) \
+            -exec perl -pi -e 's/export const runtime = .edge.;\n?//g' {} +
 
       - name: Build static export (STATIC_EXPORT=1 → output:export + basePath:/cafe)
         run: pnpm build

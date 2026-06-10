@@ -59,6 +59,7 @@ export function SettingsForm() {
   const [multipleMenus, setMultipleMenus] = useState(business.social_links?.multiple_menus_enabled ?? false)
   const [reservationsEnabled, setReservationsEnabled] = useState(business.social_links?.reservations_enabled ?? false)
   const [multipleBranchesEnabled, setMultipleBranchesEnabled] = useState(business.social_links?.multiple_branches_enabled ?? false)
+  const [waitTime, setWaitTime] = useState(business.social_links?.wait_time ?? '')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [seoOgFile, setSeoOgFile] = useState<File | null>(null)
@@ -103,11 +104,12 @@ export function SettingsForm() {
         opening_hours: hours,
         theme,
         theme_color: brand,
-        social_links: { 
-          ...business.social_links, 
+        social_links: {
+          ...business.social_links,
           multiple_menus_enabled: multipleMenus,
           reservations_enabled: reservationsEnabled,
           multiple_branches_enabled: multipleBranchesEnabled,
+          wait_time: waitTime.trim() || null,
         },
         seo_title: values.seo_title || null,
         seo_description: values.seo_description || null,
@@ -151,6 +153,21 @@ export function SettingsForm() {
           <Field label="Phone"><Input {...register('phone')} placeholder="+91-…" /></Field>
           <Field label="WhatsApp" hint="Digits only, with country code"><Input {...register('whatsapp')} placeholder="9198…" /></Field>
         </div>
+        <Field label="Tonight's wait time" hint="Shown on your menu hero to manage expectations. Leave blank to hide.">
+          <div className="flex gap-2 items-center">
+            <Input
+              placeholder="e.g. 20 min"
+              value={waitTime}
+              onChange={(e) => setWaitTime(e.target.value)}
+              className="max-w-[180px]"
+            />
+            {waitTime && (
+              <button type="button" onClick={() => setWaitTime('')} className="text-xs text-neutral-400 hover:text-red-500">
+                Clear
+              </button>
+            )}
+          </div>
+        </Field>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Address"><Input {...register('address')} /></Field>
           <Field label="City"><Input {...register('city')} /></Field>
