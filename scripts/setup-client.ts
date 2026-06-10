@@ -21,6 +21,7 @@ import { stdin as input, stdout as output } from 'node:process'
 import { randomBytes } from 'node:crypto'
 import { config as loadEnv } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
 
 loadEnv({ path: '.env.local' })
 
@@ -44,6 +45,7 @@ async function main() {
   }
   const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
+    realtime: { transport: ws as any },
   })
 
   const rl = createInterface({ input, output })

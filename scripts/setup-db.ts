@@ -15,6 +15,7 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { config as loadEnv } from 'dotenv'
 import { createClient } from '@supabase/supabase-js'
+import ws from 'ws'
 
 loadEnv({ path: '.env.local' })
 
@@ -26,6 +27,7 @@ const PROJECT_REF = SUPABASE_URL?.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] 
 function db() {
   return createClient(SUPABASE_URL, SERVICE_KEY, {
     auth: { autoRefreshToken: false, persistSession: false },
+    realtime: { transport: ws as any },
   })
 }
 
