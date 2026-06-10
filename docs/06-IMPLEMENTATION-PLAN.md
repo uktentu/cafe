@@ -313,8 +313,8 @@ Do phases in order. Each phase must pass its done-check before starting the next
 - [ ] Test: sold-out toggle → menu updates within 30 seconds
 - [ ] Test: `prefers-reduced-motion` reduces to opacity-only fades
 - [ ] Test: tablet (768px) layout for all 9 themes
-- [ ] `pnpm tsc --noEmit` → zero TypeScript errors
-- [ ] `pnpm lint` → zero ESLint errors
+- [x] `pnpm tsc --noEmit` → zero TypeScript errors
+- [x] `pnpm lint` → zero ESLint errors
 - [ ] 30-minute client deploy using setup script
 
 ---
