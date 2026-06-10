@@ -28,7 +28,7 @@ export default async function CmsAppLayout({ children }: { children: React.React
   return (
     <CmsProviders business={ctx.business} role={ctx.role}>
       <div className="min-h-[100svh] bg-[#F7F8FA] dark:bg-neutral-950">
-        <Sidebar businessName={ctx.business.name} userEmail={ctx.userEmail} />
+        <Sidebar businessName={ctx.business.name} userEmail={ctx.userEmail} isAdmin={ctx.isAdmin} />
         <MobileTopbar businessName={ctx.business.name} />
         <div className="md:pl-64">
           <main className="mx-auto max-w-5xl p-4 md:p-8">{children}</main>

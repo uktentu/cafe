@@ -109,26 +109,6 @@ const FEATURE_PITCHES: Record<string, { title: string; desc: string }> = {
   Branches:         { title: 'Multi-Branch Management',  desc: 'Run up to 3 locations from one dashboard. Each branch gets its own QR codes, menu overrides, and analytics.' },
 }
 
-function FeatureRow({ label, value }: { label: string; value: boolean | string }) {
-  if (value === true) return (
-    <div className="flex items-center gap-2">
-      <Check className="h-4 w-4 shrink-0 text-emerald-500" />
-      <span className="text-sm text-neutral-700 dark:text-neutral-300">{label}</span>
-    </div>
-  )
-  if (value === false) return (
-    <div className="flex items-center gap-2 opacity-40">
-      <X className="h-4 w-4 shrink-0" />
-      <span className="text-sm line-through">{label}</span>
-    </div>
-  )
-  return (
-    <div className="flex items-center gap-2">
-      <span className="h-4 w-4 shrink-0 text-center text-xs font-bold text-amber-500">~</span>
-      <span className="text-sm text-neutral-600 dark:text-neutral-400">{label} ({value})</span>
-    </div>
-  )
-}
 
 export default function UpgradePage({ searchParams }: { searchParams: { feature?: string } }) {
   const featureKey = searchParams.feature || ''
@@ -286,7 +266,7 @@ export default function UpgradePage({ searchParams }: { searchParams: { feature?
       {devContact && (
         <div className="rounded-2xl bg-neutral-900 dark:bg-neutral-800 p-8 text-center text-white">
           <h3 className="mb-2 text-xl font-bold">Ready to upgrade?</h3>
-          <p className="mb-6 text-sm text-neutral-400">Message the developer on WhatsApp and we'll switch your plan within the hour.</p>
+          <p className="mb-6 text-sm text-neutral-400">Message the developer on WhatsApp and we&apos;ll switch your plan within the hour.</p>
           <a
             href={`https://wa.me/${devContact.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi, I\'d like to discuss upgrading my MenuOS plan.')}`}
             target="_blank"

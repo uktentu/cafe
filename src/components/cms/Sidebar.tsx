@@ -7,7 +7,7 @@ import { AnimatePresence, m } from 'framer-motion'
 import {
   Menu, LayoutList, Settings, QrCode, LogOut, BarChart3, Store, CalendarCheck, FileText,
   Megaphone, CalendarClock, Users, LayoutDashboard,
-  Lock, Menu as MenuIcon, X, ExternalLink, type LucideIcon,
+  Lock, Menu as MenuIcon, X, ExternalLink, CreditCard, ShieldCheck, type LucideIcon,
 } from 'lucide-react'
 import { getConfig } from '@/lib/config'
 import type { Features } from '@/lib/config'
@@ -118,7 +118,7 @@ function BranchSwitcher() {
   )
 }
 
-function SidebarContent({ businessName, userEmail, onNavigate }: { businessName: string; userEmail: string; onNavigate: () => void }) {
+function SidebarContent({ businessName, userEmail, isAdmin, onNavigate }: { businessName: string; userEmail: string; isAdmin: boolean; onNavigate: () => void }) {
   const pathname = usePathname()
   const router = useRouter()
   const { features, siteUrl } = getConfig()
@@ -178,6 +178,34 @@ function SidebarContent({ businessName, userEmail, onNavigate }: { businessName:
       </nav>
 
       <div className="space-y-1 border-t border-white/10 p-3">
+        <Link
+          href="/cms/plans"
+          onClick={onNavigate}
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
+            isActive('/cms/plans') ? 'text-amber-400 font-medium' : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+          )}
+        >
+          <CreditCard className="h-[18px] w-[18px]" />
+          Plans &amp; Pricing
+        </Link>
+
+        {isAdmin && (
+          <Link
+            href="/cms/admin"
+            onClick={onNavigate}
+            className={cn(
+              'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
+              isActive('/cms/admin')
+                ? 'bg-purple-500/20 text-purple-300 font-medium'
+                : 'text-purple-400 hover:bg-purple-500/10 hover:text-purple-300'
+            )}
+          >
+            <ShieldCheck className="h-[18px] w-[18px]" />
+            Admin Panel
+          </Link>
+        )}
+
         <div className="flex items-center gap-2 px-3 py-2">
           <ThemeToggle className="w-full flex-1 border-white/10 bg-white/5 hover:bg-white/10 hover:text-white" />
         </div>
@@ -202,7 +230,7 @@ function SidebarContent({ businessName, userEmail, onNavigate }: { businessName:
   )
 }
 
-export function Sidebar({ businessName, userEmail }: { businessName: string; userEmail: string }) {
+export function Sidebar({ businessName, userEmail, isAdmin }: { businessName: string; userEmail: string; isAdmin: boolean }) {
   const open = useCmsStore((s) => s.sidebarOpen)
   const setSidebar = useCmsStore((s) => s.setSidebar)
 
@@ -210,7 +238,7 @@ export function Sidebar({ businessName, userEmail }: { businessName: string; use
     <>
       {/* Desktop: fixed rail */}
       <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 md:block">
-        <SidebarContent businessName={businessName} userEmail={userEmail} onNavigate={() => {}} />
+        <SidebarContent businessName={businessName} userEmail={userEmail} isAdmin={isAdmin} onNavigate={() => {}} />
       </aside>
 
       {/* Mobile: slide-in drawer */}
@@ -231,7 +259,7 @@ export function Sidebar({ businessName, userEmail }: { businessName: string; use
               exit={{ x: -300 }}
               transition={{ type: 'spring', stiffness: 400, damping: 40 }}
             >
-              <SidebarContent businessName={businessName} userEmail={userEmail} onNavigate={() => setSidebar(false)} />
+              <SidebarContent businessName={businessName} userEmail={userEmail} isAdmin={isAdmin} onNavigate={() => setSidebar(false)} />
             </m.aside>
           </>
         )}

@@ -12,7 +12,7 @@ export type CmsContext =
   | { state: 'unauthed' }
   | { state: 'no-business' }
   | { state: 'forbidden' }
-  | { state: 'ok'; business: Business; userEmail: string; role: StaffRole }
+  | { state: 'ok'; business: Business; userEmail: string; role: StaffRole; isAdmin: boolean }
 
 // Cached per request so the (app) layout and the page share one resolution.
 export const getCmsContext = cache(_getCmsContext)
@@ -68,5 +68,7 @@ async function _getCmsContext(): Promise<CmsContext> {
     .maybeSingle<{ role: StaffRole }>()
   if (!staff) return { state: 'forbidden' }
 
-  return { state: 'ok', business, userEmail: user.email ?? '', role: staff.role }
+  const adminEmail = process.env.ADMIN_EMAIL
+  const isAdmin = Boolean(adminEmail && user.email === adminEmail)
+  return { state: 'ok', business, userEmail: user.email ?? '', role: staff.role, isAdmin }
 }
