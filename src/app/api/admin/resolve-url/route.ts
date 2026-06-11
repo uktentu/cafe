@@ -11,7 +11,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ expandedUrl: res.headers.get('location') })
     }
     return NextResponse.json({ error: 'No redirect found' }, { status: 404 })
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 })
   }
 }
+
+export const runtime = "edge";
