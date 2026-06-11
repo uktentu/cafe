@@ -4,6 +4,7 @@
 // Golden metallic scanline sweeping vertically. Price text has animated gold shimmer.
 // Sidebar category switch triggers spring stamp-pulse. Dot-leaders animate on hover.
 
+import { useEffect, useRef } from 'react'
 import { m } from 'framer-motion'
 import type { Item } from '@/types/database'
 import { useMenuStore } from '@/stores/menu'
@@ -117,8 +118,22 @@ export function OnyxLayout({ categories, items, businessId: _businessId }: Layou
   const requestJump = useMenuStore((s) => s.requestJump)
   const { activeId, register } = useScrollCategorySync(categories)
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const navRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const nav = navRef.current
+    const container = containerRef.current
+    if (!nav || !container) return
+    const ro = new ResizeObserver(() => {
+      container.style.setProperty('--inner-nav-h', `${nav.offsetHeight}px`)
+    })
+    ro.observe(nav)
+    return () => ro.disconnect()
+  }, [])
+
   return (
-    <div className="relative flex flex-col md:flex-row min-h-screen" style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
+    <div ref={containerRef} className="relative flex flex-col md:flex-row min-h-screen" style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
       <GoldScanline />
 
       {/* Fixed left sidebar (md+) */}
@@ -165,7 +180,7 @@ export function OnyxLayout({ categories, items, businessId: _businessId }: Layou
       </aside>
 
       {/* Mobile sticky top strip */}
-      <nav className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex gap-4 overflow-x-auto px-4 py-3 md:hidden" style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--bdr)' }}>
+      <nav ref={navRef} className="sticky top-[var(--menu-tabs-offset,0px)] z-30 flex gap-4 overflow-x-auto px-4 py-3 md:hidden" style={{ background: 'var(--glass)', backdropFilter: 'blur(12px)', borderBottom: '1px solid var(--bdr)' }}>
         {categories.map((cat) => (
           <button id={`nav-btn-${cat.id}`}
             key={cat.id}
@@ -192,7 +207,7 @@ export function OnyxLayout({ categories, items, businessId: _businessId }: Layou
             <section key={cat.id} data-cat={cat.id} ref={register(cat.id)} className="scroll-mt-16">
               <div
                 className="sticky z-20 flex items-center gap-4 px-6 py-3 md:static md:mb-6 md:px-8 md:py-0 md:pt-12"
-                style={{ top: 'calc(48px + var(--menu-tabs-offset, 0px))', background: 'var(--bg)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--bdr)' }}
+                style={{ top: 'calc(var(--inner-nav-h, 48px) + var(--menu-tabs-offset, 0px))', background: 'var(--bg)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--bdr)' }}
               >
                 <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.3em]" style={{ color: 'var(--brand)', fontFamily: 'var(--font-body)' }}>
                   {cat.name.split('').map((char, i) => (

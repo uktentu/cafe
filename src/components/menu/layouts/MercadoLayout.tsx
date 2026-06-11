@@ -4,6 +4,7 @@
 // Sticky pill nav → full-width band heading per category → dense 2/3-col grid.
 // Square cards: image fills, name + price over a dark gradient. Diagonal reveals.
 
+import { useEffect, useRef } from 'react'
 import Image from 'next/image'
 import { m } from 'framer-motion'
 import type { Category, Item } from '@/types/database'
@@ -39,8 +40,22 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
   const requestJump = useMenuStore((s) => s.requestJump)
   const { activeId, register } = useScrollCategorySync(categories)
 
+  const containerRef = useRef<HTMLDivElement>(null)
+  const navRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const nav = navRef.current
+    const container = containerRef.current
+    if (!nav || !container) return
+    const ro = new ResizeObserver(() => {
+      container.style.setProperty('--inner-nav-h', `${nav.offsetHeight}px`)
+    })
+    ro.observe(nav)
+    return () => ro.disconnect()
+  }, [])
+
   return (
-    <div className="relative" style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
+    <div ref={containerRef} className="relative" style={{ background: 'var(--bg)', color: 'var(--txt)' }}>
       <style dangerouslySetInnerHTML={{ __html: MERCADO_STYLES }} />
       {/* Subtle diagonal stripe overlay */}
       <div className="pointer-events-none fixed inset-0 z-0" style={{
@@ -50,6 +65,7 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
       }} />
       {/* Sticky pill nav */}
       <nav
+        ref={navRef}
         className="sticky top-[var(--menu-tabs-offset,0px)] z-30 overflow-x-auto px-4 py-3 lg:px-8"
         style={{ background: 'var(--glass)', backdropFilter: 'blur(14px)', borderBottom: '1px solid var(--bdr)' }}
       >
@@ -79,11 +95,11 @@ export function MercadoLayout({ categories, items, businessId: _businessId }: La
           const Icon = getCategoryIcon(cat.icon)
           return (
             <section key={cat.id} data-cat={cat.id} ref={register(cat.id)} className="scroll-mt-16">
-              {/* Sticky band heading — sits just below the pill nav (~52px tall) */}
+              {/* Sticky band heading — sits just below the pill nav */}
               <div
                 key={cat.id}
                 className="sticky z-20 px-4 py-3 md:px-8 md:py-4"
-                style={{ top: 'calc(52px + var(--menu-tabs-offset, 0px))', background: 'var(--sf1)', borderBottom: '1px solid var(--bdr)', borderLeft: '4px solid var(--brand)' }}
+                style={{ top: 'calc(var(--inner-nav-h, 52px) + var(--menu-tabs-offset, 0px))', background: 'var(--sf1)', borderBottom: '1px solid var(--bdr)', borderLeft: '4px solid var(--brand)' }}
               >
                 <h2
                   className="mercado-cat-heading font-black uppercase tracking-widest"
