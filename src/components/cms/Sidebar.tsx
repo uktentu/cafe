@@ -7,8 +7,9 @@ import { AnimatePresence, m } from 'framer-motion'
 import {
   Menu, LayoutList, Settings, QrCode, LogOut, BarChart3, Store, CalendarCheck, FileText,
   Megaphone, CalendarClock, Users, LayoutDashboard,
-  Lock, Menu as MenuIcon, X, ExternalLink, CreditCard, ShieldCheck, type LucideIcon,
+  Lock, Menu as MenuIcon, X, ExternalLink, CreditCard, ShieldCheck, Moon, Sun, type LucideIcon,
 } from 'lucide-react'
+import { useTheme } from 'next-themes'
 import { getConfig } from '@/lib/config'
 import type { Features } from '@/lib/config'
 import { createClient } from '@/lib/supabase/client'
@@ -16,7 +17,6 @@ import { qk, fetchBranches } from '@/lib/cms-queries'
 import { useCmsStore } from '@/stores/cms'
 import { useCms } from '@/components/cms/Providers'
 import { cn } from '@/lib/utils'
-import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
 // Owner opt-in toggles (set in Settings) — separate from tier gating. When the
 // tier supports a feature but the owner hasn't switched it on, we hide the nav
@@ -165,6 +165,7 @@ function SidebarContent({ businessName, userEmail, isAdmin, onNavigate }: { busi
   const router = useRouter()
   const { features, siteUrl } = getConfig()
   const { business } = useCms()
+  const { resolvedTheme, setTheme } = useTheme()
 
   async function signOut() {
     await createClient().auth.signOut()
@@ -241,9 +242,17 @@ function SidebarContent({ businessName, userEmail, isAdmin, onNavigate }: { busi
           </Link>
         )}
 
-        <div className="flex items-center gap-2 px-3 py-2">
-          <ThemeToggle className="w-full flex-1 border-white/10 bg-white/5 hover:bg-white/10 hover:text-white" />
-        </div>
+        <button
+          type="button"
+          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-neutral-300 hover:bg-white/5 hover:text-white transition-colors"
+        >
+          {resolvedTheme === 'dark'
+            ? <Moon className="h-[18px] w-[18px]" />
+            : <Sun className="h-[18px] w-[18px]" />
+          }
+          {resolvedTheme === 'dark' ? 'Dark mode' : 'Light mode'}
+        </button>
         <a
           href={siteUrl || '/'}
           target="_blank"
