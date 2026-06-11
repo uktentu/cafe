@@ -132,7 +132,8 @@ export const getMenuData = cache(async (slug: string): Promise<MenuData> => {
   // KV miss (cold start or first deploy) — fetch from Supabase then warm KV
   const data = await _getMenuData(slug)
   if (kv && data) {
-    kv.put(`menu:${slug}`, JSON.stringify(data)).catch(() => {})
+    // 24h TTL is a safety net; the revalidate route overwrites on every CMS save
+    kv.put(`menu:${slug}`, JSON.stringify(data), { expirationTtl: 86400 }).catch(() => {})
   }
   return data as MenuData
 })
@@ -152,9 +153,12 @@ async function _getMenuData(slug: string): Promise<MenuData | null> {
 
   const supabase = createAnonClient()
 
-  const { data: raw, error } = await supabase
+  // Single PostgREST round-trip: embed all related tables in one request.
+  // Client-side sort/filter replaces per-table .order()/.eq() calls.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: raw, error } = await (supabase as any)
     .from('businesses')
-    .select('*')
+    .select('*, categories(*), items(*), translations(*), banners(*), branches(*), menus(*)')
     .eq('slug', slug)
     .eq('is_active', true)
     .maybeSingle()
@@ -162,38 +166,20 @@ async function _getMenuData(slug: string): Promise<MenuData | null> {
   if (!raw) return { _error: error, _slug: slug, _supabaseUrl: process.env.NEXT_PUBLIC_SUPABASE_URL } as unknown as MenuData
   const business = normaliseBusiness(raw)
 
-  const [{ data: rawCats }, { data: rawItems }, { data: rawTrans }, { data: rawBanners }, { data: rawBranches }, { data: rawMenus }] = await Promise.all([
-    supabase
-      .from('categories')
-      .select('*')
-      .eq('business_id', business.id)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true }),
-    supabase
-      .from('items')
-      .select('*')
-      .eq('business_id', business.id)
-      .order('sort_order', { ascending: true }),
-    supabase
-      .from('translations')
-      .select('*')
-      .eq('business_id', business.id),
-    supabase
-      .from('banners')
-      .select('*')
-      .eq('business_id', business.id)
-      .eq('is_active', true)
-      .order('sort_order', { ascending: true }),
-    supabase
-      .from('branches')
-      .select('*')
-      .eq('business_id', business.id),
-    supabase
-      .from('menus')
-      .select('*')
-      .eq('business_id', business.id)
-      .eq('is_active', true),
-  ])
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const byOrder = (a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawCats = ((raw.categories ?? []) as any[]).filter((c) => c.is_active).sort(byOrder)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawItems = ((raw.items ?? []) as any[]).sort(byOrder)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawTrans = (raw.translations ?? []) as any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawBanners = ((raw.banners ?? []) as any[]).filter((b) => b.is_active).sort(byOrder)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawBranches = (raw.branches ?? []) as any[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rawMenus = ((raw.menus ?? []) as any[]).filter((m) => m.is_active)
 
   const { limits, features } = getConfig()
 

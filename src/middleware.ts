@@ -11,6 +11,18 @@ import { supabaseConfigured, supabaseAnonKey } from '@/lib/env'
 const PUBLIC_CMS_PATHS = ['/cms/login', '/cms/reset-password']
 
 export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl
+
+  // Public menu routes: inject CDN cache headers and return immediately.
+  // No auth check needed — saves a Supabase round-trip on every menu request.
+  // Cloudflare Pages CDN will serve the cached HTML for s-maxage seconds,
+  // meaning zero edge-function invocations for most visitors.
+  if (!pathname.startsWith('/cms') && !pathname.startsWith('/api')) {
+    const response = NextResponse.next()
+    response.headers.set('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
+    return response
+  }
+
   // Before Supabase is configured (local dev), don't try to auth — let routes
   // render so the login page and a "not configured" notice are reachable.
   if (!supabaseConfigured()) return NextResponse.next()
@@ -38,7 +50,6 @@ export async function middleware(request: NextRequest) {
     }
   )
 
-  const { pathname } = request.nextUrl
   const isPublic = PUBLIC_CMS_PATHS.some((p) => pathname.startsWith(p))
 
   // IMPORTANT: getUser() validates the JWT with Supabase Auth. Wrapped in
@@ -91,6 +102,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Run on CMS routes only; skip static assets and the public menu.
-  matcher: ['/cms/:path*'],
+  // Run on all paths except Next.js internals and static assets.
+  // Public menu routes are handled above (fast path, no auth).
+  matcher: ['/((?!_next/static|_next/image|favicon\\.ico).*)'],
 }
