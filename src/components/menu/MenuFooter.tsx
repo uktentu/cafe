@@ -69,7 +69,7 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
         
       const coordMatch = url.pathname.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
       if (coordMatch) return `${coordMatch[1]},${coordMatch[2]}`
-    } catch(e) {}
+    } catch (_) {}
     
     return `${business.name}, ${city || ''} ${address || ''}`
   }
