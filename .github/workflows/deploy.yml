@@ -1,4 +1,19 @@
-name: Build & Deploy to Cloudflare Pages
+name: Build & Deploy — all clients
+
+# ─────────────────────────────────────────────────────────────────────────────
+# HOW TO ADD A NEW CLIENT
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. Create a Cloudflare Pages project (name must match project-name below).
+# 2. In CF dashboard → Pages project → Settings → Bindings, add KV binding:
+#      Variable: MENU_CACHE  →  namespace ID from wrangler.toml (shared for all).
+# 3. Copy a deploy-* job block below, fill in the client's values, commit.
+#    On next push to main the new client deploys automatically in parallel.
+#
+# Shared repo secrets (Settings → Secrets → Actions):
+#   NEXT_PUBLIC_SUPABASE_URL   NEXT_PUBLIC_SUPABASE_ANON_KEY
+#   SUPABASE_SERVICE_ROLE_KEY  CLOUDFLARE_API_TOKEN  CLOUDFLARE_ACCOUNT_ID
+#   R2_BUCKET_NAME             NEXT_PUBLIC_CDN_URL
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
   push:
@@ -8,7 +23,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # ── CI: type-check + lint ──────────────────────────────────────────
+  # ── Type-check runs ONCE; all client deploys wait for it ──────────────────
   ci:
     name: Type-check & Lint
     runs-on: ubuntu-latest
@@ -30,71 +45,50 @@ jobs:
       - name: Type-check
         run: pnpm typecheck
         env:
-          NEXT_PUBLIC_CLIENT_SLUG: ${{ secrets.NEXT_PUBLIC_CLIENT_SLUG }}
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
-          NEXT_PUBLIC_THEME: ${{ secrets.NEXT_PUBLIC_THEME }}
+          # TypeScript doesn't validate env values — generic placeholders are fine here
+          NEXT_PUBLIC_CLIENT_SLUG: ci-placeholder
+          NEXT_PUBLIC_TIER: basic
+          NEXT_PUBLIC_THEME: mercado
 
-  # ── Deploy: static export → Cloudflare Pages ──────────────────────
-  deploy:
-    name: Deploy to Cloudflare Pages
-    runs-on: ubuntu-latest
+  # ── CLIENT: demo-cafe ──────────────────────────────────────────────────────
+  deploy-demo-cafe:
+    name: Deploy → demo-cafe
     needs: ci
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    permissions:
-      contents: read
-      deployments: write
-    steps:
-      - uses: actions/checkout@v4
+    uses: ./.github/workflows/_deploy-client.yml
+    with:
+      project-name: cafe
+      client-slug: demo-cafe
+      site-url: https://cafe-1z6.pages.dev
+      tier: premium
+      theme: mercado
+      bilingual: 'true'
+      secondary-locale: hi
+      reservations: 'false'
+      multi-branch: 'false'
+    secrets: inherit
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 10
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      # Build for Cloudflare Pages Edge Runtime.
-      # pages:build = set-runtime.js edge + @cloudflare/next-on-pages + patch-routes.js
-      - name: Build for Cloudflare Pages
-        run: pnpm run pages:build
-        env:
-          NEXT_PUBLIC_CLIENT_SLUG: ${{ secrets.NEXT_PUBLIC_CLIENT_SLUG }}
-          NEXT_PUBLIC_SITE_URL: https://cafe.pages.dev
-          NEXT_PUBLIC_TIER: ${{ secrets.NEXT_PUBLIC_TIER }}
-          NEXT_PUBLIC_THEME: ${{ secrets.NEXT_PUBLIC_THEME }}
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
-          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          NEXT_PUBLIC_CDN_URL: ${{ secrets.NEXT_PUBLIC_CDN_URL }}
-          NEXT_PUBLIC_WHATSAPP: ${{ secrets.NEXT_PUBLIC_WHATSAPP }}
-          NEXT_PUBLIC_PHONE: ${{ secrets.NEXT_PUBLIC_PHONE }}
-          OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
-          NEXT_PUBLIC_RESERVATIONS: false
-          NEXT_PUBLIC_MULTI_BRANCH: false
-          NEXT_PUBLIC_BILINGUAL: true
-          NEXT_PUBLIC_SECONDARY_LOCALE: hi
-
-      - name: Verify build output exists
-        run: |
-          if [ ! -d ".vercel/output/static" ]; then
-            echo "❌ .vercel/output/static not found — pages:build may have failed"
-            exit 1
-          fi
-          echo "✅ Build output verified at .vercel/output/static"
-          ls -la .vercel/output/static/ | head -20
-
-      - name: Deploy to Cloudflare Pages
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy .vercel/output/static --project-name=cafe --branch main --commit-dirty=true
+  # ── ADD NEW CLIENTS BELOW ──────────────────────────────────────────────────
+  # Each job builds and deploys independently in parallel after CI passes.
+  # KV cache is automatically isolated per client via the `menu:<slug>` key.
+  #
+  # deploy-spice-garden:
+  #   name: Deploy → spice-garden
+  #   needs: ci
+  #   if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+  #   uses: ./.github/workflows/_deploy-client.yml
+  #   with:
+  #     project-name: spice-garden          # CF Pages project name
+  #     client-slug: spice-garden           # must match businesses.slug in Supabase
+  #     site-url: https://spicegarden.com   # custom domain or *.pages.dev URL
+  #     tier: advanced
+  #     theme: bazaar
+  #     whatsapp: '919876543210'
+  #     phone: '+91 98765 43210'
+  #     owner-email: owner@spicegarden.com
+  #     reservations: 'true'
+  #     multi-branch: 'false'
+  #     bilingual: 'false'
+  #   secrets: inherit

@@ -1,0 +1,111 @@
+# Reusable: build + deploy one MenuOS client to Cloudflare Pages.
+# Per-client config comes in as inputs; shared infra secrets are inherited.
+# Shared secrets (repo level): SUPABASE_*, CLOUDFLARE_*, R2_*, CDN.
+# Per-client values (inputs):  slug, site-url, tier, theme, phone, etc.
+name: _deploy-client
+
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        description: 'Cloudflare Pages project name (must exist in CF dashboard)'
+        required: true
+        type: string
+      client-slug:
+        description: 'NEXT_PUBLIC_CLIENT_SLUG — matches businesses.slug in Supabase'
+        required: true
+        type: string
+      site-url:
+        description: 'Full public URL, e.g. https://spicegarden.com'
+        required: true
+        type: string
+      tier:
+        description: 'basic | advanced | premium'
+        required: true
+        type: string
+      theme:
+        description: 'mercado | bazaar | nocturne | coastal | provenance | terrain | aether | onyx | studio'
+        required: true
+        type: string
+      # ── Feature toggles (default off; set to "true" to enable) ─────────────
+      reservations:
+        type: string
+        default: 'false'
+      multi-branch:
+        type: string
+        default: 'false'
+      bilingual:
+        type: string
+        default: 'false'
+      secondary-locale:
+        type: string
+        default: 'hi'
+      # ── Contact info (public, shown on menu) ────────────────────────────────
+      whatsapp:
+        description: 'WhatsApp number with country code, e.g. 919876543210'
+        type: string
+        default: ''
+      phone:
+        description: 'Phone number for click-to-call'
+        type: string
+        default: ''
+      owner-email:
+        description: 'Owner email for transactional emails'
+        type: string
+        default: ''
+
+jobs:
+  deploy:
+    name: Deploy → ${{ inputs.project-name }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build for Cloudflare Pages
+        run: pnpm run pages:build
+        env:
+          NEXT_PUBLIC_CLIENT_SLUG: ${{ inputs.client-slug }}
+          NEXT_PUBLIC_SITE_URL: ${{ inputs.site-url }}
+          NEXT_PUBLIC_TIER: ${{ inputs.tier }}
+          NEXT_PUBLIC_THEME: ${{ inputs.theme }}
+          NEXT_PUBLIC_RESERVATIONS: ${{ inputs.reservations }}
+          NEXT_PUBLIC_MULTI_BRANCH: ${{ inputs.multi-branch }}
+          NEXT_PUBLIC_BILINGUAL: ${{ inputs.bilingual }}
+          NEXT_PUBLIC_SECONDARY_LOCALE: ${{ inputs.secondary-locale }}
+          NEXT_PUBLIC_WHATSAPP: ${{ inputs.whatsapp }}
+          NEXT_PUBLIC_PHONE: ${{ inputs.phone }}
+          OWNER_EMAIL: ${{ inputs.owner-email }}
+          # ── Shared secrets (inherited from caller) ──────────────────
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          NEXT_PUBLIC_CDN_URL: ${{ secrets.NEXT_PUBLIC_CDN_URL }}
+
+      - name: Verify build output
+        run: |
+          if [ ! -d ".vercel/output/static" ]; then
+            echo "❌ .vercel/output/static not found"
+            exit 1
+          fi
+          echo "✅ Build verified for ${{ inputs.project-name }}"
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy .vercel/output/static --project-name=${{ inputs.project-name }} --branch main --commit-dirty=true
