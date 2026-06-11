@@ -29,8 +29,9 @@ function walk(dir) {
       results = results.concat(walk(file))
     } else {
       if (file.endsWith('page.tsx') || file.endsWith('route.ts')) {
-        // Exclude the entire (menu) route group — those pages use ISR/static, not edge.
-        if (!file.includes('/(menu)/')) {
+        // The public menu (/(menu)/page.tsx) must be edge so Cloudflare renders it
+        // dynamically (fresh data). Only the loyalty page stays static ISR.
+        if (!file.includes('/(menu)/loyalty/')) {
           results.push(file)
         }
       }

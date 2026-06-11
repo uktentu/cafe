@@ -18,31 +18,73 @@ import { useCms } from '@/components/cms/Providers'
 import { cn } from '@/lib/utils'
 import { ThemeToggle } from '@/components/ui/ThemeToggle'
 
+// Owner opt-in toggles (set in Settings) — separate from tier gating. When the
+// tier supports a feature but the owner hasn't switched it on, we hide the nav
+// item (not lock it); tier-locked items are always shown with a lock as upsell.
+type UserToggle = 'multiBranch' | 'reservations' | 'menus'
+
 interface NavItem {
   href: string
   label: string
   icon: LucideIcon
   feature?: keyof Features
+  userToggle?: UserToggle
 }
 
-const PRIMARY: NavItem[] = [
-  { href: '/cms/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/cms/items', label: 'Items', icon: Menu },
-  { href: '/cms/categories', label: 'Categories', icon: LayoutList },
-  { href: '/cms/qr-codes', label: 'QR Codes', icon: QrCode },
-  { href: '/cms/branches', label: 'Branches', icon: Store, feature: 'multiBranch' },
-  { href: '/cms/reservations', label: 'Reservations', icon: CalendarCheck, feature: 'reservations' },
-  { href: '/cms/settings', label: 'Settings', icon: Settings },
-  { href: '/cms/tools', label: 'Tools', icon: FileText },
+interface NavSection {
+  label: string
+  items: NavItem[]
+}
+
+// Grouped by the job the owner is doing — editing the menu, running the floor,
+// or managing the business — instead of one long flat list.
+const SECTIONS: NavSection[] = [
+  {
+    label: 'Overview',
+    items: [
+      { href: '/cms/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/cms/analytics', label: 'Analytics', icon: BarChart3, feature: 'analytics' },
+    ],
+  },
+  {
+    label: 'Menu',
+    items: [
+      { href: '/cms/items', label: 'Items', icon: Menu },
+      { href: '/cms/categories', label: 'Categories', icon: LayoutList },
+      { href: '/cms/menus', label: 'Menus', icon: CalendarClock, feature: 'menus', userToggle: 'menus' },
+      { href: '/cms/banners', label: 'Banners', icon: Megaphone, feature: 'banners' },
+    ],
+  },
+  {
+    label: 'Front of House',
+    items: [
+      { href: '/cms/qr-codes', label: 'QR Codes', icon: QrCode },
+      { href: '/cms/reservations', label: 'Reservations', icon: CalendarCheck, feature: 'reservations', userToggle: 'reservations' },
+      { href: '/cms/branches', label: 'Branches', icon: Store, feature: 'multiBranch', userToggle: 'multiBranch' },
+    ],
+  },
+  {
+    label: 'Business',
+    items: [
+      { href: '/cms/staff', label: 'Staff', icon: Users, feature: 'staffAccounts' },
+      { href: '/cms/settings', label: 'Settings', icon: Settings },
+      { href: '/cms/tools', label: 'Tools', icon: FileText },
+    ],
+  },
 ]
 
-// Tier-gated — shown with a lock when the feature is off (sales mechanism, not hidden).
-const GATED: NavItem[] = [
-  { href: '/cms/analytics', label: 'Analytics', icon: BarChart3, feature: 'analytics' },
-  { href: '/cms/banners', label: 'Banners', icon: Megaphone, feature: 'banners' },
-  { href: '/cms/menus', label: 'Menus', icon: CalendarClock, feature: 'menus' },
-  { href: '/cms/staff', label: 'Staff', icon: Users, feature: 'staffAccounts' },
-]
+type NavState = 'show' | 'locked' | 'hidden'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function navStateFor(item: NavItem, features: Features, business: any): NavState {
+  const lockedByTier = item.feature ? !features[item.feature] : false
+  if (lockedByTier) return 'locked' // tier upsell — always visible with a lock
+  const links = business?.social_links ?? {}
+  if (item.userToggle === 'multiBranch' && links.multiple_branches_enabled !== true) return 'hidden'
+  if (item.userToggle === 'reservations' && links.reservations_enabled !== true) return 'hidden'
+  if (item.userToggle === 'menus' && links.multiple_menus_enabled !== true) return 'hidden'
+  return 'show'
+}
 
 function NavRow({ item, active, locked, onNavigate }: { item: NavItem; active: boolean; locked: boolean; onNavigate: () => void }) {
   const Icon = item.icon
@@ -142,37 +184,30 @@ function SidebarContent({ businessName, userEmail, isAdmin, onNavigate }: { busi
         <BranchSwitcher />
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-3">
-        {PRIMARY.map((item) => {
-          const isLockedByTier = item.feature ? !features[item.feature] : false
-          let isHiddenByUser = false
+      <nav className="flex-1 space-y-5 overflow-y-auto p-3">
+        {SECTIONS.map((section) => {
+          // Resolve each item's state; drop hidden ones, hide the whole section if empty.
+          const visible = section.items
+            .map((item) => ({ item, state: navStateFor(item, features, business) }))
+            .filter(({ state }) => state !== 'hidden')
 
-          if (item.feature === 'multiBranch' && !isLockedByTier) {
-            if (business.social_links?.multiple_branches_enabled !== true) isHiddenByUser = true
-          }
-          if (item.feature === 'reservations' && !isLockedByTier) {
-            if (business.social_links?.reservations_enabled !== true) isHiddenByUser = true
-          }
+          if (visible.length === 0) return null
 
-          if (isHiddenByUser) return null
-
-          return <NavRow key={item.href} item={item} active={isActive(item.href)} locked={isLockedByTier} onNavigate={onNavigate} />
-        })}
-        <div className="my-3 border-t border-white/10" />
-        {GATED.map((item) => {
-          const isLockedByTier = item.feature ? !features[item.feature] : false
-          let isHiddenByUser = false
-          
-          if (item.feature === 'menus' && !isLockedByTier) {
-            if (business.social_links?.multiple_menus_enabled !== true) {
-              isHiddenByUser = true
-            }
-          }
-          
-          if (isHiddenByUser) return null
-          
           return (
-            <NavRow key={item.href} item={item} active={isActive(item.href)} locked={isLockedByTier} onNavigate={onNavigate} />
+            <div key={section.label} className="space-y-1">
+              <p className="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-neutral-500">
+                {section.label}
+              </p>
+              {visible.map(({ item, state }) => (
+                <NavRow
+                  key={item.href}
+                  item={item}
+                  active={isActive(item.href)}
+                  locked={state === 'locked'}
+                  onNavigate={onNavigate}
+                />
+              ))}
+            </div>
           )
         })}
       </nav>

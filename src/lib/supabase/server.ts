@@ -39,14 +39,20 @@ export function createAdminClient() {
   )
 }
 
-// Cookie-FREE anon client for the public menu (ISR pages must not touch cookies
-// or Next.js forces them dynamic, breaking edge caching).
+// Cookie-FREE anon client for the public menu. The menu is dynamically rendered
+// (Cloudflare can't run Next ISR), so reads MUST bypass Next's fetch Data Cache —
+// otherwise the menu serves stale data and CMS edits never appear. `cache: 'no-store'`
+// guarantees a fresh DB read on every render; CDN caching (s-maxage=30) handles load.
 export function createAnonClient() {
   return createSupabaseClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     supabaseAnonKey(),
-    { 
+    {
       auth: { autoRefreshToken: false, persistSession: false },
+      global: {
+        fetch: (input, init) =>
+          fetch(input, { ...init, cache: 'no-store' }),
+      },
     },
   )
 }

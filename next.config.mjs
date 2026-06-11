@@ -42,6 +42,21 @@ const nextConfig = {
   },
   // Trailing slashes make GitHub Pages work correctly (each page → folder/index.html).
   trailingSlash: isStaticExport,
+  // The live menu is dynamically edge-rendered (so CMS edits show up). This header
+  // lets Cloudflare's CDN cache each render for 30s, keeping Supabase reads low
+  // while still going live within 30s. (Skipped for the static export demo.)
+  ...(isStaticExport ? {} : {
+    async headers() {
+      return [
+        {
+          source: '/',
+          headers: [
+            { key: 'Cache-Control', value: 'public, max-age=0, s-maxage=30, stale-while-revalidate=300' },
+          ],
+        },
+      ]
+    },
+  }),
 }
 
 export default nextConfig

@@ -1,14 +1,17 @@
-// Public QR menu — SSG + ISR (revalidate: 30). Statically generated and served
-// from the Cloudflare edge cache, so 50K visitors/day cost ~0 DB reads; a CMS
-// save calls revalidatePath('/') to push changes live within 30s.
+// Public QR menu.
+//   • Cloudflare/live  → dynamically edge-rendered each request (fresh Supabase
+//     read) and cached at the CDN for 30s via Cache-Control: s-maxage=30. This is
+//     what makes CMS edits go live within 30s — Cloudflare's next-on-pages does
+//     NOT run Next ISR / revalidatePath, so a force-static menu would freeze at
+//     build time.
+//   • STATIC_EXPORT=1 → force-static for the GitHub Pages demo (no server).
 import type { Metadata } from 'next'
 import { getConfig } from '@/lib/config'
 import { getMenuData } from '@/lib/menu-data'
 import { cdnUrl } from '@/types/database'
 import { MenuLayoutClient } from '@/components/menu/MenuLayoutClient'
 
-export const dynamic = 'force-static'
-export const revalidate = 30
+export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
 
 export async function generateMetadata(): Promise<Metadata> {
   const { slug, siteUrl, features } = getConfig()
@@ -85,3 +88,5 @@ export default async function MenuPage() {
 }
 
 
+
+export const runtime = "edge";
