@@ -1,12 +1,14 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import React, { lazy, Suspense } from 'react'
 import type { Theme } from '@/types/database'
 
-// The detail modal (and its SpringModal/drag features) is only needed after a
-// tap — defer it out of the menu's first-load JS (Basic < 120KB budget).
-const ItemModal = dynamic(() => import('./ItemModal').then((m) => m.ItemModal), { ssr: false })
+const ItemModal = lazy(() => import('./ItemModal').then((m) => ({ default: m.ItemModal })))
 
 export function DeferredItemModal(props: { theme?: Theme }) {
-  return <ItemModal {...props} />
+  return (
+    <Suspense fallback={null}>
+      <ItemModal {...props} />
+    </Suspense>
+  )
 }

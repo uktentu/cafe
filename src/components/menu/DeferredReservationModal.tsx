@@ -1,10 +1,14 @@
 'use client'
 
-import dynamic from 'next/dynamic'
+import React, { lazy, Suspense } from 'react'
 import type { Theme } from '@/types/database'
 
-const ReservationModal = dynamic(() => import('./ReservationModal').then((m) => m.ReservationModal), { ssr: false })
+const ReservationModal = lazy(() => import('./ReservationModal').then((m) => ({ default: m.ReservationModal })))
 
-export function DeferredReservationModal(props: { businessId: string; businessName: string; branchId?: string; theme?: Theme }) {
-  return <ReservationModal {...props} />
+export function DeferredReservationModal(props: { businessId: string, businessName: string, branchId?: string, theme?: Theme }) {
+  return (
+    <Suspense fallback={null}>
+      <ReservationModal {...props} />
+    </Suspense>
+  )
 }
