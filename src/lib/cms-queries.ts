@@ -400,7 +400,7 @@ export async function fetchStaff(businessId: string): Promise<StaffAccount[]> {
     .from('staff_accounts')
     .select('*')
     .eq('business_id', businessId)
-    .order('created_at', { ascending: true })
+    .order('id', { ascending: true })
   if (error) throw error
   return (data ?? []) as StaffAccount[]
 }
