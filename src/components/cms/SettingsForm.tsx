@@ -18,7 +18,7 @@ import { cdnUrl, type Theme, type OpeningHours, SUPPORTED_LOCALES } from '@/type
 import { cn } from '@/lib/utils'
 import {
   Store, Share2, Palette, Layers, Clock, Zap, Globe,
-  MapPin, Check, Star, Loader2
+  MapPin, Check, Star
 } from 'lucide-react'
 
 const DAYS: { key: string; label: string }[] = [
