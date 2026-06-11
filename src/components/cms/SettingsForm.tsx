@@ -18,7 +18,7 @@ import { cdnUrl, type Theme, type OpeningHours, SUPPORTED_LOCALES } from '@/type
 import { cn } from '@/lib/utils'
 import {
   Store, Share2, Palette, Layers, Clock, Zap, Globe,
-  MapPin, Check, Star,
+  MapPin, Check, Star, Loader2
 } from 'lucide-react'
 import { resolveGoogleMapsShortlink } from '@/app/actions/maps'
 
