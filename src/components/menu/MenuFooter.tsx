@@ -57,6 +57,23 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
   const { phone, whatsapp, social_links, address, city, opening_hours } = business
   const { instagram, swiggy, zomato, google_maps, google_reviews } = social_links || {}
 
+  // Helper to extract precise location from maps link if possible
+  const getMapQuery = () => {
+    if (!google_maps) return `${business.name}, ${city || ''} ${address || ''}`
+    try {
+      const url = new URL(google_maps)
+      if (url.searchParams.has('q')) return url.searchParams.get('q')!
+      
+      const placeMatch = url.pathname.match(/\/place\/([^\/]+)/)
+      if (placeMatch && placeMatch[1]) return decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
+        
+      const coordMatch = url.pathname.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+      if (coordMatch) return `${coordMatch[1]},${coordMatch[2]}`
+    } catch(e) {}
+    
+    return `${business.name}, ${city || ''} ${address || ''}`
+  }
+
   const showSocials = features.socialLinks && (instagram || swiggy || zomato || google_maps || google_reviews)
   const showContactBar = phone || whatsapp || showSocials
   const hasContactInfo = address || city || (opening_hours && Object.keys(opening_hours).length > 0)
@@ -119,7 +136,7 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
                     <span className="text-[10px] uppercase tracking-wider opacity-60">{tUi('Tap Map', 'Tap Map')}</span>
                   </div>
                   <iframe 
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(`${business.name}, ${city || ''} ${address || ''}`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`} 
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(getMapQuery())}&t=&z=15&ie=UTF8&iwloc=&output=embed`} 
                     width="100%" 
                     height="180" 
                     style={{ border: 0, pointerEvents: 'none' }} 
