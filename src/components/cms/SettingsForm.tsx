@@ -358,8 +358,8 @@ export function SettingsForm() {
           </div>
           <Divider />
           <Field label="Brand colour" hint="Used for buttons, accents, and highlights across your menu">
-            <div className="flex items-center gap-3">
-              <label className="relative cursor-pointer">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="relative cursor-pointer shrink-0">
                 <input type="color" value={brand} onChange={(e) => setBrand(e.target.value)}
                   className="sr-only" />
                 <span
@@ -370,7 +370,7 @@ export function SettingsForm() {
               <Input
                 value={brand}
                 onChange={(e) => setBrand(e.target.value)}
-                className="w-32 font-mono text-sm"
+                className="w-32 font-mono text-sm shrink-0"
                 placeholder="#F59E0B"
               />
               <span className="text-xs text-neutral-400">Click the swatch to open colour picker</span>
@@ -445,25 +445,27 @@ export function SettingsForm() {
             {DAYS.map(({ key, label }) => {
               const d = hours[key] ?? { open: '09:00', close: '22:00', closed: false }
               return (
-                <div key={key} className="flex items-center gap-3 py-2.5 first:pt-0 last:pb-0">
-                  <span className="w-9 shrink-0 text-sm font-medium text-neutral-600 dark:text-neutral-400">{label}</span>
-                  <Toggle checked={!d.closed} onChange={(open) => setDay(key, { closed: !open })} size="sm" label={`${label} open`} />
+                <div key={key} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 py-3 sm:py-2.5 first:pt-0 last:pb-0">
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span className="w-9 shrink-0 text-sm font-medium text-neutral-600 dark:text-neutral-400">{label}</span>
+                    <Toggle checked={!d.closed} onChange={(open) => setDay(key, { closed: !open })} size="sm" label={`${label} open`} />
+                  </div>
                   {d.closed ? (
-                    <span className="text-sm text-neutral-400">Closed</span>
+                    <span className="text-sm text-neutral-400 sm:ml-2">Closed</span>
                   ) : (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 sm:ml-auto">
                       <input
                         type="time"
                         value={d.open}
                         onChange={(e) => setDay(key, { open: e.target.value })}
-                        className="h-9 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-amber-500 focus:outline-none"
+                        className="h-9 w-full sm:w-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-amber-500 focus:outline-none"
                       />
-                      <span className="text-neutral-400">–</span>
+                      <span className="text-neutral-400 shrink-0">–</span>
                       <input
                         type="time"
                         value={d.close}
                         onChange={(e) => setDay(key, { close: e.target.value })}
-                        className="h-9 rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-amber-500 focus:outline-none"
+                        className="h-9 w-full sm:w-auto rounded-lg border border-neutral-200 dark:border-neutral-700 bg-white dark:bg-neutral-800 px-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-amber-500 focus:outline-none"
                       />
                     </div>
                   )}
