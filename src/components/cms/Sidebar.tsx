@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { useQuery } from '@tanstack/react-query'
-import { AnimatePresence, m } from 'framer-motion'
+import { m } from 'framer-motion'
 import {
   Menu, LayoutList, Settings, QrCode, LogOut, BarChart3, Store, CalendarCheck, FileText,
   Megaphone, CalendarClock, Users, LayoutDashboard,
@@ -286,30 +286,23 @@ export function Sidebar({ businessName, userEmail, isAdmin }: { businessName: st
       </aside>
 
       {/* Mobile: slide-in drawer */}
-      <AnimatePresence>
-        {open && (
-          <m.div
-            key="backdrop"
-            className="fixed inset-0 z-40 bg-black/50 md:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setSidebar(false)}
-          />
-        )}
-        {open && (
-          <m.aside
-            key="drawer"
-            className="fixed inset-y-0 left-0 z-50 w-[280px] md:hidden"
-            initial={{ x: -300 }}
-            animate={{ x: 0 }}
-            exit={{ x: -300 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-          >
-            <SidebarContent businessName={businessName} userEmail={userEmail} isAdmin={isAdmin} onNavigate={() => setSidebar(false)} />
-          </m.aside>
-        )}
-      </AnimatePresence>
+      <m.div
+        className="fixed inset-0 z-40 bg-black/50 md:hidden"
+        initial={false}
+        animate={{ 
+          opacity: open ? 1 : 0, 
+          pointerEvents: open ? 'auto' : 'none' 
+        }}
+        onClick={() => setSidebar(false)}
+      />
+      <m.aside
+        className="fixed inset-y-0 left-0 z-50 w-[280px] md:hidden"
+        initial={false}
+        animate={{ x: open ? 0 : -300 }}
+        transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+      >
+        <SidebarContent businessName={businessName} userEmail={userEmail} isAdmin={isAdmin} onNavigate={() => setSidebar(false)} />
+      </m.aside>
     </>
   )
 }
