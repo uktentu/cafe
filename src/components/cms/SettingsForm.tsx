@@ -61,6 +61,10 @@ export function SettingsForm() {
   const [multipleBranchesEnabled, setMultipleBranchesEnabled] = useState(business.social_links?.multiple_branches_enabled ?? false)
   const [waitTime, setWaitTime] = useState(business.social_links?.wait_time ?? '')
   const [about, setAbout] = useState(business.social_links?.about ?? '')
+  const [instagram, setInstagram] = useState(business.social_links?.instagram ?? '')
+  const [swiggy, setSwiggy] = useState(business.social_links?.swiggy ?? '')
+  const [zomato, setZomato] = useState(business.social_links?.zomato ?? '')
+  const [googleMaps, setGoogleMaps] = useState(business.social_links?.google_maps ?? '')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [seoOgFile, setSeoOgFile] = useState<File | null>(null)
@@ -107,6 +111,10 @@ export function SettingsForm() {
         theme_color: brand,
         social_links: {
           ...business.social_links,
+          instagram: instagram.trim() || null,
+          swiggy: swiggy.trim() || null,
+          zomato: zomato.trim() || null,
+          google_maps: googleMaps.trim() || null,
           multiple_menus_enabled: multipleMenus,
           reservations_enabled: reservationsEnabled,
           multiple_branches_enabled: multipleBranchesEnabled,
@@ -202,6 +210,28 @@ export function SettingsForm() {
             </div>
           )}
         </Field>
+      </section>
+
+      {/* Social Links */}
+      <section className="space-y-4 rounded-2xl bg-white dark:bg-neutral-900 p-5 ring-1 ring-black/5 dark:ring-white/10">
+        <div>
+          <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Social &amp; ordering links</h2>
+          <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">Links shown as icons on your menu footer. Leave blank to hide.</p>
+        </div>
+        <Field label="Instagram" hint="Full URL — e.g. https://instagram.com/yourplace">
+          <Input value={instagram} onChange={(e) => setInstagram(e.target.value)} placeholder="https://instagram.com/…" type="url" />
+        </Field>
+        <Field label="Google Maps" hint="Your Google Maps listing URL">
+          <Input value={googleMaps} onChange={(e) => setGoogleMaps(e.target.value)} placeholder="https://maps.google.com/…" type="url" />
+        </Field>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <Field label="Swiggy" hint="Your restaurant's Swiggy ordering page">
+            <Input value={swiggy} onChange={(e) => setSwiggy(e.target.value)} placeholder="https://swiggy.com/…" type="url" />
+          </Field>
+          <Field label="Zomato" hint="Your restaurant's Zomato ordering page">
+            <Input value={zomato} onChange={(e) => setZomato(e.target.value)} placeholder="https://zomato.com/…" type="url" />
+          </Field>
+        </div>
       </section>
 
       {/* Branding */}
