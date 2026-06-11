@@ -41,6 +41,8 @@ export interface SocialLinks {
   multiple_branches_enabled?: boolean
   wait_time?: string | null
   wait_time_label?: string | null
+  /** "Our Story" / about text shown on the public menu. */
+  about?: string | null
 }
 
 export interface Business {
@@ -97,6 +99,8 @@ export interface Item {
   dietary: DietaryPreference
   is_jain: boolean
   is_gluten_free: boolean
+  /** 0 = not spicy, 1 = mild, 2 = medium, 3 = hot. Optional until migration 006 runs. */
+  spice_level?: number
   allergens: string[]
   badge: Badge | null
   is_available: boolean

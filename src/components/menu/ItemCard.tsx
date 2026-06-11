@@ -6,6 +6,7 @@ import { m } from 'framer-motion'
 import { cdnUrl, itemImageKey, type Category, type Item, type Theme } from '@/types/database'
 import { getCategoryIcon } from './categoryIcon'
 import { VegMark, ItemBadge } from './badges'
+import { SpiceMeter } from './SpiceMeter'
 import { useMenuStore } from '@/stores/menu'
 import { track } from '@/lib/firebase'
 import { cn, formatPrice } from '@/lib/utils'
@@ -150,6 +151,7 @@ export function ItemCard({ item, category, variant = 'grid', theme = 'mercado', 
           {formatPrice(item.compare_price)}
         </span>
       )}
+      <span className="ml-auto"><SpiceMeter level={item.spice_level} size={12} /></span>
     </div>
   )
 

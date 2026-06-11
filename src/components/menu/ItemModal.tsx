@@ -5,6 +5,7 @@ import Image from 'next/image'
 import { ShoppingBag, CheckCircle2 } from 'lucide-react'
 import { SpringModal } from '@/components/motion/SpringModal'
 import { VegMark, ItemBadge, DietaryFlags, AllergenTags } from './badges'
+import { SpiceMeter } from './SpiceMeter'
 import { useMenuStore } from '@/stores/menu'
 import { track } from '@/lib/firebase'
 import { cdnUrl, itemImageKey, type Item, type Theme, type AddOn } from '@/types/database'
@@ -126,6 +127,9 @@ export function ItemModal({ theme = 'mercado' }: ItemModalProps) {
           <div className="mt-3 space-y-2">
             <DietaryFlags item={item} />
             <AllergenTags allergens={item.allergens} />
+            {(item.spice_level ?? 0) > 0 && (
+              <SpiceMeter level={item.spice_level} size={16} showLabel />
+            )}
           </div>
 
           {/* Add-ons */}

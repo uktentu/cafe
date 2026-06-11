@@ -60,6 +60,7 @@ export function SettingsForm() {
   const [reservationsEnabled, setReservationsEnabled] = useState(business.social_links?.reservations_enabled ?? false)
   const [multipleBranchesEnabled, setMultipleBranchesEnabled] = useState(business.social_links?.multiple_branches_enabled ?? false)
   const [waitTime, setWaitTime] = useState(business.social_links?.wait_time ?? '')
+  const [about, setAbout] = useState(business.social_links?.about ?? '')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [seoOgFile, setSeoOgFile] = useState<File | null>(null)
@@ -110,6 +111,7 @@ export function SettingsForm() {
           reservations_enabled: reservationsEnabled,
           multiple_branches_enabled: multipleBranchesEnabled,
           wait_time: waitTime.trim() || null,
+          about: about.trim() || null,
         },
         seo_title: values.seo_title || null,
         seo_description: values.seo_description || null,
@@ -149,6 +151,16 @@ export function SettingsForm() {
         <h2 className="text-sm font-semibold text-neutral-700 dark:text-neutral-300">Business info</h2>
         <Field label="Restaurant name" required><Input {...register('name', { required: true })} /></Field>
         <Field label="Tagline"><Input {...register('tagline')} placeholder="Good food, good vibes." /></Field>
+        <Field label="Our Story" hint="A short paragraph shown on your menu. Leave blank to hide.">
+          <textarea
+            value={about}
+            onChange={(e) => setAbout(e.target.value)}
+            rows={4}
+            maxLength={600}
+            placeholder="Tell guests what makes your place special — your history, your signature dishes, your vibe."
+            className="w-full rounded-lg border border-neutral-300 dark:border-neutral-700 bg-white dark:bg-neutral-950 px-3 py-2 text-sm text-neutral-900 dark:text-neutral-100 focus:border-amber-500 focus:outline-none focus:ring-1 focus:ring-amber-500"
+          />
+        </Field>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Phone"><Input {...register('phone')} placeholder="+91-…" /></Field>
           <Field label="WhatsApp" hint="Digits only, with country code"><Input {...register('whatsapp')} placeholder="9198…" /></Field>

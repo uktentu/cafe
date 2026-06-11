@@ -78,6 +78,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
   const [gf, setGf] = useState(false)
   const [featured, setFeatured] = useState(false)
   const [isSpecial, setIsSpecial] = useState(false)
+  const [spice, setSpice] = useState(0)
   const [showFrom, setShowFrom] = useState('')
   const [showUntil, setShowUntil] = useState('')
   const [allergens, setAllergens] = useState<string[]>([])
@@ -113,6 +114,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
     setDietary(it.dietary); setJain(it.is_jain); setGf(it.is_gluten_free)
     setFeatured(it.is_featured)
     setIsSpecial(it.is_special ?? false)
+    setSpice(it.spice_level ?? 0)
     setShowFrom(it.show_from ?? '')
     setShowUntil(it.show_until ?? '')
     setAllergens(it.allergens ?? [])
@@ -146,6 +148,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         dietary, is_jain: jain, is_gluten_free: gf,
         is_featured: featured,
         is_special: isSpecial,
+        spice_level: spice,
         show_from: showFrom || null,
         show_until: showUntil || null,
         allergens,
@@ -371,6 +374,25 @@ export function ItemForm({ itemId }: { itemId?: string }) {
             <option value="egg">Contains Egg</option>
             <option value="vegan">Vegan</option>
           </Select>
+        </Field>
+
+        <Field label="Spice level" hint="Shown as 🌶️ chillies on the menu">
+          <div className="flex gap-2">
+            {[['None', 0], ['Mild', 1], ['Medium', 2], ['Hot', 3]].map(([lbl, v]) => (
+              <button
+                key={v as number}
+                type="button"
+                onClick={() => setSpice(v as number)}
+                className={`flex-1 rounded-lg px-2 py-2 text-sm font-medium transition-colors ${
+                  spice === v
+                    ? 'bg-amber-500 text-white'
+                    : 'bg-neutral-50 dark:bg-neutral-800/50 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+                }`}
+              >
+                {lbl}
+              </button>
+            ))}
+          </div>
         </Field>
 
         <div className="grid grid-cols-2 gap-3 mt-3">

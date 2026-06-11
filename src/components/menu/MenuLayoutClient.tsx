@@ -15,6 +15,9 @@ import { CartButton } from './CartButton'
 import { CartDrawer } from './CartDrawer'
 import { DeferredItemModal } from './DeferredItemModal'
 import { DeferredReservationModal } from './DeferredReservationModal'
+import { ThemeAmbience } from './ThemeAmbience'
+import { ChefsSpecial } from './ChefsSpecial'
+import { OurStory } from './OurStory'
 import { Palette } from 'lucide-react'
 import { BannerStrip } from './BannerStrip'
 import { BranchSelector } from './BranchSelector'
@@ -133,6 +136,8 @@ export function MenuLayoutClient({ business, categories, items, translations, ba
 
       <SplashScreen name={business.name} splashMs={splashMs} theme={theme} />
 
+      <ThemeAmbience theme={theme} />
+
       {showDemo && <DemoThemeSwitcher currentTheme={theme} setTheme={setTheme} />}
 
       <LanguageProvider translations={translations}>
@@ -148,12 +153,14 @@ export function MenuLayoutClient({ business, categories, items, translations, ba
           {banners.length > 0 && <BannerStrip banners={banners} theme={theme} />}
           {branches.length > 1 && <BranchSelector branches={branches} theme={theme} />}
           <MenuHero business={business} theme={theme} />
+          <ChefsSpecial items={items} categories={categories} theme={theme} />
           {getConfig().features.featuredCarousel && <BestsellerStrip items={items} categories={categories} theme={theme} />}
         </div>
 
         <MenuContent categories={categories} items={items} menus={menus} businessId={business.id} theme={theme} multipleMenusEnabled={business.social_links?.multiple_menus_enabled ?? false} />
 
         <div className={['provenance', 'onyx', 'sakura', 'coastal'].includes(theme) ? "md:ml-[220px]" : ""}>
+          <OurStory business={business} theme={theme} />
           <MenuFooter business={business} theme={theme} />
         </div>
 

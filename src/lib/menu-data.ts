@@ -37,13 +37,16 @@ function normaliseBusiness(raw: any): Business {
     seo_title: raw.seo_title ?? null,
     seo_description: raw.seo_description ?? null,
     seo_og_r2_key: raw.seo_og_r2_key ?? null,
-    // Ensure social_links matches our type (old schema may have extra fields)
+    // Preserve the full social_links blob (about, wait_time, *_enabled flags, …)
+    // while guaranteeing the known keys have sane defaults. Whitelisting here
+    // previously dropped fields like multiple_branches_enabled and about.
     social_links: {
-      instagram: raw.social_links?.instagram ?? null,
-      swiggy: raw.social_links?.swiggy ?? null,
-      zomato: raw.social_links?.zomato ?? null,
-      google_maps: raw.social_links?.google_maps ?? null,
-      multiple_menus_enabled: raw.social_links?.multiple_menus_enabled ?? false,
+      instagram: null,
+      swiggy: null,
+      zomato: null,
+      google_maps: null,
+      multiple_menus_enabled: false,
+      ...(raw.social_links ?? {}),
     },
   } as Business
 }
@@ -78,6 +81,7 @@ function normaliseItem(raw: any): Item {
     is_gluten_free: raw.is_gluten_free ?? false,
     badge: raw.badge ?? null,
     is_featured: raw.is_featured ?? false,
+    spice_level: raw.spice_level ?? 0,
   } as Item
 }
 

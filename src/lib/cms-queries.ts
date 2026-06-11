@@ -53,6 +53,7 @@ function normaliseItem(raw: any): Item {
     is_special: raw.is_special ?? false,
     show_from: raw.show_from ?? null, show_until: raw.show_until ?? null,
     add_ons: raw.add_ons ?? [],
+    spice_level: raw.spice_level ?? 0,
     dietary: raw.dietary ?? 'none' } as Item
 }
 
