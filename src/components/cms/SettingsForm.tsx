@@ -18,7 +18,7 @@ import { cdnUrl, type Theme, type OpeningHours, SUPPORTED_LOCALES } from '@/type
 import { cn } from '@/lib/utils'
 import {
   Store, Share2, Palette, Layers, Clock, Zap, Globe,
-  MapPin, Check,
+  MapPin, Check, Star,
 } from 'lucide-react'
 
 const DAYS: { key: string; label: string }[] = [
@@ -128,6 +128,7 @@ export function SettingsForm() {
   const [swiggy, setSwiggy] = useState(business.social_links?.swiggy ?? '')
   const [zomato, setZomato] = useState(business.social_links?.zomato ?? '')
   const [googleMaps, setGoogleMaps] = useState(business.social_links?.google_maps ?? '')
+  const [googleReviews, setGoogleReviews] = useState(business.social_links?.google_reviews ?? '')
 
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
@@ -176,6 +177,7 @@ export function SettingsForm() {
           swiggy: swiggy.trim() || null,
           zomato: zomato.trim() || null,
           google_maps: googleMaps.trim() || null,
+          google_reviews: googleReviews.trim() || null,
           multiple_menus_enabled: multipleMenus,
           reservations_enabled: reservationsEnabled,
           multiple_branches_enabled: multipleBranchesEnabled,
@@ -312,6 +314,18 @@ export function SettingsForm() {
                   value={googleMaps}
                   onChange={(e) => setGoogleMaps(e.target.value)}
                   placeholder="https://maps.google.com/…"
+                  type="url"
+                  className="pl-9"
+                />
+              </div>
+            </Field>
+            <Field label="Google Reviews">
+              <div className="relative">
+                <Star className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-yellow-500" />
+                <Input
+                  value={googleReviews}
+                  onChange={(e) => setGoogleReviews(e.target.value)}
+                  placeholder="https://g.page/r/…"
                   type="url"
                   className="pl-9"
                 />

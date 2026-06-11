@@ -1,10 +1,9 @@
 'use client'
 
-import { Phone, MapPin, Share2 } from 'lucide-react'
+import { Phone, MapPin, Share2, Star, Clock } from 'lucide-react'
 import type { Business, Theme } from '@/types/database'
 import { track } from '@/lib/firebase'
 import { getConfig } from '@/lib/config'
-import { Clock } from 'lucide-react'
 import { useLanguage } from './LanguageProvider'
 
 const DAYS = [
@@ -56,9 +55,9 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
   const { features } = getConfig()
 
   const { phone, whatsapp, social_links, address, city, opening_hours } = business
-  const { instagram, swiggy, zomato, google_maps } = social_links || {}
+  const { instagram, swiggy, zomato, google_maps, google_reviews } = social_links || {}
 
-  const showSocials = features.socialLinks && (instagram || swiggy || zomato || google_maps)
+  const showSocials = features.socialLinks && (instagram || swiggy || zomato || google_maps || google_reviews)
   const showContactBar = phone || whatsapp || showSocials
   const hasContactInfo = address || city || (opening_hours && Object.keys(opening_hours).length > 0)
   
@@ -82,6 +81,9 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
             {showSocials && google_maps && (
               <SocialIcon href={google_maps} label="Google Maps" iconComponent={<MapPin className="h-5 w-5" />} onClick={() => track('maps_click', { business_id: business.id })} />
             )}
+            {showSocials && google_reviews && (
+              <SocialIcon href={google_reviews} label="Google Reviews" iconComponent={<Star className="h-5 w-5 text-yellow-500" />} onClick={() => track('reviews_click', { business_id: business.id })} />
+            )}
             {showSocials && instagram && <SocialIcon href={instagram} label="Instagram" icon="IG" />}
             {showSocials && zomato && <SocialIcon href={zomato} label="Zomato" icon="Z" />}
             {showSocials && swiggy && <SocialIcon href={swiggy} label="Swiggy" icon="S" />}
@@ -90,17 +92,43 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
 
         {/* Shop Info (Address & Hours) */}
         <div className="flex flex-col gap-6 w-full mt-6 pt-6" style={{ borderTop: '1px solid var(--bdr2)' }}>
-          {/* Address */}
-          {(address || city) && (
-            <div className="flex justify-center w-full">
-              <div className={`flex ${isArcade ? 'flex-col items-center gap-3 text-center' : 'items-start gap-2 text-left'}`}>
-                <MapPin className={`shrink-0 ${isArcade ? 'h-5 w-5 mb-1' : 'h-4 w-4 mt-0.5'}`} style={{ color: 'var(--txt2)' }} />
-                <p className={`leading-relaxed max-w-sm ${isArcade ? 'text-[10px] leading-loose' : 'text-sm'}`} style={{ color: 'var(--txt)' }}>
-                  {address}
-                  {address && city && ', '}
-                  {city}
-                </p>
-              </div>
+          {/* Address & Embedded Map */}
+          {(address || city || google_maps) && (
+            <div className="flex flex-col items-center w-full gap-4">
+              {(address || city) && (
+                <div className={`flex ${isArcade ? 'flex-col items-center gap-3 text-center' : 'items-start gap-2 text-left'}`}>
+                  <MapPin className={`shrink-0 ${isArcade ? 'h-5 w-5 mb-1' : 'h-4 w-4 mt-0.5'}`} style={{ color: 'var(--txt2)' }} />
+                  <p className={`leading-relaxed max-w-sm ${isArcade ? 'text-[10px] leading-loose' : 'text-sm'}`} style={{ color: 'var(--txt)' }}>
+                    {address}
+                    {address && city && ', '}
+                    {city}
+                  </p>
+                </div>
+              )}
+              {google_maps && (
+                <a 
+                  href={google_maps} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="w-full max-w-sm rounded-xl overflow-hidden block border transition-opacity hover:opacity-90 active:opacity-75"
+                  style={{ borderColor: 'var(--bdr2)' }}
+                  onClick={() => track('maps_embed_click', { business_id: business.id })}
+                >
+                  <div className="p-2.5 text-left font-semibold text-xs border-b flex items-center justify-between" style={{ backgroundColor: 'var(--sf1)', color: 'var(--txt)', borderColor: 'var(--bdr2)' }}>
+                    <span className="flex items-center gap-1.5"><MapPin className="h-3.5 w-3.5" /> {tUi('Get Directions', 'Get Directions')}</span>
+                    <span className="text-[10px] uppercase tracking-wider opacity-60">{tUi('Tap Map', 'Tap Map')}</span>
+                  </div>
+                  <iframe 
+                    src={`https://maps.google.com/maps?q=${encodeURIComponent(`${business.name}, ${city || ''} ${address || ''}`)}&t=&z=15&ie=UTF8&iwloc=&output=embed`} 
+                    width="100%" 
+                    height="180" 
+                    style={{ border: 0, pointerEvents: 'none' }} 
+                    allowFullScreen={false} 
+                    loading="lazy" 
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                </a>
+              )}
             </div>
           )}
 
