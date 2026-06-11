@@ -133,7 +133,7 @@ export const getMenuData = cache(async (slug: string): Promise<MenuData> => {
   const data = await _getMenuData(slug)
   if (kv && data) {
     // 24h TTL is a safety net; the revalidate route overwrites on every CMS save
-    kv.put(`menu:${slug}`, JSON.stringify(data), { expirationTtl: 86400 }).catch(() => {})
+    await kv.put(`menu:${slug}`, JSON.stringify(data), { expirationTtl: 86400 }).catch(() => {})
   }
   return data as MenuData
 })

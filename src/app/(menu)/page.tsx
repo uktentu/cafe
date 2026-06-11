@@ -27,7 +27,14 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     title,
     description,
-    metadataBase: siteUrl ? new URL(siteUrl) : undefined,
+    metadataBase: (() => {
+      if (!siteUrl) return undefined
+      try {
+        return new URL(siteUrl.startsWith('http') ? siteUrl : `https://${siteUrl}`)
+      } catch {
+        return undefined
+      }
+    })(),
     openGraph: {
       title,
       description,
