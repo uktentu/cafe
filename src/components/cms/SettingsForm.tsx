@@ -327,12 +327,12 @@ export function SettingsForm() {
                 <Input
                   value={googleMapsQuery}
                   onChange={(e) => setGoogleMapsQuery(e.target.value)}
-                  placeholder="e.g. Spice Factory, Pune"
+                  placeholder='<iframe src="https://www.google.com/maps/embed...'
                   type="text"
                   className="pl-9"
                 />
               </div>
-              <p className="mt-2 text-xs opacity-60">If the map preview is wrong, type the exact place name here.</p>
+              <p className="mt-2 text-xs opacity-60">If the map is wrong, paste the exact <b>HTML Embed code</b> from Google Maps here.</p>
             </Field>
             <Field label="Google Reviews">
               <div className="relative">

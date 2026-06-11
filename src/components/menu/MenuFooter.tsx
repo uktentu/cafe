@@ -57,22 +57,33 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
   const { phone, whatsapp, social_links, address, city, opening_hours } = business
   const { instagram, swiggy, zomato, google_maps, google_reviews, google_maps_query } = social_links || {}
 
-  // Helper to extract precise location from maps link if possible
-  const getMapQuery = () => {
-    if (google_maps_query) return google_maps_query
-    if (!google_maps) return `${business.name}, ${city || ''} ${address || ''}`
-    try {
-      const url = new URL(google_maps)
-      if (url.searchParams.has('q')) return url.searchParams.get('q')!
-      
-      const placeMatch = url.pathname.match(/\/place\/([^\/]+)/)
-      if (placeMatch && placeMatch[1]) return decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
-        
-      const coordMatch = url.pathname.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
-      if (coordMatch) return `${coordMatch[1]},${coordMatch[2]}`
-    } catch {}
-    
-    return `${business.name}, ${city || ''} ${address || ''}`
+  // Helper to get the absolute iframe src
+  const getMapIframeSrc = () => {
+    // 1. If user provided an override (either HTML iframe, pb= url, or a plain query string)
+    if (google_maps_query) {
+      const srcMatch = google_maps_query.match(/src="([^"]+)"/)
+      if (srcMatch) return srcMatch[1] // Extract src from <iframe src="...">
+      if (google_maps_query.startsWith('http') && google_maps_query.includes('pb=')) return google_maps_query
+      return `https://maps.google.com/maps?q=${encodeURIComponent(google_maps_query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`
+    }
+
+    // 2. Fallback: parse the clickable link or use business name
+    let query = `${business.name}, ${city || ''} ${address || ''}`
+    if (google_maps) {
+      try {
+        const url = new URL(google_maps)
+        if (url.searchParams.has('q')) query = url.searchParams.get('q')!
+        else {
+          const placeMatch = url.pathname.match(/\/place\/([^\/]+)/)
+          if (placeMatch && placeMatch[1]) query = decodeURIComponent(placeMatch[1].replace(/\+/g, ' '))
+          else {
+            const coordMatch = url.pathname.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+            if (coordMatch) query = `${coordMatch[1]},${coordMatch[2]}`
+          }
+        }
+      } catch {}
+    }
+    return `https://maps.google.com/maps?q=${encodeURIComponent(query)}&t=&z=15&ie=UTF8&iwloc=&output=embed`
   }
 
   const showSocials = features.socialLinks && (instagram || swiggy || zomato || google_maps || google_reviews)
@@ -137,7 +148,7 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
                     <span className="text-[10px] uppercase tracking-wider opacity-60">{tUi('Tap Map', 'Tap Map')}</span>
                   </div>
                   <iframe 
-                    src={`https://maps.google.com/maps?q=${encodeURIComponent(getMapQuery())}&t=&z=15&ie=UTF8&iwloc=&output=embed`} 
+                    src={getMapIframeSrc()} 
                     width="100%" 
                     height="180" 
                     style={{ border: 0, pointerEvents: 'none' }} 
