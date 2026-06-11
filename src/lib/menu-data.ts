@@ -7,6 +7,7 @@
 // the legacy menuos schema that may still be in place.
 // ════════════════════════════════════════════════════════════════════
 
+import { cache } from 'react'
 import { createAnonClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 import { demoBusiness, demoCategories, demoItems } from '@/lib/demo-data'
@@ -95,41 +96,54 @@ function normaliseCategory(raw: any): Category {
   } as Category
 }
 
-export const getMenuData = async (slug: string): Promise<MenuData> => {
-  // Use Edge Runtime cache if available
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const cfCaches = typeof caches !== 'undefined' ? (caches as any) : null;
-  if (cfCaches?.default) {
-    const cacheUrl = `https://internal-cache.local/menu-data/${slug}`
-    const req = new Request(cacheUrl)
-    
+// Minimal KV interface — avoids importing @cloudflare/workers-types globally
+// which conflicts with DOM lib types.
+interface MenuCacheKV {
+  get(key: string, type: 'json'): Promise<unknown>
+  put(key: string, value: string, options?: { expirationTtl?: number }): Promise<void>
+  delete(key: string): Promise<void>
+}
+
+function getKV(): MenuCacheKV | null {
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { getRequestContext } = require('@cloudflare/next-on-pages')
+    const { env } = getRequestContext() as { env: Record<string, unknown> }
+    return (env.MENU_CACHE as MenuCacheKV) ?? null
+  } catch {
+    return null
+  }
+}
+
+// cache() deduplicates within a single render — generateMetadata() and MenuPage()
+// both call getMenuData(); without this they'd each independently hit KV/Supabase.
+export const getMenuData = cache(async (slug: string): Promise<MenuData> => {
+  const kv = getKV()
+
+  if (kv) {
     try {
-      const cache = cfCaches.default
-      const cached = await cache.match(req)
-      if (cached) {
-        return await cached.json()
-      }
-      
-      const data = await _getMenuData(slug)
-      
-      // Store in Edge cache indefinitely (purged on CMS writes)
-      await cache.put(req, new Response(JSON.stringify(data), {
-        headers: {
-          'Cache-Control': 's-maxage=31536000', // 1 year
-          'Content-Type': 'application/json'
-        }
-      }))
-      
-      return data as MenuData
+      const cached = await kv.get(`menu:${slug}`, 'json')
+      if (cached) return cached as MenuData
     } catch (e) {
-      console.warn('Edge cache error', e)
+      console.warn('KV read error', e)
     }
   }
 
-  // Fallback if not running in Edge Runtime
+  // KV miss (cold start or first deploy) — fetch from Supabase then warm KV
   const data = await _getMenuData(slug)
+  if (kv && data) {
+    kv.put(`menu:${slug}`, JSON.stringify(data)).catch(() => {})
+  }
   return data as MenuData
+})
+
+// Exported for the /api/revalidate route so it can write fresh data into KV
+// without going through the React.cache() memoization layer.
+export async function fetchFreshMenuData(slug: string): Promise<MenuData | null> {
+  return _getMenuData(slug)
 }
+
+export { getKV }
 
 async function _getMenuData(slug: string): Promise<MenuData | null> {
   if (!supabaseConfigured()) {

@@ -7,6 +7,13 @@ pages_build_output_dir = ".vercel/output/static"
 binding = "__NEXT_ON_PAGES__KV_SUSPENSE_CACHE"
 id = "9a2b203829934a39bbd1b8646cf6118d"
 
+# Menu data cache — globally replicated, written on every CMS save.
+# To get the ID: run `pnpm exec wrangler kv namespace create MENU_CACHE`
+# then paste the id it prints below.
+[[kv_namespaces]]
+binding = "MENU_CACHE"
+id = "598ed8cc005d4108888d324ee7ba7acd"
+
 [vars]
 NEXT_PUBLIC_CLIENT_SLUG = "demo-cafe"
 NEXT_PUBLIC_SITE_URL = "http://localhost:3000"

@@ -1,13 +1,14 @@
-
 export const dynamic = process.env.STATIC_EXPORT === '1' ? 'force-static' : 'force-dynamic'
-// POST /api/revalidate — push the public menu's ISR cache after a CMS write
-// done via the browser Supabase client. Auth required. Rule: every CMS mutation
-// that affects the public menu calls this so changes go live in ≤ 30s.
+// POST /api/revalidate — on every CMS write that affects the public menu:
+//   1. Fetches fresh data from Supabase
+//   2. Writes it into Cloudflare KV (MENU_CACHE binding)
+//
+// KV is globally replicated — all PoPs worldwide read the new data immediately.
+// No per-PoP cache invalidation needed; no stale data window.
 import { NextResponse } from 'next/server'
-import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
-
+import { fetchFreshMenuData, getKV } from '@/lib/menu-data'
 
 export async function POST() {
   if (!supabaseConfigured()) {
@@ -19,22 +20,33 @@ export async function POST() {
   } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-  revalidatePath('/', 'layout')
-  
-  const { data: staff } = await supabase.from('staff_accounts').select('business_id').eq('user_id', user.id).single()
+  const { data: staff } = await supabase
+    .from('staff_accounts')
+    .select('business_id')
+    .eq('user_id', user.id)
+    .single()
+
   if (staff?.business_id) {
-    const { data: business } = await supabase.from('businesses').select('slug').eq('id', staff.business_id).single()
+    const { data: business } = await supabase
+      .from('businesses')
+      .select('slug')
+      .eq('id', staff.business_id)
+      .single()
+
     if (business?.slug) {
-       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-       const cfCaches = typeof caches !== 'undefined' ? (caches as any) : null;
-       if (cfCaches?.default) {
-         const cacheUrl = `https://internal-cache.local/menu-data/${business.slug}`
-         await cfCaches.default.delete(new Request(cacheUrl))
-       }
+      const kv = getKV()
+      if (kv) {
+        // Write-through: fetch fresh data and push directly into KV.
+        // All edge nodes globally read the new value on their next request.
+        const freshData = await fetchFreshMenuData(business.slug)
+        if (freshData) {
+          await kv.put(`menu:${business.slug}`, JSON.stringify(freshData))
+        }
+      }
     }
   }
 
   return NextResponse.json({ ok: true })
 }
 
-export const runtime = "edge";
+export const runtime = 'edge'
