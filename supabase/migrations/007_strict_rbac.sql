@@ -23,14 +23,31 @@ DROP POLICY IF EXISTS "item_staff_all" ON items;
 CREATE POLICY "item_staff_insert" ON items FOR INSERT TO authenticated 
 WITH CHECK (is_staff_of(business_id));
 
--- UPDATE: Admins can update anything. Regular staff can update if they don't change the price.
+-- UPDATE: Any staff can update, BUT the trigger below restricts price changes.
 CREATE POLICY "item_staff_update" ON items FOR UPDATE TO authenticated 
 USING (is_staff_of(business_id))
-WITH CHECK (
-  is_admin_of(business_id) 
-  OR 
-  (is_staff_of(business_id) AND price = OLD.price)
-);
+WITH CHECK (is_staff_of(business_id));
+
+-- Trigger to prevent regular staff from changing prices
+CREATE OR REPLACE FUNCTION check_staff_item_update()
+RETURNS TRIGGER AS $$
+BEGIN
+  -- If user is NOT an admin/owner
+  IF NOT is_admin_of(NEW.business_id) THEN
+    -- And they try to change the price
+    IF NEW.price IS DISTINCT FROM OLD.price THEN
+      RAISE EXCEPTION 'Access Denied: Regular staff cannot modify item prices.';
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+DROP TRIGGER IF EXISTS trg_check_staff_item_update ON items;
+CREATE TRIGGER trg_check_staff_item_update
+BEFORE UPDATE ON items
+FOR EACH ROW
+EXECUTE FUNCTION check_staff_item_update();
 
 -- DELETE: Only admins/owners can delete items
 CREATE POLICY "item_admin_delete" ON items FOR DELETE TO authenticated 
