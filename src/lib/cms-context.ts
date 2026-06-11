@@ -48,12 +48,16 @@ async function _getCmsContext(): Promise<CmsContext> {
     seo_title: rawBiz.seo_title ?? null,
     seo_description: rawBiz.seo_description ?? null,
     seo_og_r2_key: rawBiz.seo_og_r2_key ?? null,
+    // Preserve the FULL social_links blob. Whitelisting here silently dropped
+    // wait_time / about / reservations_enabled / multiple_branches_enabled, so the
+    // settings form loaded them blank and overwrote them with null/false on save.
     social_links: {
-      instagram: rawBiz.social_links?.instagram ?? null,
-      swiggy: rawBiz.social_links?.swiggy ?? null,
-      zomato: rawBiz.social_links?.zomato ?? null,
-      google_maps: rawBiz.social_links?.google_maps ?? null,
-      multiple_menus_enabled: rawBiz.social_links?.multiple_menus_enabled ?? false,
+      instagram: null,
+      swiggy: null,
+      zomato: null,
+      google_maps: null,
+      multiple_menus_enabled: false,
+      ...(rawBiz.social_links ?? {}),
     },
   } as Business
 
