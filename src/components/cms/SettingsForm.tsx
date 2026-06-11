@@ -203,7 +203,7 @@ export function SettingsForm() {
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       {/* ── Sticky page header ── */}
-      <div className="sticky top-0 z-10 -mx-4 md:-mx-8 mb-6 flex items-center justify-between bg-neutral-50/95 dark:bg-neutral-950/95 backdrop-blur-sm px-4 md:px-8 py-4 border-b border-black/5 dark:border-white/[0.06]">
+      <div className="sticky top-[49px] md:top-0 z-10 -mx-4 md:-mx-8 mb-6 flex items-center justify-between bg-neutral-50/95 dark:bg-neutral-950/95 backdrop-blur-sm px-4 md:px-8 py-4 border-b border-black/5 dark:border-white/[0.06]">
         <div>
           <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">Settings</h1>
           <p className="mt-0.5 text-xs text-neutral-500 dark:text-neutral-400">Restaurant profile, branding, and features</p>
