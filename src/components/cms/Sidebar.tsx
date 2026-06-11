@@ -313,10 +313,10 @@ export function MobileTopbar({ businessName }: { businessName: string }) {
   const open = useCmsStore((s) => s.sidebarOpen)
   return (
     <div className="sticky top-0 z-30 flex items-center gap-3 border-b border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 px-4 py-3 md:hidden">
-      <button onClick={toggle} aria-label="Toggle menu" className="text-neutral-700 dark:text-neutral-300">
+      <button onClick={toggle} aria-label="Toggle menu" className="text-neutral-700 dark:text-neutral-300 flex-shrink-0">
         {open ? <X className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
       </button>
-      <span className="font-semibold text-neutral-800 dark:text-neutral-200">{businessName}</span>
+      <span className="font-semibold text-neutral-800 dark:text-neutral-200 truncate flex-1 min-w-0">{businessName}</span>
     </div>
   )
 }
