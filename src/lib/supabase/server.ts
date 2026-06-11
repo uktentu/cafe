@@ -50,8 +50,13 @@ export function createAnonClient() {
     {
       auth: { autoRefreshToken: false, persistSession: false },
       global: {
-        fetch: (input, init) =>
-          fetch(input, { ...init, cache: 'no-store' }),
+        fetch: (input, init) => {
+          const opts = { ...init }
+          // Cloudflare Workers fetch throws if 'cache' is passed.
+          // In Edge runtime, data is fresh per request anyway when using force-dynamic.
+          delete opts.cache
+          return fetch(input, opts)
+        },
       },
     },
   )

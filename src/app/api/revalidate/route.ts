@@ -20,6 +20,20 @@ export async function POST() {
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   revalidatePath('/', 'layout')
+  
+  const { data: staff } = await supabase.from('staff_accounts').select('business_id').eq('user_id', user.id).single()
+  if (staff?.business_id) {
+    const { data: business } = await supabase.from('businesses').select('slug').eq('id', staff.business_id).single()
+    if (business?.slug) {
+       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+       const cfCaches = typeof caches !== 'undefined' ? (caches as any) : null;
+       if (cfCaches?.default) {
+         const cacheUrl = `https://internal-cache.local/menu-data/${business.slug}`
+         await cfCaches.default.delete(new Request(cacheUrl))
+       }
+    }
+  }
+
   return NextResponse.json({ ok: true })
 }
 

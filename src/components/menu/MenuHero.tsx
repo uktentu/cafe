@@ -49,8 +49,8 @@ function StatusBadge({ business, theme, align = 'center' }: { business: Business
       {/* Wait time widget */}
       {waitTime && (
         <div
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-amber-400/30 ${radiusClass}`}
-          style={{ background: 'rgba(245,158,11,0.12)', color: '#F59E0B', fontFamily: sharedBadgeStyle.fontFamily }}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border ${radiusClass}`}
+          style={{ borderColor: 'var(--brand)', background: 'var(--brand-dim)', color: 'var(--brand)', fontFamily: sharedBadgeStyle.fontFamily }}
         >
           <Clock className="h-3.5 w-3.5" />
           ~{waitTime} wait tonight

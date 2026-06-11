@@ -6,7 +6,7 @@
 // normalise*() functions handle both the MenuOS schema (after patch) and
 // the legacy menuos schema that may still be in place.
 // ════════════════════════════════════════════════════════════════════
-import { cache } from 'react'
+
 import { createAnonClient } from '@/lib/supabase/server'
 import { supabaseConfigured } from '@/lib/env'
 import { demoBusiness, demoCategories, demoItems } from '@/lib/demo-data'
@@ -95,7 +95,41 @@ function normaliseCategory(raw: any): Category {
   } as Category
 }
 
-export const getMenuData = cache(_getMenuData)
+export const getMenuData = async (slug: string): Promise<MenuData> => {
+  // Use Edge Runtime cache if available
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const cfCaches = typeof caches !== 'undefined' ? (caches as any) : null;
+  if (cfCaches?.default) {
+    const cacheUrl = `https://internal-cache.local/menu-data/${slug}`
+    const req = new Request(cacheUrl)
+    
+    try {
+      const cache = cfCaches.default
+      const cached = await cache.match(req)
+      if (cached) {
+        return await cached.json()
+      }
+      
+      const data = await _getMenuData(slug)
+      
+      // Store in Edge cache indefinitely (purged on CMS writes)
+      await cache.put(req, new Response(JSON.stringify(data), {
+        headers: {
+          'Cache-Control': 's-maxage=31536000', // 1 year
+          'Content-Type': 'application/json'
+        }
+      }))
+      
+      return data as MenuData
+    } catch (e) {
+      console.warn('Edge cache error', e)
+    }
+  }
+
+  // Fallback if not running in Edge Runtime
+  const data = await _getMenuData(slug)
+  return data as MenuData
+}
 
 async function _getMenuData(slug: string): Promise<MenuData | null> {
   if (!supabaseConfigured()) {
