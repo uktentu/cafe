@@ -20,7 +20,6 @@ import {
   Store, Share2, Palette, Layers, Clock, Zap, Globe,
   MapPin, Check, Star, Loader2
 } from 'lucide-react'
-import { resolveGoogleMapsShortlink } from '@/app/actions/maps'
 
 const DAYS: { key: string; label: string }[] = [
   { key: 'mon', label: 'Mon' }, { key: 'tue', label: 'Tue' }, { key: 'wed', label: 'Wed' },
@@ -100,23 +99,6 @@ export function SettingsForm() {
   const pushToast = useCmsStore((s) => s.pushToast)
   const { tier } = getConfig()
 
-  const handleMapsBlur = async () => {
-    if (!googleMaps || !googleMaps.includes('goo.gl')) return
-    if (googleMapsQuery) return // already has an override
-    
-    setResolvingMap(true)
-    try {
-      const expanded = await resolveGoogleMapsShortlink(googleMaps)
-      if (expanded) {
-        const url = new URL(expanded, 'https://maps.google.com')
-        if (url.searchParams.has('q')) {
-          setGoogleMapsQuery(url.searchParams.get('q')!)
-        }
-      }
-    } catch {}
-    setResolvingMap(false)
-  }
-
   const { register, handleSubmit } = useForm<InfoForm>({
     defaultValues: {
       name: business.name,
@@ -147,7 +129,6 @@ export function SettingsForm() {
   const [zomato, setZomato] = useState(business.social_links?.zomato ?? '')
   const [googleMaps, setGoogleMaps] = useState(business.social_links?.google_maps ?? '')
   const [googleMapsQuery, setGoogleMapsQuery] = useState(business.social_links?.google_maps_query ?? '')
-  const [resolvingMap, setResolvingMap] = useState(false)
   const [googleReviews, setGoogleReviews] = useState(business.social_links?.google_reviews ?? '')
 
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -334,12 +315,10 @@ export function SettingsForm() {
                 <Input
                   value={googleMaps}
                   onChange={(e) => setGoogleMaps(e.target.value)}
-                  onBlur={handleMapsBlur}
                   placeholder="https://maps.google.com/… or https://maps.app.goo.gl/…"
                   type="url"
-                  className="pl-9 pr-8"
+                  className="pl-9"
                 />
-                {resolvingMap && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-white/50" />}
               </div>
             </Field>
             <Field label="Map Embed Override (Optional)">
