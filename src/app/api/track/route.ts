@@ -14,8 +14,17 @@ const ALLOWED: ReadonlySet<string> = new Set<AnalyticsEventType>([
   'maps_click', 'reservation_submit', 'category_tap', 'share',
 ])
 
+import { rateLimiter, getIp } from '@/lib/rate-limit'
+
 export async function POST(request: Request) {
   try {
+    const ip = getIp(request)
+    if (rateLimiter.analytics) {
+      const { success } = await rateLimiter.analytics.limit(ip)
+      if (!success) {
+        return new Response(null, { status: 429 }) // Too many requests
+      }
+    }
     if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
       return new Response(null, { status: 204 })
     }

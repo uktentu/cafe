@@ -6,6 +6,8 @@ import { SpringModal } from '@/components/motion/SpringModal'
 import { useMenuStore } from '@/stores/menu'
 import type { Theme } from '@/types/database'
 
+import { Turnstile } from '@marsidev/react-turnstile'
+
 interface ReservationModalProps {
   businessId: string
   businessName: string
@@ -20,6 +22,9 @@ export function ReservationModal({ businessId, businessName, branchId, theme = '
   const [saving, setSaving] = useState(false)
   const [success, setSuccess] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  
+  const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(siteKey ? null : 'dummy_token')
 
   const [formData, setFormData] = useState({
     name: '',
@@ -36,6 +41,11 @@ export function ReservationModal({ businessId, businessName, branchId, theme = '
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!turnstileToken) {
+      setError('Please complete the CAPTCHA')
+      return
+    }
+
     setError(null)
     setSaving(true)
 
@@ -46,6 +56,7 @@ export function ReservationModal({ businessId, businessName, branchId, theme = '
         body: JSON.stringify({
           business_id: businessId,
           branch_id: branchId,
+          turnstileToken,
           ...formData
         })
       })
@@ -135,7 +146,7 @@ export function ReservationModal({ businessId, businessName, branchId, theme = '
                 className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors"
                 style={{ background: 'var(--bg)', borderColor: 'var(--bdr)', color: 'var(--txt)' }}
               >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, '10+'].map(num => (
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(num => (
                   <option key={num} value={num}>{num} {num === 1 ? 'person' : 'people'}</option>
                 ))}
               </select>
@@ -182,14 +193,25 @@ export function ReservationModal({ businessId, businessName, branchId, theme = '
               />
             </div>
 
+            {siteKey && (
+              <div className="flex justify-center pt-2">
+                <Turnstile 
+                  siteKey={siteKey}
+                  onSuccess={(token) => setTurnstileToken(token)}
+                  onError={() => setError('CAPTCHA failed to load')}
+                  options={{ theme: 'auto' }}
+                />
+              </div>
+            )}
+
             {error && (
               <p className="text-sm text-red-500 font-medium py-1">{error}</p>
             )}
 
             <button 
               type="submit"
-              disabled={saving}
-              className="mt-6 flex w-full items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-transform active:scale-[0.98] disabled:opacity-70"
+              disabled={saving || !turnstileToken}
+              className="mt-6 flex w-full items-center justify-center gap-2 py-3.5 rounded-xl font-bold transition-transform active:scale-[0.98] disabled:opacity-70 disabled:active:scale-100"
               style={{ background: 'var(--brand)', color: 'var(--bg)' }}
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}

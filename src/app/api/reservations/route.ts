@@ -12,26 +12,54 @@ const db = createClient(supabaseUrl, supabaseKey, {
 })
 
 import { getConfig } from '@/lib/config'
+import { rateLimiter, getIp } from '@/lib/rate-limit'
+import { reservationSchema } from '@/lib/validations'
 
 export async function POST(req: Request) {
   if (!getConfig().features.reservations) {
     return NextResponse.json({ error: 'Reservations feature is not enabled for this tier' }, { status: 403 })
   }
+
+  // 1. Rate Limiting
+  const ip = getIp(req)
+  if (rateLimiter.reservations) {
+    const { success } = await rateLimiter.reservations.limit(ip)
+    if (!success) {
+      return NextResponse.json({ error: 'Too many requests. Please try again later.' }, { status: 429 })
+    }
+  }
+
   try {
     const body = await req.json()
-    const { business_id, branch_id, name, phone, email, party_size, date, time, notes } = body
+    
+    // 2. Zod Validation
+    const parseResult = reservationSchema.safeParse(body)
+    if (!parseResult.success) {
+      return NextResponse.json({ error: parseResult.error.errors[0].message }, { status: 400 })
+    }
+    const { business_id, branch_id, name, phone, email, party_size, date, time, notes, turnstileToken } = parseResult.data
 
-    if (!business_id || !name || !phone || !party_size || !date || !time) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    // 3. Turnstile Verification
+    if (process.env.TURNSTILE_SECRET_KEY) {
+      const turnstileRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `secret=${encodeURIComponent(process.env.TURNSTILE_SECRET_KEY)}&response=${encodeURIComponent(turnstileToken)}&remoteip=${encodeURIComponent(ip)}`,
+      })
+      const turnstileData = await turnstileRes.json()
+      if (!turnstileData.success) {
+        return NextResponse.json({ error: 'CAPTCHA verification failed. Are you a bot?' }, { status: 400 })
+      }
     }
 
+    // 4. Insert into Supabase
     const { data, error } = await db.from('reservations').insert({
       business_id,
       branch_id: branch_id || null,
       name,
       phone,
       email: email || null,
-      party_size: Number(party_size),
+      party_size,
       date,
       time,
       notes: notes || null,
