@@ -288,24 +288,26 @@ export function Sidebar({ businessName, userEmail, isAdmin }: { businessName: st
       {/* Mobile: slide-in drawer */}
       <AnimatePresence>
         {open && (
-          <>
-            <m.div
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setSidebar(false)}
-            />
-            <m.aside
-              className="fixed inset-y-0 left-0 z-50 w-[280px] md:hidden"
-              initial={{ x: -300 }}
-              animate={{ x: 0 }}
-              exit={{ x: -300 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 40 }}
-            >
-              <SidebarContent businessName={businessName} userEmail={userEmail} isAdmin={isAdmin} onNavigate={() => setSidebar(false)} />
-            </m.aside>
-          </>
+          <m.div
+            key="backdrop"
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebar(false)}
+          />
+        )}
+        {open && (
+          <m.aside
+            key="drawer"
+            className="fixed inset-y-0 left-0 z-50 w-[280px] md:hidden"
+            initial={{ x: -300 }}
+            animate={{ x: 0 }}
+            exit={{ x: -300 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 40 }}
+          >
+            <SidebarContent businessName={businessName} userEmail={userEmail} isAdmin={isAdmin} onNavigate={() => setSidebar(false)} />
+          </m.aside>
         )}
       </AnimatePresence>
     </>
