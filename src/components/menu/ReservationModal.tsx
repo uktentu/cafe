@@ -28,6 +28,7 @@ export function ReservationModal({ businessId, businessName, branchId, theme = '
 
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     phone: '',
     party_size: '2',
     date: new Date().toISOString().split('T')[0],
@@ -161,6 +162,19 @@ export function ReservationModal({ businessId, businessName, branchId, theme = '
                 value={formData.name}
                 onChange={handleChange}
                 placeholder="John Doe"
+                className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors"
+                style={{ background: 'var(--bg)', borderColor: 'var(--bdr)', color: 'var(--txt)' }}
+              />
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--txt3)' }}>Email Address (Optional)</label>
+              <input 
+                type="email" 
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="john@example.com"
                 className="w-full rounded-xl border px-3 py-2.5 text-sm outline-none transition-colors"
                 style={{ background: 'var(--bg)', borderColor: 'var(--bdr)', color: 'var(--txt)' }}
               />
