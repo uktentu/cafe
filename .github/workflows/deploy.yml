@@ -80,7 +80,7 @@ jobs:
           OWNER_EMAIL: ${{ secrets.OWNER_EMAIL }}
           NEXT_PUBLIC_RESERVATIONS: false
           NEXT_PUBLIC_MULTI_BRANCH: false
-          NEXT_PUBLIC_BILINGUAL: false
+          NEXT_PUBLIC_BILINGUAL: true
           NEXT_PUBLIC_SECONDARY_LOCALE: hi
 
       - name: Verify build output exists
