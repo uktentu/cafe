@@ -128,6 +128,7 @@ export function SettingsForm() {
   const [swiggy, setSwiggy] = useState(business.social_links?.swiggy ?? '')
   const [zomato, setZomato] = useState(business.social_links?.zomato ?? '')
   const [googleMaps, setGoogleMaps] = useState(business.social_links?.google_maps ?? '')
+  const [googleMapsQuery, setGoogleMapsQuery] = useState(business.social_links?.google_maps_query ?? '')
   const [googleReviews, setGoogleReviews] = useState(business.social_links?.google_reviews ?? '')
 
   const [logoFile, setLogoFile] = useState<File | null>(null)
@@ -177,6 +178,7 @@ export function SettingsForm() {
           swiggy: swiggy.trim() || null,
           zomato: zomato.trim() || null,
           google_maps: googleMaps.trim() || null,
+          google_maps_query: googleMapsQuery.trim() || null,
           google_reviews: googleReviews.trim() || null,
           multiple_menus_enabled: multipleMenus,
           reservations_enabled: reservationsEnabled,
@@ -307,7 +309,7 @@ export function SettingsForm() {
                 />
               </div>
             </Field>
-            <Field label="Google Maps">
+            <Field label="Google Maps Link">
               <div className="relative">
                 <MapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-red-400" />
                 <Input
@@ -318,6 +320,19 @@ export function SettingsForm() {
                   className="pl-9"
                 />
               </div>
+            </Field>
+            <Field label="Map Embed Override (Optional)">
+              <div className="relative">
+                <MapPin className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 opacity-50" />
+                <Input
+                  value={googleMapsQuery}
+                  onChange={(e) => setGoogleMapsQuery(e.target.value)}
+                  placeholder="e.g. Spice Factory, Pune"
+                  type="text"
+                  className="pl-9"
+                />
+              </div>
+              <p className="mt-2 text-xs opacity-60">If the map preview is wrong, type the exact place name here.</p>
             </Field>
             <Field label="Google Reviews">
               <div className="relative">

@@ -55,10 +55,11 @@ export function MenuFooter({ business, theme = 'mercado' }: { business: Business
   const { features } = getConfig()
 
   const { phone, whatsapp, social_links, address, city, opening_hours } = business
-  const { instagram, swiggy, zomato, google_maps, google_reviews } = social_links || {}
+  const { instagram, swiggy, zomato, google_maps, google_reviews, google_maps_query } = social_links || {}
 
   // Helper to extract precise location from maps link if possible
   const getMapQuery = () => {
+    if (google_maps_query) return google_maps_query
     if (!google_maps) return `${business.name}, ${city || ''} ${address || ''}`
     try {
       const url = new URL(google_maps)
