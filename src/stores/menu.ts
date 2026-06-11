@@ -81,6 +81,7 @@ export const useMenuStore = create<MenuState>((set, get) => ({
     set((s) => {
       const existing = s.cart.find((c) => c.item.id === item.id)
       if (existing) {
+        if (existing.qty >= 20) return s
         return {
           cart: s.cart.map((c) =>
             c.item.id === item.id ? { ...c, qty: c.qty + 1 } : c
@@ -98,7 +99,7 @@ export const useMenuStore = create<MenuState>((set, get) => ({
     set((s) => ({
       cart: qty <= 0
         ? s.cart.filter((c) => c.item.id !== itemId)
-        : s.cart.map((c) => (c.item.id === itemId ? { ...c, qty } : c)),
+        : s.cart.map((c) => (c.item.id === itemId ? { ...c, qty: Math.min(qty, 20) } : c)),
     })),
 
   clearCart: () => set({ cart: [] }),

@@ -17,20 +17,34 @@ function initials(name: string): string {
 
 // ── Shared building blocks ─────────────────────────────────────────
 
+// Themes that use sharp/square badge edges instead of pills
+const SQUARE_BADGE_THEMES: Theme[] = ['arcade', 'onyx', 'nocturne', 'studio', 'ember']
+
 function StatusBadge({ business, theme, align = 'center' }: { business: Business; theme?: Theme; align?: 'start' | 'center' }) {
   const status = isOpenNow(business.opening_hours)
   const justifyClass = align === 'start' ? 'justify-start' : 'justify-center'
 
   const isArcade = theme === 'arcade'
-  const isOnyx = theme === 'onyx'
-  const isProvenance = theme === 'provenance'
-  const radiusClass = (isArcade || isOnyx || isProvenance) ? 'rounded-none' : 'rounded-full'
+  const isSquare = SQUARE_BADGE_THEMES.includes(theme as Theme)
+  const radiusClass = isSquare ? 'rounded-none' : 'rounded-full'
   const waitTime = business.social_links?.wait_time
 
   const sharedBadgeStyle: React.CSSProperties = {
     background: 'var(--glass)', backdropFilter: 'blur(8px)',
     fontFamily: isArcade ? undefined : 'var(--font-body)',
   }
+
+  // Per-theme typography for the wait time badge
+  const waitTypography: React.CSSProperties =
+    isArcade
+      ? { fontFamily: undefined, fontSize: '8px', letterSpacing: '0.15em', textTransform: 'uppercase' }
+      : theme === 'onyx' || theme === 'nocturne'
+      ? { fontFamily: 'var(--font-body)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase' }
+      : theme === 'bazaar' || theme === 'ember'
+      ? { fontFamily: 'var(--font-body)', fontSize: '10px', letterSpacing: '0.12em', textTransform: 'uppercase' }
+      : theme === 'studio'
+      ? { fontFamily: 'var(--font-display)', fontSize: '10px', letterSpacing: '-0.01em' }
+      : { fontFamily: 'var(--font-body)', fontSize: '12px' }
 
   const infoBtn = (
     <button
@@ -46,13 +60,12 @@ function StatusBadge({ business, theme, align = 'center' }: { business: Business
 
   return (
     <div className={`flex flex-col items-${align === 'start' ? 'start' : 'center'} gap-2 mt-1`}>
-      {/* Wait time widget */}
       {waitTime && (
         <div
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border ${radiusClass}`}
-          style={{ borderColor: 'var(--brand)', background: 'var(--brand-dim)', color: 'var(--brand)', fontFamily: sharedBadgeStyle.fontFamily }}
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-medium border ${radiusClass}`}
+          style={{ borderColor: 'var(--brand)', background: 'var(--brand-dim)', color: 'var(--brand)', ...waitTypography }}
         >
-          <Clock className="h-3.5 w-3.5" />
+          <Clock className="h-3.5 w-3.5 shrink-0" />
           ~{waitTime} wait tonight
         </div>
       )}
@@ -170,7 +183,7 @@ function ProvenanceHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} theme="onyx" />
+        <StatusBadge business={business} theme="provenance" />
         <div className="h-px w-12" style={{ background: 'var(--bdr2)' }} />
       </div>
     </header>
@@ -376,7 +389,7 @@ function AetherHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} align="start" theme="sakura" />
+        <StatusBadge business={business} align="start" theme="aether" />
       </div>
     </header>
   )
@@ -422,7 +435,7 @@ function OnyxHero({ business }: { business: Business }) {
             {business.tagline}
           </p>
         )}
-        <StatusBadge business={business} theme="provenance" />
+        <StatusBadge business={business} theme="onyx" />
         {/* Scroll cue */}
         <div className="absolute bottom-20 flex flex-col items-center gap-1">
           <span className="text-[10px] uppercase tracking-[0.3em]" style={{ color: 'var(--txt3)', fontFamily: 'var(--font-body)' }}>
@@ -524,7 +537,7 @@ function SakuraHero({ business }: { business: Business }) {
         )}
         <div className="flex items-center gap-3">
           <div className="h-px w-8" style={{ background: 'var(--brand3)' }} />
-          <StatusBadge business={business} theme="coastal" />
+          <StatusBadge business={business} theme="sakura" />
           <div className="h-px w-8" style={{ background: 'var(--brand3)' }} />
         </div>
       </div>
