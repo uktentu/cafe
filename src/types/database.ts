@@ -36,6 +36,7 @@ export interface SocialLinks {
   swiggy?: string | null
   zomato?: string | null
   google_maps?: string | null
+  google_maps_query?: string | null
   google_reviews?: string | null
   multiple_menus_enabled?: boolean
   reservations_enabled?: boolean
