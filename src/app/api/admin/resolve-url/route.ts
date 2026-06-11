@@ -6,14 +6,23 @@ export async function POST(req: Request) {
     if (!url || !url.includes('goo.gl')) {
       return NextResponse.json({ error: 'Invalid URL' }, { status: 400 })
     }
-    const res = await fetch(url, { redirect: 'manual', cache: 'no-store' })
-    if (res.status >= 300 && res.status < 400) {
-      return NextResponse.json({ expandedUrl: res.headers.get('location') })
+    // Follow the full redirect chain (goo.gl → maps.google.com → google.com/maps/place/...)
+    let current: string = url
+    for (let i = 0; i < 5; i++) {
+      const res = await fetch(current, { redirect: 'manual', cache: 'no-store' })
+      if (res.status >= 300 && res.status < 400) {
+        const next = res.headers.get('location')
+        if (!next) break
+        current = next.startsWith('http') ? next : new URL(next, current).href
+        if (current.includes('google.com/maps')) break
+      } else {
+        break
+      }
     }
-    return NextResponse.json({ error: 'No redirect found' }, { status: 404 })
+    return NextResponse.json({ expandedUrl: current })
   } catch {
     return NextResponse.json({ error: 'Failed' }, { status: 500 })
   }
 }
 
-export const runtime = "edge";
+export const runtime = 'edge'

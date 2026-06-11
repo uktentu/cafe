@@ -99,10 +99,24 @@ export function SettingsForm() {
   const pushToast = useCmsStore((s) => s.pushToast)
   const { tier } = getConfig()
 
+  const extractQueryFromMapsUrl = (expandedUrl: string): string | null => {
+    try {
+      const u = new URL(expandedUrl)
+      if (u.searchParams.has('q')) return u.searchParams.get('q')
+      // @lat,lng,zoom pattern (place pins and search results)
+      const coordMatch = expandedUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/)
+      if (coordMatch) return `${coordMatch[1]},${coordMatch[2]}`
+      // /place/Name or /search/Name in pathname
+      const pathMatch = expandedUrl.match(/\/(?:place|search)\/([^/@]+)/)
+      if (pathMatch?.[1]) return decodeURIComponent(pathMatch[1].replace(/\+/g, ' '))
+    } catch {}
+    return null
+  }
+
   const handleMapsBlur = async () => {
     if (!googleMaps || !googleMaps.includes('goo.gl')) return
     if (googleMapsQuery) return // already has an override
-    
+
     setResolvingMap(true)
     try {
       const res = await fetch('/api/admin/resolve-url', {
@@ -113,10 +127,8 @@ export function SettingsForm() {
       if (res.ok) {
         const data = await res.json()
         if (data.expandedUrl) {
-          const url = new URL(data.expandedUrl, 'https://maps.google.com')
-          if (url.searchParams.has('q')) {
-            setGoogleMapsQuery(url.searchParams.get('q')!)
-          }
+          const q = extractQueryFromMapsUrl(data.expandedUrl)
+          if (q) setGoogleMapsQuery(q)
         }
       }
     } catch (err) {
@@ -157,6 +169,28 @@ export function SettingsForm() {
   const [googleMapsQuery, setGoogleMapsQuery] = useState(business.social_links?.google_maps_query ?? '')
   const [resolvingMap, setResolvingMap] = useState(false)
   const [googleReviews, setGoogleReviews] = useState(business.social_links?.google_reviews ?? '')
+
+  // Auto-resolve on mount: if a goo.gl shortlink is already saved but no embed query was extracted yet
+  useEffect(() => {
+    const savedMaps = business.social_links?.google_maps ?? ''
+    const savedQuery = business.social_links?.google_maps_query ?? ''
+    if (!savedMaps.includes('goo.gl') || savedQuery) return
+    setResolvingMap(true)
+    fetch('/api/admin/resolve-url', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: savedMaps }),
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (!data?.expandedUrl) return
+        const q = extractQueryFromMapsUrl(data.expandedUrl)
+        if (q) setGoogleMapsQuery(q)
+      })
+      .catch(() => {})
+      .finally(() => setResolvingMap(false))
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
