@@ -204,7 +204,7 @@ export interface Translation {
 export type AnalyticsEventType =
   | 'page_view' | 'item_view' | 'whatsapp_click' | 'call_click'
   | 'share' | 'maps_click' | 'reservation_submit' | 'category_tap'
-  | 'add_to_cart' | 'cart_order'
+  | 'add_to_cart' | 'cart_order' | 'reviews_click' | 'maps_embed_click'
 
 export interface AnalyticsEvent {
   id: string
