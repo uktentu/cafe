@@ -53,9 +53,10 @@ export async function POST(req: NextRequest) {
   if (bizErr) return NextResponse.json({ error: bizErr.message }, { status: 500 })
 
   // 2. Create owner auth user
+  const tempPassword = generatePassword()
   const { data: authUser, error: authErr } = await admin.auth.admin.createUser({
     email,
-    password: generatePassword(),
+    password: tempPassword,
     email_confirm: true,
   })
   if (authErr && !authErr.message.includes('already registered')) {
@@ -129,8 +130,12 @@ export async function POST(req: NextRequest) {
     `NEXT_PUBLIC_MULTI_BRANCH=false`,
     `NEXT_PUBLIC_BILINGUAL=false`,
     ``,
-    `# Business ID (for reference): ${biz.id}`,
-    `# Owner Email: ${email}`,
+    `# ── Owner login ────────────────────────────────────────────────────`,
+    `# CMS URL:  https://${slug}.menuos.in/cms`,
+    `# Email:    ${email}`,
+    `# Password: ${tempPassword}   ← share this securely, owner changes it on first login`,
+    `# ──────────────────────────────────────────────────────────────────`,
+    `# Business ID: ${biz.id}`,
     `# Tier: ${tier}`,
   ].join('\n')
 

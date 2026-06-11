@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
-
-
+import { getKV } from '@/lib/menu-data'
 
 export async function PATCH(req: NextRequest) {
   const adminEmail = process.env.ADMIN_EMAIL
@@ -19,13 +18,30 @@ export async function PATCH(req: NextRequest) {
   }
 
   const admin = createAdminClient()
+
+  // Fetch slug before update so we can clear KV
+  const { data: business } = await admin
+    .from('businesses')
+    .select('slug')
+    .eq('id', businessId)
+    .single()
+
   const { error } = await admin
     .from('businesses')
     .update({ is_active: isActive })
     .eq('id', businessId)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Clear KV cache so the status change is effective immediately.
+  // Suspend: cached menu would otherwise stay live for the next visitor.
+  // Reactivate: stale "inactive" state in cache would block the menu.
+  if (business?.slug) {
+    const kv = getKV()
+    if (kv) await kv.delete(`menu:${business.slug}`).catch(() => {})
+  }
+
   return NextResponse.json({ ok: true })
 }
 
-export const runtime = "edge";
+export const runtime = 'edge'

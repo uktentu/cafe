@@ -50,7 +50,7 @@ Click **Create**. The API will:
 4. Seed 3 starter categories + 3 sample items
 5. Return a ready-to-paste env vars block — **copy it**
 
-The owner's temporary password is in the response. Share it securely; they can change it from the CMS settings.
+The response modal shows the full env vars block **including the temporary password** at the bottom. Copy it before closing — the password cannot be retrieved again.
 
 ---
 
@@ -63,12 +63,9 @@ The owner's temporary password is in the response. Share it securely; they can c
    - Build command: `pnpm run pages:build`
    - Build output: `.vercel/output/static`
 5. Under **Environment variables**, paste the env vars from Step 1
-6. Click **Save and Deploy** — skip this first deploy; it'll use wrong vars until Step 3
+6. Click **Save and Deploy** — skip this first auto-deploy; the real deploy happens in Step 3 via GitHub Actions
 
-> **Add the KV binding before the first real deploy:**
-> Pages project → Settings → Bindings → KV namespace → Add:
-> - Variable name: `MENU_CACHE`
-> - KV namespace ID: `598ed8cc005d4108888d324ee7ba7acd`
+> **KV binding is automatic** — `wrangler.toml` already declares `MENU_CACHE`. When GitHub Actions deploys the project in Step 3, the binding is wired up automatically. You do NOT need to add it manually in the CF dashboard (and trying to will show "bindings managed by wrangler.toml").
 
 ---
 
@@ -160,7 +157,7 @@ From the admin panel toggle the **Active** switch, or:
 curl -X PATCH https://<your-domain>/api/admin/set-active \
   -d '{"businessId":"<uuid>","isActive":false}'
 ```
-Suspending sets `is_active = false` in Supabase. The public menu immediately returns 404. The KV cache entry for that slug will be stale but harmless — the menu page checks `is_active` on every Supabase read.
+Suspending sets `is_active = false` in Supabase **and immediately clears the KV cache** for that slug. The next visitor gets a 404. Reactivating does the same — clears KV so the menu repopulates fresh on the next request.
 
 ### Clear a client's KV cache manually
 If a client reports stale data and can't wait for their next CMS save:
