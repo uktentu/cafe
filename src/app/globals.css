@@ -67,6 +67,27 @@ button, a, label, input[type="button"], input[type="submit"] {
   .no-scrollbar::-webkit-scrollbar { display: none; }
 }
 
+/* CMS sidebar nav: with POS enabled there are 6 sections / ~19 links, which
+   overflows shorter viewports. The universal scrollbar-removal rule above
+   made that overflow invisible — Settings/Staff/Reports/Sales/Expenses/
+   Customers were scrollable but looked like they didn't exist. Restore a
+   thin, visible scrollbar just here so "there's more below" is obvious. */
+.cms-nav-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.18) transparent;
+}
+.cms-nav-scroll::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+.cms-nav-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.18);
+  border-radius: 9999px;
+}
+.cms-nav-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 /* ── Item reveal — CSS scroll-driven (Basic tier, no GSAP) ─────────────── */
 @media (prefers-reduced-motion: no-preference) {
   @supports (animation-timeline: view()) {

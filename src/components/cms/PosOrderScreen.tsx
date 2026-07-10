@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { Plus, Minus, Send, Receipt as ReceiptIcon, ShoppingBag, Search, X } from 'lucide-react'
 import { useCms } from './Providers'
@@ -10,6 +10,7 @@ import { qk, fetchCategories, fetchItems } from '@/lib/cms-queries'
 import {
   posQk, fetchTables, fetchActiveOrders, fetchOrderItems, addOrderItemsAsStaff, updateOrderItemStatus,
 } from '@/lib/pos-queries'
+import { createClient } from '@/lib/supabase/client'
 import { PosBillingPanel } from './PosBillingPanel'
 import { cn } from '@/lib/utils'
 import type { Order, RestaurantTable, TableStatus } from '@/types/database'
@@ -30,9 +31,31 @@ export function PosOrderScreen() {
   const pushToast = useCmsStore((s) => s.pushToast)
 
   const tablesQ = useQuery({ queryKey: posQk.tables(bid), queryFn: () => fetchTables(bid) })
-  const ordersQ = useQuery({ queryKey: posQk.orders(bid), queryFn: () => fetchActiveOrders(bid), refetchInterval: 8000 })
+  // 60s is a safety net only — Realtime below invalidates instantly on any change.
+  const ordersQ = useQuery({ queryKey: posQk.orders(bid), queryFn: () => fetchActiveOrders(bid), refetchInterval: 60000 })
   const categoriesQ = useQuery({ queryKey: qk.categories(bid), queryFn: () => fetchCategories(bid) })
   const itemsQ = useQuery({ queryKey: qk.items(bid), queryFn: () => fetchItems(bid) })
+
+  const supabase = useRef(createClient()).current
+  useEffect(() => {
+    const channel = supabase
+      .channel(`pos-${bid}`)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders', filter: `business_id=eq.${bid}` }, () => {
+        qc.invalidateQueries({ queryKey: posQk.orders(bid) })
+        qc.invalidateQueries({ queryKey: posQk.tables(bid) })
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'order_items', filter: `business_id=eq.${bid}` }, () => {
+        qc.invalidateQueries({ queryKey: posQk.orders(bid) })
+      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'tables', filter: `business_id=eq.${bid}` }, () => {
+        qc.invalidateQueries({ queryKey: posQk.tables(bid) })
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(channel)
+    }
+  }, [supabase, bid, qc])
 
   const [ctx, setCtx] = useState<Context | null>(null)
   const [cart, setCart] = useState<Record<string, number>>({})

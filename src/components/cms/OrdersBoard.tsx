@@ -196,7 +196,8 @@ export function OrdersBoard() {
   const pushToast = useCmsStore((s) => s.pushToast)
   const supabase = useRef(createClient()).current
 
-  const ordersQ = useQuery({ queryKey: posQk.board(bid), queryFn: () => fetchBoardOrders(bid), refetchInterval: 12000 })
+  // 60s is a safety net only — Realtime below invalidates instantly on any change.
+  const ordersQ = useQuery({ queryKey: posQk.board(bid), queryFn: () => fetchBoardOrders(bid), refetchInterval: 60000 })
   const tablesQ = useQuery({ queryKey: posQk.tables(bid), queryFn: () => fetchTables(bid) })
 
   const [filter, setFilter] = useState<OrderChannel | 'all'>('all')

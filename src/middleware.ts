@@ -32,6 +32,13 @@ export async function middleware(request: NextRequest) {
   // render so the login page and a "not configured" notice are reachable.
   if (!supabaseConfigured()) return NextResponse.next()
 
+  // /api/* routes each do their own supabase.auth.getUser() check server-side
+  // (they must — middleware auth is UX-only, not the security boundary). The
+  // redirect logic below only ever fires for pathname.startsWith('/cms'), so
+  // running the full getUser() round-trip here for API calls validated nothing
+  // and just doubled the auth-network cost on every order/POS/kitchen request.
+  if (pathname.startsWith('/api')) return NextResponse.next()
+
   let response = NextResponse.next({ request })
 
   const supabase = createServerClient(

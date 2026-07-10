@@ -476,7 +476,7 @@ export async function fetchAnalyticsSummary(businessId: string): Promise<Analyti
     }
 
     if (itemsData) {
-      const nameMap = new Map(itemsData.map(i => [i.id, i.name]))
+      const nameMap = new Map<string, string>(itemsData.map((i: { id: string; name: string }) => [i.id, i.name]))
       topItems = topItems.map(t => ({ ...t, name: nameMap.get(t.item_id) }))
     }
   }

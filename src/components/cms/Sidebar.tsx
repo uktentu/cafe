@@ -85,7 +85,6 @@ const SECTIONS: NavSection[] = [
     label: 'Business',
     items: [
       { href: '/cms/staff', label: 'Staff', icon: Users, feature: 'staffAccounts' },
-      { href: '/cms/settings', label: 'Settings', icon: Settings },
       { href: '/cms/tools', label: 'Tools', icon: FileText },
     ],
   },
@@ -209,7 +208,7 @@ function SidebarContent({ businessName, userEmail, isAdmin, onNavigate }: { busi
         <BranchSwitcher />
       </div>
 
-      <nav className="flex-1 space-y-5 overflow-y-auto p-3">
+      <nav className="cms-nav-scroll flex-1 space-y-5 overflow-y-auto p-3">
         {SECTIONS.map((section) => {
           // Resolve each item's state; drop hidden ones, hide the whole section if empty.
           const visible = section.items
@@ -238,6 +237,17 @@ function SidebarContent({ businessName, userEmail, isAdmin, onNavigate }: { busi
       </nav>
 
       <div className="space-y-1 border-t border-white/10 p-3">
+        <Link
+          href="/cms/settings"
+          onClick={onNavigate}
+          className={cn(
+            'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition',
+            isActive('/cms/settings') ? 'text-amber-400 font-medium' : 'text-neutral-300 hover:bg-white/5 hover:text-white'
+          )}
+        >
+          <Settings className="h-[18px] w-[18px]" />
+          Settings
+        </Link>
         <Link
           href="/cms/plans"
           onClick={onNavigate}

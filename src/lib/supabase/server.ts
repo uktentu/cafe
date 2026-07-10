@@ -51,10 +51,14 @@ export function createAnonClient() {
       auth: { autoRefreshToken: false, persistSession: false },
       global: {
         fetch: (input, init) => {
-          const opts = { ...init }
-          // Cloudflare Workers fetch throws if 'cache' is passed.
-          // In Edge runtime, data is fresh per request anyway when using force-dynamic.
+          const opts = { ...init } as RequestInit & { next?: { revalidate?: number } }
+          // Cloudflare Workers fetch throws if the raw 'cache' RequestInit key is passed,
+          // so we can't use `cache: 'no-store'` directly. `next.revalidate` is a Next.js-only
+          // hint stripped before the request reaches the platform fetch, so it's safe here —
+          // and it's required: without it Next's Data Cache can serve a stale cached response
+          // for this fetch indefinitely, even though the route itself is force-dynamic.
           delete opts.cache
+          opts.next = { revalidate: 0 }
           return fetch(input, opts)
         },
       },

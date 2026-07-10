@@ -41,10 +41,11 @@ export function KitchenDisplay({ businessId }: { businessId: string }) {
   const supabase = useRef(createClient()).current
   const qc = useQueryClient()
 
+  // 60s is a safety net only — Realtime below invalidates instantly on any change.
   const { data: items = [] } = useQuery({
     queryKey: posQk.kot(businessId),
     queryFn: () => fetchKotItems(businessId),
-    refetchInterval: 15000,
+    refetchInterval: 60000,
   })
 
   useEffect(() => {
