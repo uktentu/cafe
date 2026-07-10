@@ -94,11 +94,16 @@ export default async function PlansPage() {
   const ctx = await getCmsContext()
   if (ctx.state !== 'ok') redirect('/cms/login')
 
-  const { tier } = getConfig()
+  const { tier, features } = getConfig()
   const devContact = process.env.NEXT_PUBLIC_DEVELOPER_CONTACT
 
   function upgradeMessage(targetTier: string) {
     const msg = `Hi! I'd like to upgrade my menu (${ctx.state === 'ok' ? ctx.business.name : ''}) from ${tier} to ${targetTier} plan. Please let me know the next steps.`
+    return `https://wa.me/${devContact}?text=${encodeURIComponent(msg)}`
+  }
+
+  function posAddonMessage() {
+    const msg = `Hi! I'd like to enable the POS add-on (table ordering, kitchen tickets, billing) for my menu (${ctx.state === 'ok' ? ctx.business.name : ''}). Please let me know the next steps.`
     return `https://wa.me/${devContact}?text=${encodeURIComponent(msg)}`
   }
 
@@ -210,6 +215,31 @@ export default async function PlansPage() {
             </div>
           )
         })}
+      </div>
+
+      {/* POS add-on — orthogonal to tier, so it gets its own callout instead of a table row */}
+      <div className="rounded-xl border border-purple-500/30 bg-purple-500/5 p-6 flex items-center justify-between gap-4 flex-wrap">
+        <div>
+          <p className="text-sm font-medium text-purple-500">POS Add-on &middot; available on any plan</p>
+          <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Table ordering, kitchen tickets &amp; billing</h3>
+          <p className="mt-1 max-w-xl text-sm text-neutral-500 dark:text-neutral-400">
+            Run your floor with live table status, waiter order-taking, a real-time kitchen display, and bill settlement — on top of whatever plan you&apos;re already on.
+          </p>
+        </div>
+        {features.posEnabled ? (
+          <span className="shrink-0 rounded-lg bg-green-500/10 px-4 py-2 text-sm font-semibold text-green-500">Enabled</span>
+        ) : (
+          devContact && (
+            <a
+              href={posAddonMessage()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 rounded-lg bg-purple-500 px-5 py-2.5 text-sm font-semibold text-white hover:bg-purple-600 transition-colors"
+            >
+              Enable POS Add-on →
+            </a>
+          )
+        )}
       </div>
 
       {/* How upgrade works */}

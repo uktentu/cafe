@@ -21,6 +21,28 @@ export default async function DashboardPage() {
 
   const { features } = getConfig()
 
+  // Command-center: today's live POS numbers. All reads degrade to 0 if the
+  // POS tables aren't present yet (results carry errors, never throw), so the
+  // dashboard never breaks.
+  let pos: { todaySales: number; todayBills: number; occupiedTables: number; activeTickets: number } | null = null
+  if (features.posEnabled) {
+    const todayStart = new Date()
+    todayStart.setHours(0, 0, 0, 0)
+    const todayIso = todayStart.toISOString()
+    const [settled, occupied, tickets] = await Promise.all([
+      supabase.from('orders').select('total_amount').eq('business_id', id).eq('status', 'settled').gte('settled_at', todayIso),
+      supabase.from('tables').select('id', { count: 'exact', head: true }).eq('business_id', id).eq('status', 'occupied'),
+      supabase.from('order_items').select('id', { count: 'exact', head: true }).eq('business_id', id).in('status', ['placed', 'preparing', 'ready']),
+    ])
+    const todayOrders = (settled.data ?? []) as { total_amount: number }[]
+    pos = {
+      todaySales: todayOrders.reduce((s, o) => s + o.total_amount, 0),
+      todayBills: todayOrders.length,
+      occupiedTables: occupied.count ?? 0,
+      activeTickets: tickets.count ?? 0,
+    }
+  }
+
   return (
     <DashboardClient
       stats={{
@@ -32,6 +54,7 @@ export default async function DashboardPage() {
       }}
       business={ctx.business}
       features={features}
+      pos={pos}
     />
   )
 }

@@ -12,6 +12,7 @@ import type { AnalyticsEventType } from '@/types/database'
 const ALLOWED: ReadonlySet<string> = new Set<AnalyticsEventType>([
   'page_view', 'item_view', 'whatsapp_click', 'call_click',
   'maps_click', 'reservation_submit', 'category_tap', 'share',
+  'order_placed', 'order_settled',
 ])
 
 import { rateLimiter, getIp } from '@/lib/rate-limit'

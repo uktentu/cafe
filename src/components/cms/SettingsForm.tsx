@@ -97,7 +97,7 @@ export function SettingsForm() {
   const { business } = useCms()
   const router = useRouter()
   const pushToast = useCmsStore((s) => s.pushToast)
-  const { tier } = getConfig()
+  const { tier, features } = getConfig()
 
   const extractQueryFromMapsUrl = (expandedUrl: string): string | null => {
     try {
@@ -192,6 +192,11 @@ export function SettingsForm() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const [taxPercent, setTaxPercent] = useState(String(business.tax_percent ?? 5))
+  const [barTaxPercent, setBarTaxPercent] = useState(String(business.bar_tax_percent ?? 18))
+  const [gstin, setGstin] = useState(business.gstin ?? '')
+  const [fssaiLicense, setFssaiLicense] = useState(business.fssai_license ?? '')
+  const [receiptFooter, setReceiptFooter] = useState(business.receipt_footer ?? '')
   const [logoFile, setLogoFile] = useState<File | null>(null)
   const [coverFile, setCoverFile] = useState<File | null>(null)
   const [seoOgFile, setSeoOgFile] = useState<File | null>(null)
@@ -249,6 +254,15 @@ export function SettingsForm() {
         },
         seo_title: values.seo_title || null,
         seo_description: values.seo_description || null,
+      }
+      if (features.posEnabled) {
+        const parsedTax = Number(taxPercent)
+        patch.tax_percent = Number.isFinite(parsedTax) ? parsedTax : 5
+        const parsedBarTax = Number(barTaxPercent)
+        patch.bar_tax_percent = Number.isFinite(parsedBarTax) ? parsedBarTax : 18
+        patch.gstin = gstin.trim() || null
+        patch.fssai_license = fssaiLicense.trim() || null
+        patch.receipt_footer = receiptFooter.trim() || null
       }
       if (logoFile) { const up = await uploadImage(logoFile, 'logo'); patch.logo_r2_key = up.r2_key }
       if (coverFile) { const up = await uploadImage(coverFile, 'cover'); patch.cover_r2_key = up.r2_key }
@@ -606,6 +620,29 @@ export function SettingsForm() {
             <UpgradePrompt feature="Multiple Branches" description="Expand your menu to support multiple outlets and branch-specific stock." />
           )}
         </SectionCard>
+
+        {/* ── POS ── */}
+        {features.posEnabled && (
+          <SectionCard icon={Zap} title="Billing" description="Printed on every bill — GST/VAT rates, license numbers, footer">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="GST on food (%)">
+                <Input type="number" min={0} max={100} step="0.01" value={taxPercent} onChange={(e) => setTaxPercent(e.target.value)} />
+              </Field>
+              <Field label="VAT on bar/liquor (%)">
+                <Input type="number" min={0} max={100} step="0.01" value={barTaxPercent} onChange={(e) => setBarTaxPercent(e.target.value)} />
+              </Field>
+              <Field label="GSTIN">
+                <Input value={gstin} onChange={(e) => setGstin(e.target.value)} placeholder="e.g. 29ABCDE1234F1Z5" />
+              </Field>
+              <Field label="FSSAI license no.">
+                <Input value={fssaiLicense} onChange={(e) => setFssaiLicense(e.target.value)} placeholder="e.g. 12345678901234" />
+              </Field>
+            </div>
+            <Field label="Receipt footer">
+              <Input value={receiptFooter} onChange={(e) => setReceiptFooter(e.target.value)} placeholder="Thank you! Visit again." />
+            </Field>
+          </SectionCard>
+        )}
 
         {/* ── SEO ── */}
         <SectionCard icon={Globe} title="SEO" description="Control how your menu appears on Google and when shared">

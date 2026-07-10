@@ -109,8 +109,8 @@ export function BranchManager() {
       </div>
 
       {(isAdding || editingId) && (
-        <form onSubmit={handleSubmit} className="rounded-xl border border-neutral-800 bg-neutral-900/50 p-4 space-y-4">
-          <h3 className="font-medium text-white">{isAdding ? 'New Branch' : 'Edit Branch'}</h3>
+        <form onSubmit={handleSubmit} className="rounded-xl border border-neutral-200 bg-neutral-50 p-4 space-y-4 dark:border-neutral-800 dark:bg-neutral-900/50">
+          <h3 className="font-medium text-neutral-900 dark:text-white">{isAdding ? 'New Branch' : 'Edit Branch'}</h3>
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-1">
               <label className="text-xs font-medium text-neutral-400">Branch Name *</label>
@@ -137,17 +137,17 @@ export function BranchManager() {
       {isLoading ? (
         <div className="flex h-32 items-center justify-center text-sm text-neutral-500 dark:text-neutral-400">Loading branches...</div>
       ) : branches.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-neutral-800 p-8 text-center">
-          <p className="text-sm text-neutral-400">No branches added yet.</p>
+        <div className="rounded-xl border border-dashed border-neutral-300 p-8 text-center dark:border-neutral-800">
+          <p className="text-sm text-neutral-500 dark:text-neutral-400">No branches added yet.</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {branches.map(branch => (
-            <div key={branch.id} className="relative group overflow-hidden rounded-xl border border-neutral-800 bg-[#161616] p-5 hover:border-neutral-700 transition-colors">
+            <div key={branch.id} className="relative group overflow-hidden rounded-xl border border-neutral-200 bg-white p-5 transition-colors hover:border-neutral-300 dark:border-neutral-800 dark:bg-[#161616] dark:hover:border-neutral-700">
               <div className="flex items-start justify-between">
                 <div>
-                  <h3 className="font-semibold text-white">{branch.name}</h3>
-                  <div className="mt-2 space-y-1 text-sm text-neutral-400">
+                  <h3 className="font-semibold text-neutral-900 dark:text-white">{branch.name}</h3>
+                  <div className="mt-2 space-y-1 text-sm text-neutral-500 dark:text-neutral-400">
                     {branch.phone && (
                       <div className="flex items-center gap-1.5">
                         <Phone className="h-3.5 w-3.5" />
@@ -163,7 +163,7 @@ export function BranchManager() {
                   </div>
                 </div>
               </div>
-              <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-800/50 pt-3">
+              <div className="mt-4 flex items-center justify-end gap-2 border-t border-neutral-100 pt-3 dark:border-neutral-800/50">
                 <Button variant="ghost" size="sm" onClick={() => startEdit(branch)}>
                   <Pencil className="h-4 w-4" />
                 </Button>

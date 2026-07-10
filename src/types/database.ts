@@ -14,7 +14,7 @@ export type Theme =
 export type ImageMode = 'none' | 'stock' | 'custom'
 export type Badge = 'bestseller' | 'chef_special' | 'new' | 'spicy'
 export type DietaryPreference = 'none' | 'veg' | 'non-veg' | 'egg' | 'vegan'
-export type StaffRole = 'owner' | 'manager' | 'staff'
+export type StaffRole = 'owner' | 'admin' | 'manager' | 'staff' | 'waiter' | 'kitchen' | 'cashier'
 export type StockCategory =
   | 'indian' | 'chinese' | 'continental' | 'drinks' | 'desserts' | 'street' | 'hero'
 
@@ -69,6 +69,20 @@ export interface Business {
   seo_description: string | null
   seo_og_r2_key: string | null
   firebase_measurement_id: string | null
+  /** GST/tax percent applied at bill time (POS add-on). Default 5.00. */
+  tax_percent?: number
+  /** POS billing config: { default_discount_reasons? } */
+  pos_settings?: Record<string, unknown>
+  /** GST identification number, printed on bills (POS add-on). */
+  gstin?: string | null
+  /** FSSAI license number, printed on bills (POS add-on). */
+  fssai_license?: string | null
+  /** State VAT percent applied to bar/liquor lines at bill time. Default 18.00. */
+  bar_tax_percent?: number
+  /** Footer line printed at the bottom of every bill. */
+  receipt_footer?: string | null
+  /** Next sequential bill number — assigned by DB trigger at settle, never by the client. */
+  next_bill_no?: number
   created_at?: string
   updated_at?: string
 }
@@ -110,6 +124,8 @@ export interface Item {
   is_special: boolean
   show_from: string | null
   show_until: string | null
+  /** POS add-on: liquor/bar item — billed separately under state VAT, not GST. */
+  is_bar?: boolean
   add_ons: AddOn[]
   sort_order: number
   view_count: number
@@ -138,6 +154,8 @@ export interface QrCode {
   include_logo: boolean
   branch_id: string | null
   table_number: string | null
+  /** POS add-on: links this QR to an operational tables row. */
+  table_id?: string | null
   downloads: number
   created_at?: string
 }
@@ -206,6 +224,7 @@ export type AnalyticsEventType =
   | 'page_view' | 'item_view' | 'whatsapp_click' | 'call_click'
   | 'share' | 'maps_click' | 'reservation_submit' | 'category_tap'
   | 'add_to_cart' | 'cart_order' | 'reviews_click' | 'maps_embed_click'
+  | 'order_placed' | 'order_settled'
 
 export interface AnalyticsEvent {
   id: string
@@ -243,6 +262,142 @@ export interface Banner {
 }
 
 // Duplicates removed
+
+// ── POS (add-on, orthogonal to tier — gated by features.posEnabled) ──
+export type TableStatus = 'available' | 'occupied' | 'needs_cleaning' | 'reserved'
+export type OrderType = 'dine_in' | 'takeaway' | 'counter' | 'delivery'
+export type OrderSource = 'customer' | 'staff' | 'aggregator'
+/** Where a live order arrived from. 'direct' = our own dine-in/takeaway/QR. */
+export type OrderChannel = 'direct' | 'swiggy' | 'zomato' | 'phone'
+export type OrderStatus =
+  | 'placed' | 'confirmed' | 'preparing' | 'ready' | 'served' | 'billed' | 'settled' | 'cancelled'
+export type OrderItemStatus = 'placed' | 'preparing' | 'ready' | 'served' | 'cancelled'
+export type PaymentMethod = 'cash' | 'card' | 'upi' | 'other'
+
+export interface RestaurantTable {
+  id: string
+  business_id: string
+  branch_id: string | null
+  label: string
+  code: string
+  /**
+   * Random uuid embedded in the table's QR URL (?t=<qr_token>) — the only
+   * value that resolves to a table for ordering. Unlike `code` it cannot be
+   * guessed, and column privileges hide it from the anonymous REST role.
+   * Only present when read with an authenticated/staff or service client.
+   */
+  qr_token?: string
+  capacity: number
+  zone: string | null
+  status: TableStatus
+  is_active: boolean
+  sort_order: number
+  created_at?: string
+  updated_at?: string
+}
+
+export interface Order {
+  id: string
+  business_id: string
+  branch_id: string | null
+  table_id: string | null
+  order_type: OrderType
+  source: OrderSource
+  channel?: OrderChannel
+  external_ref?: string | null
+  status: OrderStatus
+  placed_by_staff_id: string | null
+  customer_name: string | null
+  customer_phone: string | null
+  customer_token: string
+  subtotal: number
+  tax_amount: number
+  discount_amount: number
+  discount_reason: string | null
+  total_amount: number
+  tax_rate_snapshot: { label: string; percent: number } | null
+  payment_method: PaymentMethod | null
+  settled_at: string | null
+  settled_by_staff_id: string | null
+  /** Sequential bill number, assigned by DB trigger when the order settles. */
+  bill_no?: number | null
+  /** CRM link, set by the award_customer_on_settle trigger at settle time. */
+  customer_id?: string | null
+  notes: string | null
+  created_at?: string
+  updated_at?: string
+}
+
+export interface OrderItem {
+  id: string
+  order_id: string
+  business_id: string
+  item_id: string | null
+  item_name_snapshot: string
+  unit_price_snapshot: number
+  selected_add_ons: AddOn[]
+  note: string | null
+  qty: number
+  line_total: number
+  status: OrderItemStatus
+  /** Snapshot of items.is_bar at order time — drives the separate bar bill. */
+  is_bar?: boolean
+  created_at?: string
+  updated_at?: string
+}
+
+export interface OrderStatusEvent {
+  id: string
+  order_id: string
+  business_id: string
+  order_item_id: string | null
+  from_status: string | null
+  to_status: string
+  changed_by_staff_id: string | null
+  created_at?: string
+}
+
+// ── Owner modules (POS add-on) ──────────────────────────────────────
+export type ExpenseCategory = 'rent' | 'salaries' | 'supplies' | 'utilities' | 'maintenance' | 'misc'
+
+export interface Expense {
+  id: string
+  business_id: string
+  branch_id: string | null
+  category: ExpenseCategory
+  vendor: string | null
+  amount: number
+  note: string | null
+  spent_on: string
+  created_by_staff_id: string | null
+  created_at?: string
+}
+
+export interface Customer {
+  id: string
+  business_id: string
+  phone: string
+  name: string | null
+  visit_count: number
+  total_spent: number
+  loyalty_points: number
+  first_seen?: string
+  last_seen?: string
+}
+
+export interface DayClose {
+  id: string
+  business_id: string
+  branch_id: string | null
+  close_date: string
+  opening_cash: number
+  expected_cash: number
+  counted_cash: number
+  variance: number
+  totals: Record<string, unknown> | null
+  closed_by_staff_id: string | null
+  closed_at?: string
+}
 
 // ════════════════════════════════════════════════════════════════════
 // Helper — derive the full CDN URL from an R2 key.

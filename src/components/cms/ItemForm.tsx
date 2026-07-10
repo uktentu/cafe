@@ -78,6 +78,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
   const [gf, setGf] = useState(false)
   const [featured, setFeatured] = useState(false)
   const [isSpecial, setIsSpecial] = useState(false)
+  const [isBar, setIsBar] = useState(false)
   const [spice, setSpice] = useState(0)
   const [showFrom, setShowFrom] = useState('')
   const [showUntil, setShowUntil] = useState('')
@@ -114,6 +115,7 @@ export function ItemForm({ itemId }: { itemId?: string }) {
     setDietary(it.dietary); setJain(it.is_jain); setGf(it.is_gluten_free)
     setFeatured(it.is_featured)
     setIsSpecial(it.is_special ?? false)
+    setIsBar(it.is_bar ?? false)
     setSpice(it.spice_level ?? 0)
     setShowFrom(it.show_from ?? '')
     setShowUntil(it.show_until ?? '')
@@ -148,6 +150,9 @@ export function ItemForm({ itemId }: { itemId?: string }) {
         dietary, is_jain: jain, is_gluten_free: gf,
         is_featured: featured,
         is_special: isSpecial,
+        // Only sent when POS is on, so item saves keep working on databases
+        // where migration 010 (which adds items.is_bar) hasn't run yet.
+        ...(getConfig().features.posEnabled ? { is_bar: isBar } : {}),
         spice_level: spice,
         show_from: showFrom || null,
         show_until: showUntil || null,
@@ -417,6 +422,15 @@ export function ItemForm({ itemId }: { itemId?: string }) {
           </div>
           <Toggle checked={isSpecial} onChange={setIsSpecial} label="Today's Special" size="sm" />
         </div>
+        {features.posEnabled && (
+          <div className="flex items-center justify-between rounded-lg bg-purple-50 dark:bg-purple-500/10 px-3 py-2.5">
+            <div>
+              <span className="text-sm font-medium text-purple-700 dark:text-purple-400">Bar item (liquor)</span>
+              <p className="text-xs text-neutral-400">Billed separately under VAT, on its own bar bill</p>
+            </div>
+            <Toggle checked={isBar} onChange={setIsBar} label="Bar item" size="sm" />
+          </div>
+        )}
         {isSpecial && (
           <div className="grid grid-cols-2 gap-3">
             <Field label="Show from (HH:MM)">

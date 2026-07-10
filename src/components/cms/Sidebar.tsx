@@ -6,7 +6,8 @@ import { useQuery } from '@tanstack/react-query'
 import { m } from 'framer-motion'
 import {
   Menu, LayoutList, Settings, QrCode, LogOut, BarChart3, Store, CalendarCheck, FileText,
-  Megaphone, CalendarClock, Users, LayoutDashboard,
+  Megaphone, CalendarClock, Users, LayoutDashboard, LayoutGrid, Receipt, IndianRupee,
+  LineChart, Wallet, Contact, KanbanSquare,
   Lock, Menu as MenuIcon, X, ExternalLink, CreditCard, ShieldCheck, Moon, Sun, type LucideIcon,
 } from 'lucide-react'
 import { useTheme } from 'next-themes'
@@ -64,6 +65,23 @@ const SECTIONS: NavSection[] = [
     ],
   },
   {
+    label: 'POS',
+    items: [
+      { href: '/cms/orders', label: 'Orders Board', icon: KanbanSquare, feature: 'aggregator' },
+      { href: '/cms/tables', label: 'Tables', icon: LayoutGrid, feature: 'tableManagement' },
+      { href: '/cms/pos', label: 'Orders & Billing', icon: Receipt, feature: 'staffOrderTaking' },
+    ],
+  },
+  {
+    label: 'Manage',
+    items: [
+      { href: '/cms/reports', label: 'Reports & Day Close', icon: LineChart, feature: 'reports' },
+      { href: '/cms/sales', label: 'Sales', icon: IndianRupee, feature: 'billing' },
+      { href: '/cms/expenses', label: 'Expenses', icon: Wallet, feature: 'expenses' },
+      { href: '/cms/customers', label: 'Customers', icon: Contact, feature: 'crm' },
+    ],
+  },
+  {
     label: 'Business',
     items: [
       { href: '/cms/staff', label: 'Staff', icon: Users, feature: 'staffAccounts' },
@@ -75,9 +93,15 @@ const SECTIONS: NavSection[] = [
 
 type NavState = 'show' | 'locked' | 'hidden'
 
+// POS features are an orthogonal add-on, not a tier upgrade — their nav items
+// navigate to their own page (which renders its own add-on-specific
+// UpgradePrompt) instead of being intercepted and redirected to the generic
+// tier-comparison /cms/upgrade page.
+const POS_FEATURES: ReadonlySet<keyof Features> = new Set<keyof Features>(['tableManagement', 'staffOrderTaking', 'kotDisplay', 'billing', 'reports', 'expenses', 'crm', 'aggregator'])
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function navStateFor(item: NavItem, features: Features, business: any): NavState {
-  const lockedByTier = item.feature ? !features[item.feature] : false
+  const lockedByTier = item.feature && !POS_FEATURES.has(item.feature) ? !features[item.feature] : false
   if (lockedByTier) return 'locked' // tier upsell — always visible with a lock
   const links = business?.social_links ?? {}
   if (item.userToggle === 'multiBranch' && links.multiple_branches_enabled !== true) return 'hidden'

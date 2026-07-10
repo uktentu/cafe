@@ -46,15 +46,27 @@ export async function generateMetadata(): Promise<Metadata> {
 
 import { resolveTheme } from '@/lib/design-tokens'
 import { notFound } from 'next/navigation'
+import { resolveTableByToken } from '@/lib/order-data'
 
-export default async function MenuPage() {
-  const { slug, theme: envTheme, tier } = getConfig()
+export default async function MenuPage({ searchParams }: { searchParams?: { t?: string } }) {
+  const { slug, theme: envTheme, tier, features } = getConfig()
+
   const data = await getMenuData(slug)
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   if ((data as any)?._error || !data?.business) notFound()
   const theme = resolveTheme(tier, data.business.theme ?? envTheme)
 
   const { business, categories, items, translations, banners, branches, menus, demo } = data
+
+  // POS self-order: a QR scan carries the table's secret token. Resolve it
+  // server-side (the token is column-revoked from anon), then the customer
+  // orders in-app from THIS themed menu — no separate page, no leaving the
+  // brand experience. Invalid/absent token → normal display menu.
+  const posTableRow =
+    features.selfOrder && searchParams?.t ? await resolveTableByToken(business.id, searchParams.t) : null
+  const posTable = posTableRow?.qr_token
+    ? { token: posTableRow.qr_token, label: posTableRow.label }
+    : null
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -89,6 +101,8 @@ export default async function MenuPage() {
         menus={menus}
         initialTheme={theme}
         isDemo={demo}
+        selfOrderEnabled={features.selfOrder}
+        posTable={posTable}
       />
     </>
   )

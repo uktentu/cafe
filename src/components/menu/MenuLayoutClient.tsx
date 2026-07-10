@@ -94,9 +94,18 @@ interface MenuLayoutClientProps {
   menus: Menu[]
   initialTheme: Theme
   isDemo?: boolean
+  /** POS add-on enabled for this business (in-app ordering possible). */
+  selfOrderEnabled?: boolean
+  /** Resolved table from the scanned QR token — present ⇒ in-app ordering active. */
+  posTable?: { token: string; label: string } | null
 }
 
-export function MenuLayoutClient({ business, categories, items, translations, banners, branches, menus, initialTheme, isDemo }: MenuLayoutClientProps) {
+/** localStorage key for the current in-app order, scoped per business + table. */
+function activeOrderKey(businessId: string, tableToken: string) {
+  return `menu_order_${businessId}_${tableToken}`
+}
+
+export function MenuLayoutClient({ business, categories, items, translations, banners, branches, menus, initialTheme, isDemo, selfOrderEnabled, posTable }: MenuLayoutClientProps) {
   const [theme, setTheme] = useState<Theme>(initialTheme)
   
   const themeMeta = THEMES[theme] ?? THEMES.mercado
@@ -124,9 +133,27 @@ export function MenuLayoutClient({ business, categories, items, translations, ba
 
   const [tableLabel, setTableLabel] = useState<string | null>(null)
   useEffect(() => {
+    // POS table (from the resolved QR token) wins; else the legacy ?table= label.
+    if (posTable) { setTableLabel(posTable.label); return }
     const t = new URLSearchParams(window.location.search).get('table')
     if (t) setTableLabel(decodeURIComponent(t))
-  }, [])
+  }, [posTable])
+
+  // In-app ordering is live only when POS is on AND a valid table was scanned.
+  const inAppOrdering = Boolean(selfOrderEnabled && posTable)
+
+  // Hydrate any in-progress order for this table so a page refresh resumes the
+  // live status view instead of losing it.
+  const setActiveOrder = useMenuStore((s) => s.setActiveOrder)
+  useEffect(() => {
+    if (!inAppOrdering || !posTable) return
+    try {
+      const raw = localStorage.getItem(activeOrderKey(business.id, posTable.token))
+      if (raw) setActiveOrder(JSON.parse(raw))
+    } catch {
+      /* ignore malformed/absent */
+    }
+  }, [inAppOrdering, posTable, business.id, setActiveOrder])
 
   return (
     <>
@@ -164,13 +191,16 @@ export function MenuLayoutClient({ business, categories, items, translations, ba
           <MenuFooter business={business} theme={theme} />
         </div>
 
-        <CartButton />
+        <CartButton inAppOrdering={inAppOrdering} />
         <CartDrawer
           whatsapp={business.whatsapp ?? ''}
           businessId={business.id}
           businessName={business.name}
           googleMapsUrl={business.social_links?.google_maps}
           tableLabel={tableLabel}
+          inAppOrdering={inAppOrdering}
+          tableToken={posTable?.token ?? null}
+          storageKey={posTable ? activeOrderKey(business.id, posTable.token) : null}
         />
         <DeferredItemModal theme={theme} />
         <DeferredReservationModal businessId={business.id} businessName={business.name} branchId={selectedBranchId ?? undefined} theme={theme} />

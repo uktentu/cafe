@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { m, AnimatePresence } from 'framer-motion'
-import { X, Minus, Plus, ShoppingBag, Star } from 'lucide-react'
+import { X, Minus, Plus, ShoppingBag, Star, Check, Loader2, ChefHat, CircleCheck, Circle } from 'lucide-react'
 import { useMenuStore } from '@/stores/menu'
 import { formatPrice } from '@/lib/utils'
 import { track } from '@/lib/firebase'
@@ -13,15 +13,57 @@ interface CartDrawerProps {
   businessId: string
   googleMapsUrl?: string | null
   tableLabel?: string | null
+  /** POS in-app ordering active (POS on + valid scanned table). */
+  inAppOrdering?: boolean
+  /** Secret table token used for the order API. */
+  tableToken?: string | null
+  /** localStorage key for persisting the active order across refreshes. */
+  storageKey?: string | null
 }
 
-export function CartDrawer({ whatsapp, businessName, businessId, googleMapsUrl, tableLabel }: CartDrawerProps) {
+// Kitchen lifecycle the customer sees. 'confirmed' is folded into 'preparing'
+// for a simpler 4-step story.
+const STEPS: { key: string; label: string }[] = [
+  { key: 'placed', label: 'Order placed' },
+  { key: 'preparing', label: 'Being prepared' },
+  { key: 'ready', label: 'Ready' },
+  { key: 'served', label: 'Served' },
+]
+const STEP_INDEX: Record<string, number> = { placed: 0, confirmed: 0, preparing: 1, ready: 2, served: 3, billed: 3, settled: 3 }
+
+interface TrackedOrder {
+  id: string
+  status: string
+  subtotal: number
+  tax_amount: number
+  discount_amount: number
+  total_amount: number
+  items: { id: string; item_name_snapshot: string; qty: number; line_total: number; status: string }[]
+}
+
+export function CartDrawer({ whatsapp, businessName, businessId, googleMapsUrl, tableLabel, inAppOrdering, tableToken, storageKey }: CartDrawerProps) {
   const { cart, cartOpen, setCartOpen, updateQty, clearCart, cartTotal, cartCount } = useMenuStore()
+  const activeOrder = useMenuStore((s) => s.activeOrder)
+  const setActiveOrder = useMenuStore((s) => s.setActiveOrder)
   const [showReview, setShowReview] = useState(false)
+  const [placing, setPlacing] = useState(false)
+  const [orderError, setOrderError] = useState<string | null>(null)
 
   const total = cartTotal()
   const count = cartCount()
 
+  function persistActive(o: { orderId: string; token: string } | null) {
+    setActiveOrder(o)
+    if (!storageKey) return
+    try {
+      if (o) localStorage.setItem(storageKey, JSON.stringify(o))
+      else localStorage.removeItem(storageKey)
+    } catch {
+      /* ignore */
+    }
+  }
+
+  // ── WhatsApp path (unchanged, for non-POS businesses) ──
   function buildWhatsAppMessage() {
     const header = tableLabel
       ? `Hi ${businessName}, I'm at ${tableLabel} and would like to order:`
@@ -39,7 +81,7 @@ export function CartDrawer({ whatsapp, businessName, businessId, googleMapsUrl, 
     return `${header}\n\n${lines.join('\n')}\n\nTotal: ₹${total}`
   }
 
-  function handleOrder() {
+  function handleWhatsAppOrder() {
     if (!whatsapp || cart.length === 0) return
     const msg = buildWhatsAppMessage()
     const href = `https://wa.me/${whatsapp}?text=${encodeURIComponent(msg)}`
@@ -52,9 +94,48 @@ export function CartDrawer({ whatsapp, businessName, businessId, googleMapsUrl, 
     }
   }
 
+  // ── In-app order → kitchen. Prices are re-read server-side by the RPC, so a
+  // cached menu price can never mis-charge; this call just sends item ids/qty. ──
+  async function handlePlaceOrder() {
+    if (cart.length === 0 || !tableToken) return
+    setPlacing(true)
+    setOrderError(null)
+    try {
+      const res = await fetch('/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          business_id: businessId,
+          table_token: tableToken,
+          order_type: 'dine_in',
+          items: cart.map((c) => ({
+            item_id: c.item.id,
+            qty: c.qty,
+            note: c.note || null,
+            selected_add_on_ids: c.selectedAddOns.map((a) => a.id),
+          })),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setOrderError(data.error || 'Could not place order')
+        setPlacing(false)
+        return
+      }
+      track('order_placed', { business_id: businessId, item_count: count, total })
+      persistActive({ orderId: data.order_id, token: data.customer_token })
+      clearCart()
+    } catch {
+      setOrderError('Network error — please try again')
+    } finally {
+      setPlacing(false)
+    }
+  }
+
+  const primaryCtaAvailable = inAppOrdering ? Boolean(tableToken) : Boolean(whatsapp)
+
   return (
     <>
-      {/* Cart Drawer */}
       <AnimatePresence>
         {cartOpen && (
           <>
@@ -77,13 +158,18 @@ export function CartDrawer({ whatsapp, businessName, businessId, googleMapsUrl, 
               <div className="flex items-center justify-between px-5 pt-4 pb-3" style={{ borderBottom: '1px solid var(--bdr)' }}>
                 <div className="mx-auto mb-2 absolute top-2 left-1/2 -translate-x-1/2 h-1 w-10 rounded-full opacity-30" style={{ background: 'var(--txt)' }} />
                 <div className="flex items-center gap-2 mt-1">
-                  <ShoppingBag className="h-5 w-5" style={{ color: 'var(--brand)' }} />
+                  {activeOrder ? <ChefHat className="h-5 w-5" style={{ color: 'var(--brand)' }} /> : <ShoppingBag className="h-5 w-5" style={{ color: 'var(--brand)' }} />}
                   <h2 className="text-base font-bold" style={{ fontFamily: 'var(--font-display)' }}>
-                    Your Order
+                    {activeOrder ? 'Your Order' : 'Your Order'}
                   </h2>
-                  {count > 0 && (
+                  {!activeOrder && count > 0 && (
                     <span className="rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ background: 'var(--brand)' }}>
                       {count}
+                    </span>
+                  )}
+                  {tableLabel && (
+                    <span className="rounded-full px-2 py-0.5 text-[11px] font-medium opacity-70" style={{ border: '1px solid var(--bdr)' }}>
+                      {tableLabel}
                     </span>
                   )}
                 </div>
@@ -92,84 +178,114 @@ export function CartDrawer({ whatsapp, businessName, businessId, googleMapsUrl, 
                 </button>
               </div>
 
-              {/* Items */}
-              <div className="flex-1 overflow-y-auto px-5 py-3 space-y-3">
-                {cart.length === 0 ? (
-                  <div className="py-12 text-center">
-                    <ShoppingBag className="mx-auto h-10 w-10 mb-3 opacity-20" />
-                    <p className="text-sm opacity-50">Your cart is empty</p>
-                    <p className="text-xs opacity-35 mt-1">Tap + on any item to add it</p>
-                  </div>
-                ) : (
-                  cart.map((c) => {
-                    const addOnTotal = c.selectedAddOns.reduce((s, a) => s + a.price, 0)
-                    const lineTotal = (c.item.price + addOnTotal) * c.qty
-                    return (
-                      <div key={c.item.id} className="flex items-start gap-3 py-2" style={{ borderBottom: '1px solid var(--bdr2)' }}>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate" style={{ fontFamily: 'var(--font-body)' }}>{c.item.name}</p>
-                          {c.selectedAddOns.length > 0 && (
-                            <p className="text-xs opacity-50 mt-0.5">
-                              + {c.selectedAddOns.map(a => a.name).join(', ')}
-                            </p>
-                          )}
-                          {c.note && <p className="text-xs italic opacity-40 mt-0.5">{c.note}</p>}
-                          <p className="text-sm font-semibold mt-1" style={{ color: 'var(--brand)' }}>
-                            {formatPrice(lineTotal)}
-                          </p>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0">
-                          <button
-                            onClick={() => updateQty(c.item.id, c.qty - 1)}
-                            className="flex h-7 w-7 items-center justify-center rounded-full border transition-colors hover:bg-black/5"
-                            style={{ borderColor: 'var(--bdr)' }}
-                          >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-5 text-center text-sm font-bold">{c.qty}</span>
-                          <button
-                            onClick={() => updateQty(c.item.id, c.qty + 1)}
-                            className="flex h-7 w-7 items-center justify-center rounded-full border transition-colors hover:bg-black/5"
-                            style={{ background: 'var(--brand)', border: 'none', color: '#fff' }}
-                          >
-                            <Plus className="h-3 w-3" />
-                          </button>
-                        </div>
+              {/* ── Active in-app order → live status ── */}
+              {activeOrder ? (
+                <OrderStatusView
+                  orderId={activeOrder.orderId}
+                  token={activeOrder.token}
+                  onNewOrder={() => persistActive(null)}
+                />
+              ) : (
+                <>
+                  {/* Items */}
+                  <div className="flex-1 overflow-y-auto px-5 py-3 space-y-3">
+                    {cart.length === 0 ? (
+                      <div className="py-12 text-center">
+                        <ShoppingBag className="mx-auto h-10 w-10 mb-3 opacity-20" />
+                        <p className="text-sm opacity-50">Your cart is empty</p>
+                        <p className="text-xs opacity-35 mt-1">Tap + on any item to add it</p>
                       </div>
-                    )
-                  })
-                )}
-              </div>
-
-              {/* Footer */}
-              {cart.length > 0 && (
-                <div className="px-5 pb-safe-bottom py-4 space-y-3" style={{ borderTop: '1px solid var(--bdr)', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="opacity-60">Total ({count} item{count !== 1 ? 's' : ''})</span>
-                    <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--brand)' }}>
-                      {formatPrice(total)}
-                    </span>
+                    ) : (
+                      cart.map((c) => {
+                        const addOnTotal = c.selectedAddOns.reduce((s, a) => s + a.price, 0)
+                        const lineTotal = (c.item.price + addOnTotal) * c.qty
+                        return (
+                          <div key={c.item.id} className="flex items-start gap-3 py-2" style={{ borderBottom: '1px solid var(--bdr2)' }}>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate" style={{ fontFamily: 'var(--font-body)' }}>{c.item.name}</p>
+                              {c.selectedAddOns.length > 0 && (
+                                <p className="text-xs opacity-50 mt-0.5">
+                                  + {c.selectedAddOns.map(a => a.name).join(', ')}
+                                </p>
+                              )}
+                              {c.note && <p className="text-xs italic opacity-40 mt-0.5">{c.note}</p>}
+                              <p className="text-sm font-semibold mt-1" style={{ color: 'var(--brand)' }}>
+                                {formatPrice(lineTotal)}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <button
+                                onClick={() => updateQty(c.item.id, c.qty - 1)}
+                                className="flex h-7 w-7 items-center justify-center rounded-full border transition-colors hover:bg-black/5"
+                                style={{ borderColor: 'var(--bdr)' }}
+                              >
+                                <Minus className="h-3 w-3" />
+                              </button>
+                              <span className="w-5 text-center text-sm font-bold">{c.qty}</span>
+                              <button
+                                onClick={() => updateQty(c.item.id, c.qty + 1)}
+                                className="flex h-7 w-7 items-center justify-center rounded-full border transition-colors hover:bg-black/5"
+                                style={{ background: 'var(--brand)', border: 'none', color: '#fff' }}
+                              >
+                                <Plus className="h-3 w-3" />
+                              </button>
+                            </div>
+                          </div>
+                        )
+                      })
+                    )}
                   </div>
-                  {whatsapp && (
-                    <button
-                      onClick={handleOrder}
-                      className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white transition-transform active:scale-95"
-                      style={{ background: '#25D366', fontFamily: 'var(--font-body)' }}
-                    >
-                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                      </svg>
-                      Order on WhatsApp
-                    </button>
+
+                  {/* Footer */}
+                  {cart.length > 0 && (
+                    <div className="px-5 py-4 space-y-3" style={{ borderTop: '1px solid var(--bdr)', paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="opacity-60">Total ({count} item{count !== 1 ? 's' : ''})</span>
+                        <span className="text-lg font-bold" style={{ fontFamily: 'var(--font-display)', color: 'var(--brand)' }}>
+                          {formatPrice(total)}
+                        </span>
+                      </div>
+                      {inAppOrdering && !tableToken && (
+                        <p className="text-center text-xs opacity-60">Scan the QR at your table to order.</p>
+                      )}
+                      {orderError && <p className="text-center text-xs" style={{ color: '#EF4444' }}>{orderError}</p>}
+
+                      {inAppOrdering ? (
+                        primaryCtaAvailable && (
+                          <button
+                            onClick={handlePlaceOrder}
+                            disabled={placing}
+                            className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white transition-transform active:scale-95 disabled:opacity-70"
+                            style={{ background: 'var(--brand)', fontFamily: 'var(--font-body)' }}
+                          >
+                            {placing ? <Loader2 className="h-5 w-5 animate-spin" /> : <Check className="h-5 w-5" />}
+                            {placing ? 'Placing…' : 'Place Order'}
+                          </button>
+                        )
+                      ) : (
+                        whatsapp && (
+                          <button
+                            onClick={handleWhatsAppOrder}
+                            className="flex w-full items-center justify-center gap-2 rounded-2xl py-3.5 text-sm font-bold text-white transition-transform active:scale-95"
+                            style={{ background: '#25D366', fontFamily: 'var(--font-body)' }}
+                          >
+                            <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                            </svg>
+                            Order on WhatsApp
+                          </button>
+                        )
+                      )}
+                    </div>
                   )}
-                </div>
+                </>
               )}
             </m.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* Google Reviews prompt — shows after ordering */}
+      {/* Google Reviews prompt — shows after WhatsApp ordering */}
       <AnimatePresence>
         {showReview && googleMapsUrl && (
           <m.div
@@ -209,5 +325,106 @@ export function CartDrawer({ whatsapp, businessName, businessId, googleMapsUrl, 
         )}
       </AnimatePresence>
     </>
+  )
+}
+
+/** Themed live status of an in-app order — polls the token-guarded API. */
+function OrderStatusView({ orderId, token, onNewOrder }: { orderId: string; token: string; onNewOrder: () => void }) {
+  const [order, setOrder] = useState<TrackedOrder | null>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function poll() {
+      try {
+        const res = await fetch(`/api/orders/${orderId}?token=${encodeURIComponent(token)}`)
+        if (!res.ok) { if (!cancelled) setError('Order not found'); return }
+        const data = await res.json()
+        if (!cancelled) { setOrder(data); setError(null) }
+      } catch {
+        if (!cancelled) setError('Could not refresh status')
+      }
+    }
+    poll()
+    const id = setInterval(poll, 8000)
+    return () => { cancelled = true; clearInterval(id) }
+  }, [orderId, token])
+
+  if (error && !order) {
+    return (
+      <div className="px-5 py-10 text-center">
+        <p className="text-sm opacity-60">{error}</p>
+        <button onClick={onNewOrder} className="mt-4 rounded-full px-4 py-2 text-sm font-medium" style={{ border: '1px solid var(--bdr)' }}>
+          Start a new order
+        </button>
+      </div>
+    )
+  }
+
+  if (!order) {
+    return (
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-6 w-6 animate-spin opacity-50" />
+      </div>
+    )
+  }
+
+  const cancelled = order.status === 'cancelled'
+  const settled = order.status === 'settled'
+  const current = STEP_INDEX[order.status] ?? 0
+
+  return (
+    <div className="flex-1 overflow-y-auto px-5 py-4" style={{ paddingBottom: 'calc(1rem + env(safe-area-inset-bottom))' }}>
+      {cancelled ? (
+        <div className="rounded-2xl p-4 text-center text-sm" style={{ background: 'var(--sf1)' }}>
+          This order was cancelled. Please ask our staff for help.
+        </div>
+      ) : (
+        <ol className="space-y-3">
+          {STEPS.map((step, i) => {
+            const done = current >= i
+            const active = current === i && !settled
+            return (
+              <li key={step.key} className="flex items-center gap-3">
+                {done ? (
+                  <CircleCheck className="h-5 w-5 shrink-0" style={{ color: 'var(--brand)' }} />
+                ) : (
+                  <Circle className="h-5 w-5 shrink-0 opacity-25" />
+                )}
+                <span className={done ? 'text-sm font-medium' : 'text-sm opacity-45'}>
+                  {step.label}
+                  {active && <span className="ml-2 text-xs" style={{ color: 'var(--brand)' }}>• now</span>}
+                </span>
+              </li>
+            )
+          })}
+        </ol>
+      )}
+
+      <div className="mt-5 space-y-1.5 text-sm" style={{ borderTop: '1px solid var(--bdr)', paddingTop: '1rem' }}>
+        {order.items.map((i) => (
+          <div key={i.id} className="flex justify-between opacity-80">
+            <span>{i.qty}× {i.item_name_snapshot}</span>
+            <span>{formatPrice(i.line_total)}</span>
+          </div>
+        ))}
+        <div className="flex justify-between pt-1.5 font-bold" style={{ borderTop: '1px solid var(--bdr2)' }}>
+          <span>Total</span>
+          <span style={{ color: 'var(--brand)' }}>{formatPrice(order.total_amount)}</span>
+        </div>
+        {order.tax_amount > 0 && <p className="text-xs opacity-45">Incl. tax {formatPrice(order.tax_amount)}</p>}
+      </div>
+
+      <p className="mt-4 text-center text-xs opacity-50">
+        {settled ? 'Bill settled. Thank you!' : 'Want more? Add items and place another order.'}
+      </p>
+      <button
+        onClick={onNewOrder}
+        className="mt-3 w-full rounded-2xl py-3 text-sm font-bold text-white transition-transform active:scale-95"
+        style={{ background: 'var(--brand)', fontFamily: 'var(--font-body)' }}
+      >
+        {settled ? 'Start a new order' : 'Add more items'}
+      </button>
+    </div>
   )
 }

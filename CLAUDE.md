@@ -123,6 +123,8 @@ No code change. No redeploy. Instant.
 
 10. **Locked state, not hidden.** Tier-gated CMS features show with upgrade prompt.
 
+11. **POS data (orders/order_items/tables) never goes through the menu KV cache.** `getMenuData()`/`MENU_CACHE` is for slow-changing branding/menu content only (up to 24h stale is fine). Order/table/kitchen state must always be a fresh, uncached read (`src/lib/order-data.ts`, direct Supabase reads, or Realtime) — never routed through `getMenuData()`. The `add_order_items()` Postgres RPC re-reads price/availability live at write time regardless, as the final safety net.
+
 ---
 
 ## GitHub Actions Keep-Alive (Create This File Now)

@@ -53,9 +53,9 @@ export function ReservationsManager() {
 
   if (reservations.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-neutral-800 p-12 text-center">
+      <div className="rounded-xl border border-dashed border-neutral-300 p-12 text-center dark:border-neutral-800">
         <Clock className="mx-auto h-8 w-8 text-neutral-600 dark:text-neutral-400 mb-3" />
-        <p className="text-sm text-neutral-400 font-medium">No reservations yet.</p>
+        <p className="text-sm text-neutral-500 dark:text-neutral-400 font-medium">No reservations yet.</p>
         <p className="text-xs text-neutral-500 dark:text-neutral-400 mt-1">When customers book a table, they will appear here.</p>
       </div>
     )
@@ -76,21 +76,21 @@ export function ReservationsManager() {
 
       <div className="space-y-3">
         {reservations.map(res => (
-          <div key={res.id} className="relative overflow-hidden rounded-xl border border-neutral-800 bg-[#161616] p-5 hover:border-neutral-700 transition-colors">
+          <div key={res.id} className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-5 transition-colors hover:border-neutral-300 dark:border-neutral-800 dark:bg-[#161616] dark:hover:border-neutral-700">
             <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
-                  <h3 className="font-semibold text-white text-lg">{res.name}</h3>
+                  <h3 className="font-semibold text-neutral-900 dark:text-white text-lg">{res.name}</h3>
                   <span className={cn("px-2 py-0.5 rounded-full text-xs font-medium border", statusColors[res.status])}>
                     {res.status.charAt(0).toUpperCase() + res.status.slice(1)}
                   </span>
-                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-800 text-neutral-300">
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-neutral-600 dark:bg-neutral-800 dark:text-neutral-300">
                     {res.party_size} {res.party_size === 1 ? 'person' : 'people'}
                   </span>
                 </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-neutral-400">
-                  <div className="flex items-center gap-1.5 text-neutral-300 font-medium">
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2 text-sm text-neutral-500 dark:text-neutral-400">
+                  <div className="flex items-center gap-1.5 text-neutral-700 dark:text-neutral-300 font-medium">
                     <Clock className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />
                     {res.date} at {res.time}
                   </div>
@@ -113,7 +113,7 @@ export function ReservationsManager() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 border-t border-neutral-800/50 pt-3 sm:border-0 sm:pt-0 shrink-0">
+              <div className="flex items-center gap-2 border-t border-neutral-100 pt-3 dark:border-neutral-800/50 sm:border-0 sm:pt-0 shrink-0">
                 {res.status === 'pending' && (
                   <>
                     <Button 

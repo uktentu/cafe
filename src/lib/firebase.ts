@@ -26,6 +26,7 @@ let sessionId = ''
 const MIRRORED: ReadonlySet<AnalyticsEventType> = new Set<AnalyticsEventType>([
   'page_view', 'item_view', 'whatsapp_click', 'call_click',
   'maps_click', 'reservation_submit', 'category_tap',
+  'order_placed', 'order_settled',
 ])
 
 function getSessionId(): string {

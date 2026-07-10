@@ -19,6 +19,9 @@ export function LoyaltyCard({ businessId, businessName, whatsapp, themeColor, st
   const [stamps, setStamps] = useState(0)
   const [earned, setEarned] = useState(false)
   const [justStamped, setJustStamped] = useState(false)
+  const [showPinModal, setShowPinModal] = useState(false)
+  const [pinInput, setPinInput] = useState('')
+  const [pinError, setPinError] = useState(false)
 
   useEffect(() => {
     try {
@@ -30,6 +33,24 @@ export function LoyaltyCard({ businessId, businessName, whatsapp, themeColor, st
       }
     } catch { /* ignore */ }
   }, [businessId, stampsNeeded])
+
+  function requestStamp() {
+    if (earned) return
+    setShowPinModal(true)
+    setPinInput('')
+    setPinError(false)
+  }
+
+  function verifyPin(pin: string) {
+    const expectedPin = process.env.NEXT_PUBLIC_LOYALTY_PIN || '1234'
+    if (pin === expectedPin) {
+      setShowPinModal(false)
+      addStamp()
+    } else {
+      setPinError(true)
+      setPinInput('')
+    }
+  }
 
   function addStamp() {
     if (earned) return
@@ -163,7 +184,7 @@ export function LoyaltyCard({ businessId, businessName, whatsapp, themeColor, st
             ) : (
               <m.button
                 key="stamp"
-                onClick={addStamp}
+                onClick={requestStamp}
                 className="w-full rounded-2xl py-3.5 font-bold text-white text-sm"
                 style={{ background: themeColor }}
                 initial={{ opacity: 0, y: 10 }}
@@ -200,6 +221,94 @@ export function LoyaltyCard({ businessId, businessName, whatsapp, themeColor, st
       <p className="mt-6 text-center text-xs text-neutral-400 max-w-xs">
         Your stamps are saved on this device. Show your card at checkout on your next visit.
       </p>
+
+      {/* Staff Verification PIN Modal */}
+      <AnimatePresence>
+        {showPinModal && (
+          <m.div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <m.div
+              className="bg-white dark:bg-neutral-900 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative"
+              initial={{ scale: 0.9, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.9, y: 20 }}
+            >
+              <div className="text-center mb-6">
+                <h3 className="text-lg font-bold text-neutral-900 dark:text-white">Staff Verification</h3>
+                <p className="text-sm text-neutral-500 mt-1">Please hand your device to the staff to authorize this stamp.</p>
+              </div>
+              
+              <div className="flex justify-center gap-3 mb-6">
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className={`w-12 h-14 rounded-xl border-2 flex items-center justify-center text-xl font-bold ${
+                      pinInput.length > i 
+                        ? 'border-neutral-900 dark:border-white text-neutral-900 dark:text-white' 
+                        : pinError ? 'border-red-500 text-red-500' : 'border-neutral-200 dark:border-neutral-700 text-transparent'
+                    }`}
+                    style={{ borderColor: pinInput.length > i ? themeColor : undefined }}
+                  >
+                    {pinInput.length > i ? '•' : ''}
+                  </div>
+                ))}
+              </div>
+
+              {pinError && <p className="text-center text-red-500 text-sm mb-4">Incorrect PIN. Please try again.</p>}
+
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
+                  <button
+                    key={num}
+                    onClick={() => {
+                      setPinError(false)
+                      if (pinInput.length < 4) {
+                        const newPin = pinInput + num
+                        setPinInput(newPin)
+                        if (newPin.length === 4) verifyPin(newPin)
+                      }
+                    }}
+                    className="aspect-square rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-xl font-medium active:scale-95 transition-transform text-neutral-900 dark:text-white"
+                  >
+                    {num}
+                  </button>
+                ))}
+                <div />
+                <button
+                  onClick={() => {
+                    setPinError(false)
+                    if (pinInput.length < 4) {
+                      const newPin = pinInput + '0'
+                      setPinInput(newPin)
+                      if (newPin.length === 4) verifyPin(newPin)
+                    }
+                  }}
+                  className="aspect-square rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-xl font-medium active:scale-95 transition-transform text-neutral-900 dark:text-white"
+                >
+                  0
+                </button>
+                <button
+                  onClick={() => setPinInput(prev => prev.slice(0, -1))}
+                  className="aspect-square rounded-2xl bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-xl font-medium active:scale-95 transition-transform text-neutral-900 dark:text-white"
+                >
+                  ⌫
+                </button>
+              </div>
+
+              <button
+                onClick={() => setShowPinModal(false)}
+                className="w-full py-3 text-sm font-medium text-neutral-500 hover:text-neutral-900 dark:hover:text-white transition-colors"
+              >
+                Cancel
+              </button>
+            </m.div>
+          </m.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }

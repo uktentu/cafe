@@ -18,6 +18,7 @@ export interface Limits {
   branches: number
   photosPerItem: number
   banners: number
+  maxTables: number         // POS add-on: max floor tables
 }
 
 export interface Features {
@@ -35,6 +36,18 @@ export interface Features {
   dynamicQr: boolean        // Premium
   seo: boolean              // Premium
   pdfReports: boolean       // Premium
+  // POS add-on — orthogonal to tier, driven entirely by NEXT_PUBLIC_POS_ENABLED.
+  // Tier still scales limits.maxTables for upsell, same as every other limit.
+  posEnabled: boolean       // master switch
+  tableManagement: boolean  // = posEnabled (bundled for phase 1)
+  staffOrderTaking: boolean // = posEnabled
+  kotDisplay: boolean       // = posEnabled
+  billing: boolean          // = posEnabled
+  selfOrder: boolean        // = posEnabled (split out so POS can run without customer self-order later)
+  reports: boolean          // = posEnabled — day close & Z-reports
+  expenses: boolean         // = posEnabled — expense tracking / P&L
+  crm: boolean              // = posEnabled — customer book & loyalty
+  aggregator: boolean       // = posEnabled — Swiggy/Zomato unified board
 }
 
 export interface Motion {
@@ -58,9 +71,9 @@ export interface AppConfig {
 }
 
 const TIER_LIMITS: Record<Tier, Limits> = {
-  basic:    { items: 30,   categories: 3,  qrCodes: 1,  staff: 1, branches: 1, photosPerItem: 1, banners: 0  },
-  advanced: { items: 100,  categories: 99, qrCodes: 5,  staff: 2, branches: 1, photosPerItem: 3, banners: 5  },
-  premium:  { items: 9999, categories: 99, qrCodes: 99, staff: 5, branches: 3, photosPerItem: 9, banners: 20 },
+  basic:    { items: 30,   categories: 3,  qrCodes: 1,  staff: 1, branches: 1, photosPerItem: 1, banners: 0,  maxTables: 6  },
+  advanced: { items: 100,  categories: 99, qrCodes: 5,  staff: 2, branches: 1, photosPerItem: 3, banners: 5,  maxTables: 20 },
+  premium:  { items: 9999, categories: 99, qrCodes: 99, staff: 5, branches: 3, photosPerItem: 9, banners: 20, maxTables: 60 },
 }
 
 const TIER_RANK: Record<Tier, number> = { basic: 0, advanced: 1, premium: 2 }
@@ -86,12 +99,14 @@ function resolveLimits(tier: Tier): Limits {
     branches:      envInt(process.env.NEXT_PUBLIC_MAX_BRANCHES, d.branches),
     photosPerItem: envInt(process.env.NEXT_PUBLIC_MAX_PHOTOS_PER_ITEM, d.photosPerItem),
     banners:       envInt(process.env.NEXT_PUBLIC_MAX_BANNERS, d.banners),
+    maxTables:     envInt(process.env.NEXT_PUBLIC_MAX_TABLES, d.maxTables),
   }
 }
 
 function resolveFeatures(tier: Tier): Features {
   const advancedUp = TIER_RANK[tier] >= TIER_RANK.advanced
   const premium = tier === 'premium'
+  const posEnabled = envBool(process.env.NEXT_PUBLIC_POS_ENABLED)
   return {
     analytics: advancedUp,
     banners: advancedUp,
@@ -108,6 +123,17 @@ function resolveFeatures(tier: Tier): Features {
     dynamicQr: premium,
     seo: premium,
     pdfReports: premium,
+    // POS add-on — orthogonal to tier
+    posEnabled,
+    tableManagement: posEnabled,
+    staffOrderTaking: posEnabled,
+    kotDisplay: posEnabled,
+    billing: posEnabled,
+    selfOrder: posEnabled,
+    reports: posEnabled,
+    expenses: posEnabled,
+    crm: posEnabled,
+    aggregator: posEnabled,
   }
 }
 

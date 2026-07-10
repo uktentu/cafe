@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/Input'
 import { useCmsStore } from '@/stores/cms'
 import { getConfig } from '@/lib/config'
 import { qk, fetchQrCodes, createQrCode, updateQrCode, deleteQrCode, type QrCodeInput, fetchBranches } from '@/lib/cms-queries'
+import { posQk, fetchTables } from '@/lib/pos-queries'
 import type { QrCode } from '@/types/database'
 import type QRCodeStylingType from 'qr-code-styling'
 
@@ -110,11 +111,13 @@ function QrForm({
   const { business } = useCms()
   const isBranchesEnabled = features.multiBranch && business?.social_links?.multiple_branches_enabled === true
   const branchesQ = useQuery({ queryKey: qk.branches(businessId), queryFn: () => fetchBranches(businessId), enabled: isBranchesEnabled })
+  const tablesQ = useQuery({ queryKey: posQk.tables(businessId), queryFn: () => fetchTables(businessId), enabled: features.tableManagement })
 
   const [label, setLabel] = useState(qr?.label ?? 'Table 1')
   const [url, setUrl] = useState(qr?.target_url ?? initialUrl)
   const [color, setColor] = useState(qr?.qr_color ?? businessThemeColor)
   const [branchId, setBranchId] = useState<string | null>(qr?.branch_id ?? activeBranchId)
+  const [tableId, setTableId] = useState<string | null>(qr?.table_id ?? null)
 
   // Auto-embed table label in QR URL when label looks like a table designation
   function applyTableParam(newLabel: string, currentUrl: string) {
@@ -134,6 +137,7 @@ function QrForm({
         qr_color: color,
         qr_bg_color: '#FFFFFF',
         branch_id: branchId,
+        table_id: tableId,
       }
       if (qr) return updateQrCode(qr.id, input)
       return createQrCode(input)
@@ -190,6 +194,32 @@ function QrForm({
               <Input value={color} onChange={(e) => setColor(e.target.value)} className="w-32" />
             </div>
           </div>
+
+          {features.tableManagement && (tablesQ.data?.length ?? 0) > 0 && (
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-widest text-neutral-500 dark:text-neutral-400 mb-1.5">Link to POS Table</label>
+              <select
+                value={tableId || ''}
+                onChange={(e) => {
+                  const newTableId = e.target.value || null
+                  setTableId(newTableId)
+                  const table = tablesQ.data?.find((t) => t.id === newTableId)
+                  // Points at the themed menu with the table's secret token —
+                  // the customer orders in-app right there. qr_token (not the
+                  // guessable code) is the only value the order flow accepts,
+                  // so a printed QR can't be tampered onto another table.
+                  setUrl(table?.qr_token ? `${initialUrl}/?t=${table.qr_token}` : initialUrl)
+                }}
+                className="w-full rounded-xl border border-neutral-200 dark:border-neutral-800 px-3.5 py-2.5 text-sm focus:border-amber-400 focus:outline-none"
+              >
+                <option value="">Not linked (menu display only)</option>
+                {tablesQ.data?.map((t) => (
+                  <option key={t.id} value={t.id}>{t.label}</option>
+                ))}
+              </select>
+              <p className="mt-1 text-[11px] text-neutral-400">Linking sends this QR straight to the self-order flow for that table.</p>
+            </div>
+          )}
 
           {isBranchesEnabled && (branchesQ.data?.length ?? 0) > 0 && (
             <div>

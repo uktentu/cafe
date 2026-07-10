@@ -28,6 +28,14 @@ export const rateLimiter = {
         analytics: true,
       })
     : null,
+
+  orders: hasRedis
+    ? new Ratelimit({
+        redis: redis!,
+        limiter: Ratelimit.slidingWindow(10, '1 h'), // 10 self-placed orders per hour per IP
+        analytics: true,
+      })
+    : null,
 }
 
 // Extract IP address from Next.js Request (works with Cloudflare Pages)

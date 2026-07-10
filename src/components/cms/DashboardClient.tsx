@@ -5,6 +5,7 @@ import {
   Plus, UtensilsCrossed, FolderTree, PackageX, QrCode, Settings,
   BarChart3, Star, FileText, ExternalLink, CheckCircle2,
   AlertCircle, Megaphone, Users, CalendarCheck, Zap,
+  Receipt, LayoutGrid, ChefHat, IndianRupee, KanbanSquare,
 } from 'lucide-react'
 import { AnimatedNumber } from '@/components/motion/AnimatedNumber'
 import { StaggerList, StaggerItem } from '@/components/motion/StaggerList'
@@ -19,10 +20,18 @@ interface DashboardStats {
   qrCodes: number
 }
 
+interface PosSnapshot {
+  todaySales: number
+  todayBills: number
+  occupiedTables: number
+  activeTickets: number
+}
+
 interface DashboardClientProps {
   stats: DashboardStats
   business: Business
   features: Features
+  pos?: PosSnapshot | null
 }
 
 interface SetupItem {
@@ -31,7 +40,11 @@ interface SetupItem {
   href: string
 }
 
-export function DashboardClient({ stats, business, features }: DashboardClientProps) {
+function inr(n: number): string {
+  return `₹${n.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`
+}
+
+export function DashboardClient({ stats, business, features, pos }: DashboardClientProps) {
   const setupItems: SetupItem[] = [
     { label: 'Business name & logo', done: !!(business.name && business.logo_r2_key), href: '/cms/settings' },
     { label: 'WhatsApp number set', done: !!business.whatsapp, href: '/cms/settings' },
@@ -73,6 +86,45 @@ export function DashboardClient({ stats, business, features }: DashboardClientPr
           </a>
         </div>
       </div>
+
+      {/* Command center — today's live POS numbers (only when POS is on) */}
+      {pos && (
+        <div className="rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 p-4 text-white shadow-sm sm:p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <p className="text-sm font-semibold uppercase tracking-wide opacity-90">Today</p>
+            <Link href="/cms/reports" className="text-xs font-medium underline-offset-2 hover:underline">Full report →</Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div>
+              <p className="text-2xl font-bold">{inr(pos.todaySales)}</p>
+              <p className="text-xs opacity-80">Sales collected</p>
+            </div>
+            <div>
+              <p className="text-2xl font-bold">{pos.todayBills}</p>
+              <p className="text-xs opacity-80">Bills settled</p>
+            </div>
+            <Link href="/cms/tables" className="transition-opacity hover:opacity-90">
+              <p className="text-2xl font-bold">{pos.occupiedTables}</p>
+              <p className="text-xs opacity-80">Tables occupied</p>
+            </Link>
+            <Link href="/cms/kitchen" className="transition-opacity hover:opacity-90">
+              <p className="text-2xl font-bold">{pos.activeTickets}</p>
+              <p className="text-xs opacity-80">Kitchen tickets</p>
+            </Link>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link href="/cms/pos" className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white/20 px-3 text-xs font-semibold backdrop-blur hover:bg-white/30">
+              <Receipt className="h-3.5 w-3.5" /> New order
+            </Link>
+            <Link href="/cms/kitchen" className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white/20 px-3 text-xs font-semibold backdrop-blur hover:bg-white/30">
+              <ChefHat className="h-3.5 w-3.5" /> Kitchen
+            </Link>
+            <Link href="/cms/reports" className="inline-flex h-8 items-center gap-1.5 rounded-lg bg-white/20 px-3 text-xs font-semibold backdrop-blur hover:bg-white/30">
+              <IndianRupee className="h-3.5 w-3.5" /> Day close
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Stat cards */}
       <StaggerList className="grid grid-cols-2 gap-3 sm:grid-cols-4 md:gap-4" whenVisible={false}>
@@ -134,6 +186,16 @@ export function DashboardClient({ stats, business, features }: DashboardClientPr
           <h2 className="mb-4 font-semibold text-neutral-800 dark:text-neutral-200 text-sm">Quick access</h2>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {[
+              // POS tiles first — during service these are the screens staff reach for.
+              ...(features.posEnabled
+                ? [
+                    { label: 'Orders Board',     icon: KanbanSquare, href: '/cms/orders', desc: 'Swiggy, Zomato & dine-in' },
+                    { label: 'Orders & Billing', icon: Receipt,    href: '/cms/pos',     desc: 'Take orders, settle bills' },
+                    { label: 'Tables',           icon: LayoutGrid, href: '/cms/tables',  desc: 'Floor & table status' },
+                    { label: 'Kitchen',          icon: ChefHat,    href: '/cms/kitchen', desc: 'Live KOT board' },
+                    { label: 'Sales',            icon: IndianRupee, href: '/cms/sales',  desc: 'Takings & bill history' },
+                  ]
+                : []),
               { label: 'Items',        icon: UtensilsCrossed, href: '/cms/items',        desc: 'Add, edit, sold-out' },
               { label: 'Categories',   icon: FolderTree,      href: '/cms/categories',   desc: 'Organise your menu' },
               { label: 'Settings',     icon: Settings,        href: '/cms/settings',     desc: 'Hours, links, theme' },

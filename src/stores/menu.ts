@@ -49,6 +49,12 @@ interface MenuState {
   clearCart: () => void
   cartTotal: () => number
   cartCount: () => number
+
+  // Active in-app POS order (set after placing an order from the themed cart).
+  // Shared so CartButton can flip to a "track order" state and CartDrawer can
+  // show the live status view. Hydrated from localStorage by MenuLayoutClient.
+  activeOrder: { orderId: string; token: string } | null
+  setActiveOrder: (o: { orderId: string; token: string } | null) => void
 }
 
 let _nonce = 0
@@ -103,6 +109,9 @@ export const useMenuStore = create<MenuState>((set, get) => ({
     })),
 
   clearCart: () => set({ cart: [] }),
+
+  activeOrder: null,
+  setActiveOrder: (o) => set({ activeOrder: o }),
 
   cartTotal: () => {
     const { cart } = get()

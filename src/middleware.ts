@@ -17,6 +17,11 @@ export async function middleware(request: NextRequest) {
   // No auth check needed — saves a Supabase round-trip on every menu request.
   // Cloudflare Pages CDN will serve the cached HTML for s-maxage seconds,
   // meaning zero edge-function invocations for most visitors.
+  //
+  // In-app ordering (POS) is safe under this cache: the menu HTML is the same
+  // per table token, and live order state is fetched client-side from
+  // /api/orders/* which is never cached. Prices are re-read server-side at
+  // order time, so a 30s-stale menu can never mis-charge.
   if (!pathname.startsWith('/cms') && !pathname.startsWith('/api')) {
     const response = NextResponse.next()
     response.headers.set('Cache-Control', 's-maxage=30, stale-while-revalidate=60')
